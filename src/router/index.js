@@ -1,25 +1,157 @@
-import { createRouter, createWebHashHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import { createRouter, createWebHistory } from "vue-router";
+import App from "../App.vue";
+import store from "../store/index";
+
+import ShoppingCartPage from "../views/ShoppingCartPage";
+import ProductDetailPage from "../views/ProductDetailPage";
+import ProductsPage from "../views/ProductsPage";
+
+import AboutUsPage from "../views/AboutUsPage";
+import ContactUsPage from "../views/ContactUsPage";
+import NotFoundPage from "../views/NotFoundPage";
+import CheckoutPage from "../views/CheckoutPage";
+import MyAccountPage from "../views/MyAccountPage";
+import LoginPage from "../views/LoginPage";
+import RegisterPage from "../views/RegisterPage";
+import ForgetPasswordPage from "../views/ForgetPasswordPage";
+import AdminPage from "@/views/AdminPage.vue";
 
 const routes = [
   {
-    path: '/',
-    name: 'home',
-    component: HomeView
+    path: "/",
+    name: "products",
+    component: ProductsPage,
+    beforeEnter: (to, from, next) => {
+      if (!store.getters.isAuthenticated) {
+        next("/login"); // Redirect to login page
+      } else {
+        next(); // Proceed to the route
+      }
+    },
+  },
+
+  {
+    path: "/about-us",
+    name: "about-us",
+    component: AboutUsPage,
+    beforeEnter: (to, from, next) => {
+      if (!store.getters.isAuthenticated) {
+        next("/login"); // Redirect to login page
+      } else {
+        next(); // Proceed to the route
+      }
+    },
   },
   {
-    path: '/about',
-    name: 'about',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
-  }
-]
+    path: "/contact-us",
+    name: "contact-us",
+    component: ContactUsPage,
+    beforeEnter: (to, from, next) => {
+      if (!store.getters.isAuthenticated) {
+        next("/login"); // Redirect to login page
+      } else {
+        next(); // Proceed to the route
+      }
+    },
+  },
+  {
+    path: "/checkout",
+    name: "checkout",
+    component: CheckoutPage,
+    beforeEnter: (to, from, next) => {
+      if (!store.getters.isAuthenticated) {
+        next("/login"); // Redirect to login page
+      } else {
+        next(); // Proceed to the route
+      }
+    },
+  },
+  {
+    path: "/my-account",
+    name: "my-account",
+    component: MyAccountPage,
+    beforeEnter: (to, from, next) => {
+      if (!store.getters.isAuthenticated) {
+        next("/login"); // Redirect to login page
+      } else {
+        next(); // Proceed to the route
+      }
+    },
+  },
+  {
+    path: "/login",
+    name: "login",
+    component: LoginPage,
+  },
+  {
+    path: "/register",
+    name: "register",
+    component: RegisterPage,
+  },
+  {
+    path: "/recover",
+    name: "recover",
+    component: ForgetPasswordPage,
+  },
+  {
+    path: "/cart",
+    name: "cart",
+    component: ShoppingCartPage,
+    beforeEnter: (to, from, next) => {
+      if (!store.getters.isAuthenticated) {
+        next("/login"); // Redirect to login page
+      } else {
+        next(); // Proceed to the route
+      }
+    },
+  },
+  {
+    path: "/products/:productId",
+    name: "productDetails",
+    component: ProductDetailPage,
+    beforeEnter: (to, from, next) => {
+      if (!store.getters.isAuthenticated) {
+        next("/login"); // Redirect to login page
+      } else {
+        next(); // Proceed to the route
+      }
+    },
+  },
+  {
+    path: "/admin/panel",
+    name: "AdminPage",
+    component: AdminPage,
+    beforeEnter: (to, from, next) => {
+      if (!store.getters.isAuthenticated || !store.state.user.isAdmin) {
+        next("/");
+      } else {
+        next();
+      }
+    },
+  },
+
+  {
+    path: "/:pathMatch(.*)*",
+    name: "notFoundPage",
+    component: NotFoundPage,
+  },
+];
 
 const router = createRouter({
-  history: createWebHashHistory(),
-  routes
-})
+  mode: "history",
+  history: createWebHistory(),
+  routes,
+});
 
-export default router
+router.beforeEach((to, from, next) => {
+  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
+  const isAuthenticated = store.getters.isAuthenticated;
+
+  if (requiresAuth && isAuthenticated) {
+    next("/login");
+  } else {
+    next();
+  }
+});
+
+export default router;

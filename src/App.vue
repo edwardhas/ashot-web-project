@@ -1,30 +1,32 @@
 <template>
-  <nav>
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
-  </nav>
-  <router-view/>
+  <router-view />
 </template>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
+<script>
+export default {
+  methods: {
+    setupWebSocket() {
+      const socket = new WebSocket("wss://localhost:8000/ws");
 
-nav {
-  padding: 30px;
-}
+      socket.onopen = () => {
+        console.log("WebSocket connection established");
+      };
 
-nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
+      socket.onmessage = (event) => {
+        console.log(`Message from server: ${event.data}`);
+        this.messages.push(event.data);
+      };
 
-nav a.router-link-exact-active {
-  color: #42b983;
-}
-</style>
+      socket.onerror = (error) => {
+        console.error(`WebSocket error: ${error}`);
+      };
+
+      socket.onclose = () => {
+        console.log("WebSocket connection closed");
+      };
+    },
+  },
+};
+</script>
+
+<style></style>
