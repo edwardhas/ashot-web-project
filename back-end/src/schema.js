@@ -132,7 +132,7 @@ const ProductsSchema = new Schema({
     required: true,
   },
   views: {
-    type: String,
+    type: Number,
   },
 });
 

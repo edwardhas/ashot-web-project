@@ -12,6 +12,7 @@ import nodemailer from "nodemailer";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import Stripe from "stripe";
+import helmet from "helmet";
 import "dotenv/config";
 
 async function start() {
@@ -20,6 +21,17 @@ async function start() {
   );
   const app = express();
   app.use(express.json());
+  app.use(
+    helmet.contentSecurityPolicy({
+      directives: {
+        defaultSrc: ["'self'"],
+        imgSrc: ["'self'", "data:"], // Allow images from self and base64-encoded
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles if needed
+        // Add more directives based on your requirements
+      },
+    })
+  );
 
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
@@ -157,6 +169,15 @@ async function start() {
     const product = await db
       .collection("products")
       .findOne({ _id: new ObjectId(productID) });
+
+    const newViews = product.views++;
+    const updatedViews = await db
+      .collection("products")
+      .updateOne(
+        { _id: new ObjectId(productID) },
+        { $push: { views: newViews } }
+      );
+
     res.json(product);
   });
 
@@ -421,50 +442,61 @@ async function start() {
   app.post("/api/:userId/contact-us", async (req, res) => {
     const { userId } = req.params;
     const { fullname, email, subject, message } = req.body;
-    console.log(userId, fullname, email, subject, message);
 
     const user = await db
       .collection("users")
       .findOne({ _id: new ObjectId(userId) });
 
-    console.log(user);
-
     if (user == null) {
       return res.json({ error: "The user does not exist" });
     }
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail", // e.g., Gmail, Outlook, etc.
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false,
+      auth: {
+        user: "edward885788@gmail.com", // Your email address
+        pass: "bzmj wlrd tifl ceid", // Your email password
+      },
+    });
+
+    // Define the email options
+    const mailOptions = {
+      from: {
+        name: "Empire TCG",
+        address: "empire-tcg.com",
+      }, // Sender address
+      to: "ash@empire-tcg.com", // List of receivers
+      subject: subject, // Subject line
+      text: `Hello Ashot. This is a test email just to see if everything works and you receive customer's message. Here are the details from the form (this is also saved in the database): ${fullname}, ${email}, ${subject}, ${message}`, // Plain text body
+      html: `<h2>I can send html. I duplicate the inputs from the form: </h2> <b>name: ${fullname}, useremail: ${email}, subject: ${subject}, message: ${message}</b>`,
+    };
+
+    // Send the email
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        return res.json({
+          error: "Error occured while trying to send an email",
+        });
+      }
+      // if no error and return status of OK
+      user.updateOne({
+        $push: {
+          emailsSent: {
+            fullname: fullname,
+            email: email,
+            subject: subject,
+            message: message,
+            created: Date.now,
+          },
+        },
+      });
+    });
+
     return res.json({ success: "user is found and data is provided" });
   });
 }
 
 start();
-
-// const transporter = nodemailer.createTransport({
-//   service: "gmail", // e.g., Gmail, Outlook, etc.
-//   host: "smtp.gmail.com",
-//   port: 587,
-//   secure: false,
-//   auth: {
-//     user: "edward885788@gmail.com", // Your email address
-//     pass: "BandiTT85107!", // Your email password
-//   },
-// });
-
-// // Define the email options
-// const mailOptions = {
-//   from: {
-//     name: "Empire TCG",
-//     address: "empire-tcg.com",
-//   }, // Sender address
-//   to: "ash@empire-tcg.com", // List of receivers
-//   subject: "Test Email", // Subject line
-//   text: "Hello Ashot. This is a test email just to see if everything works and you receive customer's message", // Plain text body
-//   html: "<b>I can even send html. Will play with it later</b>",
-// };
-
-// // Send the email
-// transporter.sendMail(mailOptions, (error, info) => {
-//   if (error) {
-//     return console.log(error);
-//   }
-//   console.log("Email sent: " + info.response);
-// });
