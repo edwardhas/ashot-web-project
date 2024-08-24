@@ -136,6 +136,33 @@ const ProductsSchema = new Schema({
   },
 });
 
+const bestDealSchema = new Schema({
+  createdAt: {
+    type: Date,
+    reqiured: true,
+  },
+  name: {
+    type: String,
+    required: true,
+  },
+  price: {
+    type: String,
+    required: true,
+  },
+  oldPrice: {
+    type: String,
+    required: true,
+  },
+  description: {
+    type: String,
+    required: true,
+  },
+  imageUrl: {
+    type: String,
+    required: true,
+  },
+});
+
 const User = mongoose.model("Users", userSchema);
 const Products = mongoose.model("Products", ProductsSchema);
 export { User, Products };

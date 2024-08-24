@@ -113,7 +113,7 @@
             <input
               class="custom-edit-input"
               :value="productName"
-              @input="updateProductName($event.target.value)"
+              @input="updateProductName($event.target.value, 'adding')"
             />
 
             <p>Place The Product Price Here</p>
@@ -123,7 +123,7 @@
               class="custom-edit-input"
               :value="productPrice"
               min="0"
-              @input="updateProductPrice($event.target.value)"
+              @input="updateProductPrice($event.target.value, 'adding')"
             />
 
             <p>Place The Product Old Price Here</p>
@@ -133,7 +133,7 @@
               class="custom-edit-input"
               :value="productOldPrice"
               min="0"
-              @input="updateProductOldPrice($event.target.value)"
+              @input="updateProductOldPrice($event.target.value, 'adding')"
             />
 
             <p>
@@ -161,7 +161,7 @@
             <input
               class="custom-edit-input"
               :value="productDescription"
-              @input="updateProductDescription($event.target.value)"
+              @input="updateProductDescription($event.target.value, 'adding')"
             />
 
             <p>Place The Product Image Link Here</p>
@@ -169,7 +169,7 @@
             <input
               class="custom-edit-input"
               :value="productImageUrl"
-              @input="updateProductImageUrl($event.target.value)"
+              @input="updateProductImageUrl($event.target.value, 'adding')"
             />
           </div>
         </div>
@@ -190,6 +190,111 @@
       </div>
     </div>
   </div>
+  <div class="hr"></div>
+  <!-- !! END OF ADDING-PRODUCT-SECTION -->
+  <!-- !!  START OF DEAL OF THE WEEK PRODUCT SECTION -->
+
+  <div class="deal-area bg-img pt-95 pb-100">
+    <div class="container">
+      <div class="section-title text-center mb-50">
+        <h4>Best Product</h4>
+        <h2>Deal of the Week</h2>
+      </div>
+      <div class="row">
+        <div class="col-lg-6 col-md-6">
+          <div class="deal-img wow fadeInLeft">
+            <img v-if="dealProductImageUrl" :src="dealProductImageUrl" />
+            <p v-else>
+              Picture will be displayed here after you place the link in the
+              corresponding field below
+            </p>
+          </div>
+        </div>
+
+        <div class="col-lg-6 col-md-6">
+          <div class="deal-content">
+            <h3>
+              <a href="">{{ dealProductName }}</a>
+            </h3>
+            <div class="deal-pro-price">
+              <span class="deal-old-price">${{ dealProductOldPrice }}.00 </span>
+              <span>${{ dealProductPrice }}.00</span>
+            </div>
+            <p>
+              {{ dealProductDescription }}
+            </p>
+            <div class="timer timer-style">
+              <div data-countdown="2017/10/01"></div>
+            </div>
+            <div class="discount-btn mt-35">
+              <a class="btn-style" href="">SHOP NOW</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="shop-area pt-95 pb-100">
+    <div class="container">
+      <div class="row">
+        <div class="custom-row-wrap">
+          <p>Place The Product Name Here</p>
+          <input
+            class="custom-edit-input"
+            :value="dealProductName"
+            @input="updateProductName($event.target.value, deal)"
+          />
+
+          <p>Place The Product Price Here</p>
+
+          <input
+            type="number"
+            class="custom-edit-input"
+            :value="dealProductPrice"
+            min="0"
+            @input="updateProductPrice($event.target.value, 'deal')"
+          />
+
+          <p>Place The Product Old Price Here</p>
+
+          <input
+            type="number"
+            class="custom-edit-input"
+            :value="dealProductOldPrice"
+            min="0"
+            @input="updateProductOldPrice($event.target.value, 'deal')"
+          />
+
+          <p>Place The Product Description Here</p>
+
+          <input
+            class="custom-edit-input"
+            :value="dealProductDescription"
+            @input="updateProductDescription($event.target.value, 'deal')"
+          />
+
+          <p>Place The Product Image Link Here</p>
+
+          <input
+            class="custom-edit-input"
+            :value="dealProductImageUrl"
+            placeholder="URL goes here"
+            @input="updateProductImageUrl($event.target.value, 'deal')"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="submit">
+    <div class="product-list-action-left">
+      <a @click="addProduct" class="addtocart-btn" href="#" title="Add to cart">
+        <i class="ion-bag"></i>
+        Add To DataBase
+      </a>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -201,6 +306,7 @@ export default {
   components: { ValidationComponent },
   data() {
     return {
+      // start of adding product section
       productName: "Product Name",
       productDescription: "Product Description",
       productPrice: 0,
@@ -213,20 +319,32 @@ export default {
       message: "",
       status: false,
       isDisplayed: false,
+      // end of adding product section
+      // start of the best deal of the week section
+      dealProductName: "Product Name",
+      dealProductDescription: "Product Description",
+      dealProductPrice: 0,
+      dealProductOldPrice: 0,
+      dealProductImageUrl: null,
+      // end of the best deal of the week section
     };
   },
   methods: {
-    updateProductName(newValue) {
-      this.productName = newValue;
+    updateProductName(newValue, section) {
+      if (section == "adding") return (this.productName = newValue);
+      return (this.dealProductName = newValue);
     },
-    updateProductDescription(newValue) {
-      this.productDescription = newValue;
+    updateProductDescription(newValue, section) {
+      if (section == "adding") return (this.productDescription = newValue);
+      return (this.dealProductDescription = newValue);
     },
-    updateProductPrice(newValue) {
-      this.productPrice = Number(newValue);
+    updateProductPrice(newValue, section) {
+      if (section == "adding") return (this.productPrice = Number(newValue));
+      return (this.dealProductPrice = Number(newValue));
     },
-    updateProductOldPrice(newValue) {
-      this.productOldPrice = Number(newValue);
+    updateProductOldPrice(newValue, section) {
+      if (section == "adding") return (this.productOldPrice = Number(newValue));
+      return (this.dealProductOldPrice = Number(newValue));
     },
     updateProductAvailability(option, event) {
       this[option] = event.target.checked;
@@ -236,8 +354,9 @@ export default {
         this.inStock = false;
       }
     },
-    updateProductImageUrl(newValue) {
-      this.productImageUrl = newValue;
+    updateProductImageUrl(newValue, section) {
+      if (section == "adding") return (this.productImageUrl = newValue);
+      return (this.dealProductImageUrl = newValue);
     },
 
     manageQuantity(operation) {
@@ -251,7 +370,7 @@ export default {
       }
     },
 
-    async addToDataBase() {
+    async addProduct() {
       const productData = {
         name: this.productName,
         price: this.productPrice,
@@ -290,6 +409,24 @@ export default {
         (this.isDisplayed = true)
       );
     },
+
+    async addBestDeal() {
+      const dealData = {
+        name: this.dealProductName,
+        price: this.dealProductPrice,
+        oldPrice: this.dealProductOldPrice,
+        description: this.dealProductDescription,
+        image: this.dealProductImageUrl,
+      };
+
+      await axios.post("/api/admin/deal/add", dealData);
+
+      this.dealProductName = "Product Name";
+      this.dealProductDescription = "Product Description";
+      this.dealProductPrice = 0;
+      this.dealProductOldPrice = 0;
+      this.dealProductImageUrl = null;
+    },
   },
 };
 </script>
@@ -302,6 +439,7 @@ export default {
 } */
 
 .breadcrumb-area {
+  width: 100%;
   /* background-image: url(../assets/img/banner/banner-2.jpg); */
   aspect-ratio: 9/2;
   filter: brightness(50%);
@@ -322,9 +460,19 @@ export default {
   }
 }
 
+.hr {
+  width: 80%;
+  height: 1px;
+  margin: 0 auto;
+  margin-top: 100px;
+  margin-bottom: 100px;
+  background: grey;
+}
+
 .section-title h2 {
   padding: 50px;
   font-weight: 400;
+  text-transform: uppercase;
 }
 
 .prevent-select {
@@ -349,7 +497,7 @@ export default {
 
 .adding-product-section {
   margin: 0 auto;
-  width: 95%;
+  width: 100%;
   /* border-radius: 20px;
   -webkit-box-shadow: 0px 0px 30px -17px rgba(0, 0, 0, 0.75);
   -moz-box-shadow: 0px 0px 30px -17px rgba(0, 0, 0, 0.75);

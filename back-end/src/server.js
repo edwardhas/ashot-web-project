@@ -267,6 +267,22 @@ async function start() {
     }
   });
 
+  // Add Best Deal from admin panel
+  app.post("/api/admin/deal/add", async (req, res) => {
+    // Get data
+    const { name, price, oldPrice, description, image } = req.body;
+
+    const deal = {
+      createdAt: new Date(),
+      name: name,
+      price: price,
+      oldPrice: oldPrice,
+      description: description,
+      imageUrl: image,
+    };
+    await db.collection("dealOfTheWeek").insertOne(deal);
+  });
+
   // Log in User
   app.post("/api/users/get", async (req, res) => {
     const userEmail = req.body.userEmail;
