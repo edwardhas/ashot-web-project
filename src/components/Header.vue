@@ -213,6 +213,10 @@ export default {
   background: white;
 }
 
+.header-login a {
+  text-decoration: none;
+}
+
 .custom-a-htop {
   text-decoration: none;
   display: flex;

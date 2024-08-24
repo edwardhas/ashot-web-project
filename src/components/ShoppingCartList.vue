@@ -143,6 +143,7 @@ export default {
 } */
 
 .breadcrumb-area {
+  width: 100%;
   /* background-image: url(../assets/img/banner/banner-2.jpg); */
   aspect-ratio: 9/2;
   filter: brightness(50%);

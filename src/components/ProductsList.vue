@@ -284,9 +284,10 @@ export default {
 
 <style scoped>
 .breadcrumb-area {
+  width: 100%;
   /* background-image: url(../assets/img/banner/banner-2.jpg); */
   aspect-ratio: 9/2;
-  filter: brightness(50%);
+  filter: brightness(100%);
   background-image: url("https://www.empire-tcg.com/cdn/shop/files/IMG_2920.jpg?v=1723960927&width=3840");
   background-size: 120%;
   animation: zoom-in-out 40s infinite;

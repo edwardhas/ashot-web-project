@@ -252,15 +252,14 @@ export default {
     },
 
     async addToDataBase() {
-      const isInStock = this.inStock ? true : false;
-
       const productData = {
         name: this.productName,
         price: this.productPrice,
         oldPrice: this.productOldPrice,
         description: this.productDescription,
-        isInStock: isInStock,
+        isInStock: this.inStock,
         image: this.productImageUrl,
+        quantity: this.quantity,
       };
       console.log(productData);
       const response = await axios.post("/api/admin/products/add", productData);
@@ -298,10 +297,29 @@ export default {
 <style scoped>
 @import "../assets/css/responsive.css";
 
+/* .breadcrumb-area {
+  background-image: url("https://wallpaperswide.com/download/amazing_asiatic_landscape_art-wallpaper-2732x768.jpg");
+} */
+
 .breadcrumb-area {
   /* background-image: url(../assets/img/banner/banner-2.jpg); */
-  /* aspect-ratio: 12/2; */
-  background-image: url("https://wallpaperswide.com/download/amazing_asiatic_landscape_art-wallpaper-2732x768.jpg");
+  aspect-ratio: 9/2;
+  filter: brightness(50%);
+  background-image: url("https://www.empire-tcg.com/cdn/shop/files/IMG_2920.jpg?v=1723960927&width=3840");
+  background-size: 120%;
+  animation: zoom-in-out 40s infinite;
+}
+
+@keyframes zoom-in-out {
+  0% {
+    background-size: 100%; /* Initial size */
+  }
+  50% {
+    background-size: 120%; /* Zoom in at the halfway point */
+  }
+  100% {
+    background-size: 100%; /* Zoom out back to original size */
+  }
 }
 
 .section-title h2 {

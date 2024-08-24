@@ -4740,3 +4740,9 @@ blockquote.importent-title {
 .blog-dec-tags ul li:last-child::after {
   display: none;
 }
+
+::selection {
+  /* background: #b5c2b7; */
+  /* background: #291720; */
+  background: #c3b091;
+}

@@ -45,8 +45,11 @@
             >
           </div>
           <!-- <p class="mt-30">Please select the amount</p> -->
-          <div class="addtocart-btn btn">
+          <div class="addtocart-btn btn" v-if="productIsInStock">
             <a @click="addToCart">Add to cart</a>
+          </div>
+          <div class="addtocart-btn btn disabled" v-else>
+            <a>Add to cart</a>
           </div>
         </div>
       </div>
@@ -86,7 +89,7 @@ export default {
   data() {
     return {
       quantity: 1,
-      cartItemsAmount: 1,
+      cartItemsAmount: 0,
     };
   },
   methods: {
@@ -110,9 +113,15 @@ export default {
       };
 
       await axios.post(`/api/users/${store.state.user.id}/cart`, data);
-      EventBus.emit("add-to-cart", this.cartItemsAmount);
+      EventBus.emit("add-to-cart", ++this.cartItemsAmount);
       alert("Added");
     },
+  },
+  async created() {
+    const response = await axios.get(`/api/users/${store.state.user.id}/cart`);
+    const cartItems = response.data;
+
+    this.cartItemsAmount = cartItems.length;
   },
 };
 </script>
@@ -183,6 +192,13 @@ export default {
   color: rgb(34, 170, 46);
   font-family: sans-serif;
   font-size: 18px;
+}
+
+.disabled {
+  cursor: not-allowed;
+  pointer-events: none;
+  background: grey;
+  opacity: 0.5;
 }
 
 .popup {

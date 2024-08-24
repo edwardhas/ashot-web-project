@@ -170,12 +170,13 @@ async function start() {
       .collection("products")
       .findOne({ _id: new ObjectId(productID) });
 
-    const newViews = product.views++;
-    const updatedViews = await db
+    const newViews = ++product.views;
+
+    await db
       .collection("products")
       .updateOne(
         { _id: new ObjectId(productID) },
-        { $push: { views: newViews } }
+        { $set: { views: newViews } }
       );
 
     res.json(product);
@@ -237,23 +238,10 @@ async function start() {
 
   // Add products From Admin Panel
   app.post("/api/admin/products/add", async (req, res) => {
-    const {
-      productName,
-      productDescription,
-      productPrice,
-      productOldPrice,
-      isInStock,
-      productImage,
-    } = req.body;
+    const { name, description, price, oldPrice, isInStock, image, quantity } =
+      req.body;
 
-    if (
-      !productName ||
-      !productDescription ||
-      !productPrice ||
-      !productOldPrice ||
-      !isInStock ||
-      !productImage
-    ) {
+    if (!name || !description || !price || !oldPrice || !isInStock || !image) {
       return res.json({ error: "Missing Fiels" });
     }
 
@@ -262,12 +250,13 @@ async function start() {
     try {
       const newProduct = Products({
         created: currentDate,
-        name: productName,
-        price: productPrice,
-        oldPrice: productOldPrice,
-        description: productDescription,
+        name: name,
+        price: price,
+        oldPrice: oldPrice,
+        description: description,
         isInStock: isInStock,
-        image: productImage,
+        quantity: quantity,
+        image: image,
         views: "0",
       });
 
