@@ -98,11 +98,7 @@
                         placeholder="Message"
                         v-model="message"
                       ></textarea>
-                      <button
-                        class="submit btn-style"
-                        type="submit"
-                        @click="sendForm"
-                      >
+                      <button class="submit btn-style" type="submit">
                         SEND MESSAGE
                       </button>
                     </div>
@@ -138,31 +134,24 @@ export default {
     };
   },
   methods: {
-    async sendForm() {
-      const data = {
-        fullname: this.fullname,
-        email: this.fullname,
-        subject: this.subject,
-        message: this.message,
-      };
-
-      const response = await axios.post(
-        `/api/${store.state.user.id}/get-in-touch`,
-        data
-      );
-
-      const error = response.data.error;
-      const success = response.data.success;
-
-      if (success) this.server_message = success;
-
-      this.server_message = error;
-
-      this.fullname = "";
-      this.email = "";
-      this.subject = "";
-      this.message = "";
-    },
+    // async sendForm() {
+    //   const data = {
+    //     fullname: this.fullname,
+    //     email: this.email,
+    //     subject: this.subject,
+    //     message: this.message,
+    //   };
+    //   const response = await axios.post("/test", data);
+    //   const error = response.data.error;
+    //   const success = response.data.success;
+    //   if (success) this.server_message = success;
+    //   this.server_message = error;
+    //   console.log(this.server_message);
+    //   this.fullname = "";
+    //   this.email = "";
+    //   this.subject = "";
+    //   this.message = "";
+    // },
   },
 };
 </script>

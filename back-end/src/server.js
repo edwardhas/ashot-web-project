@@ -418,7 +418,7 @@ async function start() {
     res.send("Cancel");
   });
 
-  app.post("/api/:userId/get-in-touch", async (req, res) => {
+  app.post("/api/:userId/contact-us", async (req, res) => {
     const { userId } = req.params;
     const { fullname, email, subject, message } = req.body;
     console.log(userId, fullname, email, subject, message);
