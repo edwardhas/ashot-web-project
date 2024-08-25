@@ -67,6 +67,10 @@ const userSchema = new Schema({
   ],
   emailsSent: [
     {
+      id: {
+        type: Schema.Types.ObjectId,
+        required: true,
+      },
       fullname: {
         type: String,
         required: true,
@@ -81,6 +85,10 @@ const userSchema = new Schema({
       },
       message: {
         type: String,
+        required: true,
+      },
+      status: {
+        type: Boolean, // in case if someone reads - this is for identifying if the email was replied or not
         required: true,
       },
       created: {

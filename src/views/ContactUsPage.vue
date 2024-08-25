@@ -26,7 +26,13 @@
             <div class="contact-info-content">
               <h4>Our Location</h4>
               <p>Street</p>
-              <p><a href="#">info@example.com</a></p>
+              <p>
+                <a
+                  href="https://mail.google.com/mail/u/0/#inbox?compose=new"
+                  target="_blank"
+                  >info@example.com</a
+                >
+              </p>
             </div>
           </div>
         </div>
@@ -48,8 +54,20 @@
             </div>
             <div class="contact-info-content">
               <h4>Write Some Words</h4>
-              <p><a href="#">Support24/7@example.com </a></p>
-              <p><a href="#">info@example.com</a></p>
+              <p>
+                <a
+                  href="https://mail.google.com/mail/u/0/#inbox?compose=new"
+                  target="_blank"
+                  >Support24/7@example.com
+                </a>
+              </p>
+              <p>
+                <a
+                  href="https://mail.google.com/mail/u/0/#inbox?compose=new"
+                  target="_blank"
+                  >info@example.com</a
+                >
+              </p>
             </div>
           </div>
         </div>
@@ -170,5 +188,9 @@ export default {
 
 textarea {
   resize: none;
+}
+
+.contact-form-style a {
+  text-decoration: none;
 }
 </style>

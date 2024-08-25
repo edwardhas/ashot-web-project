@@ -81,19 +81,13 @@
                     v-if="inStock"
                     @click="addToCart"
                     class="addtocart-btn"
-                    href="#"
                     title="Add to cart"
                   >
                     <i class="ion-bag"></i>
                     Add to cart
                   </a>
                   <!-- Put v-else -->
-                  <a
-                    class="disabled addtocart-btn"
-                    v-else
-                    href="#"
-                    title="Add to cart"
-                  >
+                  <a class="disabled addtocart-btn" v-else title="Add to cart">
                     <i class="ion-bag"></i>
                     Out of stock
                   </a>
@@ -214,7 +208,7 @@
         <div class="col-lg-6 col-md-6">
           <div class="deal-content">
             <h3>
-              <a href="">{{ dealProductName }}</a>
+              <a>{{ dealProductName }}</a>
             </h3>
             <div class="deal-pro-price">
               <span class="deal-old-price">${{ dealProductOldPrice }}.00 </span>
@@ -227,7 +221,7 @@
               <div data-countdown="2017/10/01"></div>
             </div>
             <div class="discount-btn mt-35">
-              <a class="btn-style" href="">SHOP NOW</a>
+              <a class="btn-style">SHOP NOW</a>
             </div>
           </div>
         </div>
@@ -295,6 +289,73 @@
       </a>
     </div>
   </div>
+
+  <!-- !! END OF DEAL OF THE WEEK PRODUCT SECTION -->
+  <!-- !!  START OF EMAILS SECTION -->
+  <div class="product-area pt-95 pb-70 gray-bg">
+    <div class="container">
+      <div class="section-title text-center mb-55">
+        <h4>All emails</h4>
+        <h2>Not replied</h2>
+      </div>
+      <div class="row" v-if="emails[0]">
+        <div
+          class="col-xl-3 col-lg-4 col-md-6 col-sm-6"
+          v-for="email in emails"
+          :key="email.id"
+        >
+          <div
+            class="product-wrapper mb-10"
+            v-for="eachEmail in email.emailsSent"
+            :key="eachEmail.id"
+          >
+            <div class="product-content">
+              <h4>
+                <a>User/Email ID: {{ eachEmail.id }}</a>
+              </h4>
+              <div class="product-price email-name-subject">
+                <span class="new"
+                  >{{ eachEmail.fullname }} ({{ eachEmail.email }})</span
+                >
+                <span class="new subject">{{ eachEmail.subject }}</span>
+              </div>
+              <div class="product-price email-message">
+                <span class="new">{{ eachEmail.message }}</span>
+              </div>
+            </div>
+            <div class="submit">
+              <div class="product-list-action-left">
+                <a
+                  class="addtocart-btn"
+                  href="https://mail.google.com/mail/u/0/#inbox?compose=new"
+                  target="_blank"
+                  title="Redirects to gmail.com"
+                >
+                  <i class="ion-bag"></i>
+                  Manual Reply
+                </a>
+              </div>
+              <div class="product-list-action-left">
+                <router-link :to="{ name: 'AdminPageEmailsReply' }">
+                  <a
+                    class="addtocart-btn"
+                    href="#"
+                    title="Redirects to replying section"
+                  >
+                    <i class="ion-bag"></i>
+                    Quick reply
+                  </a>
+                </router-link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="custom-empty-products-list" v-else>
+        <h3>No emails at this moment</h3>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -327,6 +388,9 @@ export default {
       dealProductOldPrice: 0,
       dealProductImageUrl: null,
       // end of the best deal of the week section
+      // start of the emails section
+      emails: [],
+      // end of the emails section
     };
   },
   methods: {
@@ -427,6 +491,12 @@ export default {
       this.dealProductOldPrice = 0;
       this.dealProductImageUrl = null;
     },
+  },
+  async created() {
+    const response = await axios.get("/api/emails");
+    const emails = response.data;
+    console.log(emails);
+    this.emails = emails;
   },
 };
 </script>
@@ -570,6 +640,30 @@ a {
   align-content: center;
   margin-bottom: 100px;
 }
+
+/* email section */
+
+.custom-empty-products-list {
+  display: flex;
+  justify-content: center;
+}
+
+.email-message {
+  margin-top: 20px;
+}
+
+.submit {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  margin-top: 20px;
+}
+
+.submit .product-list-action-left a {
+  font-size: 11px;
+}
+
+/* end of email section */
 
 @media screen and (max-width: 700px) {
   .adding-product-section {

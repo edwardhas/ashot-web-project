@@ -132,10 +132,19 @@ async function start() {
   //   });
   // };
 
-  // get products
+  //!! GET PRODUCTS
   app.get("/api/products", async (req, res) => {
     const products = await db.collection("products").find({}).toArray();
     res.send(products);
+  });
+
+  //!! GET EMAILS
+  app.get("/api/emails", async (req, res) => {
+    const emails = await db
+      .collection("users")
+      .find({ emailsSent: { $ne: [] } })
+      .toArray();
+    res.send(emails);
   });
 
   // app.post("/api/users", async (req, res) => {
@@ -148,7 +157,7 @@ async function start() {
   //   return user;
   // });
 
-  // get the cart
+  // !! GET THE CART
   app.get("/api/users/:userId/cart", async (req, res) => {
     const user = await db
       .collection("users")
@@ -163,6 +172,7 @@ async function start() {
     res.json(populatedCart);
   });
 
+  // !! GET SINGLE PRODUCT
   app.get("/api/products/:productID", async (req, res) => {
     const productID = req.params.productID;
 
@@ -182,7 +192,19 @@ async function start() {
     res.json(product);
   });
 
-  // add to cart
+  //!! GET THE SINGLE EMAIL FROM ADMIN PAGE
+  app.get("/api/emails/:emailId", async (req, res) => {
+    const emailId = req.params.emailId;
+    const userId = emailId;
+
+    const email = await db
+      .collection("users")
+      .findOne({ _id: new ObjectId(userId) });
+
+    res.json(email);
+  });
+
+  //!! ADD TO CART
   app.post("/api/users/:userId/cart", async (req, res) => {
     const userId = req.params.userId;
     const { productId, quantity } = req.body;
@@ -216,7 +238,7 @@ async function start() {
     res.json({ success: "Product successfully added", populatedCart });
   });
 
-  // delete from cart
+  // !! DELETE FROM CART
   app.delete("/api/users/:userId/cart/:productId", async (req, res) => {
     const userId = req.params.userId;
     const productId = req.params.productId;
@@ -236,7 +258,7 @@ async function start() {
     res.json(populatedCart);
   });
 
-  // Add products From Admin Panel
+  //!! ADD PRODUCTS FROM ADMIN PANEL
   app.post("/api/admin/products/add", async (req, res) => {
     const { name, description, price, oldPrice, isInStock, image, quantity } =
       req.body;
@@ -267,7 +289,7 @@ async function start() {
     }
   });
 
-  // Add Best Deal from admin panel
+  //!! ADD BEST DEAL FROM ADMIN PANEL
   app.post("/api/admin/deal/add", async (req, res) => {
     // Get data
     const { name, price, oldPrice, description, image } = req.body;
@@ -283,7 +305,7 @@ async function start() {
     await db.collection("dealOfTheWeek").insertOne(deal);
   });
 
-  // Log in User
+  //!! LOG IN USER
   app.post("/api/users/get", async (req, res) => {
     const userEmail = req.body.userEmail;
     const userPassword = req.body.userPassword;
@@ -325,7 +347,7 @@ async function start() {
     }
   });
 
-  // Register User
+  //!! REGISTER USER
   app.post("/api/users/add", async (req, res) => {
     const { userName, userLastName, userEmail, userPassword, userPhone } =
       req.body;
@@ -410,6 +432,7 @@ async function start() {
     }
   });
 
+  //!! STRIPE CHECKOUT SESSION
   app.post("/api/create-checkout-session", async (req, res) => {
     const { cartItems } = req.body;
 
@@ -444,6 +467,7 @@ async function start() {
     res.send("Cancel");
   });
 
+  // !! REVEIVING EMAILS FROM USERS
   app.post("/api/:userId/contact-us", async (req, res) => {
     const { userId } = req.params;
     const { fullname, email, subject, message } = req.body;
@@ -456,49 +480,59 @@ async function start() {
       return res.json({ error: "The user does not exist" });
     }
 
-    const transporter = nodemailer.createTransport({
-      service: "gmail", // e.g., Gmail, Outlook, etc.
-      host: "smtp.gmail.com",
-      port: 587,
-      secure: false,
-      auth: {
-        user: "edward885788@gmail.com", // Your email address
-        pass: "bzmj wlrd tifl ceid", // Your email password
-      },
-    });
+    if (fullname == "" || email == "" || subject == "" || message == "") {
+      return res.json({ error: "Incorrect inputs" });
+    }
 
-    // Define the email options
-    const mailOptions = {
-      from: {
-        name: "Empire TCG",
-        address: "empire-tcg.com",
-      }, // Sender address
-      to: "ash@empire-tcg.com", // List of receivers
-      subject: subject, // Subject line
-      text: `Hello Ashot. This is a test email just to see if everything works and you receive customer's message. Here are the details from the form (this is also saved in the database): ${fullname}, ${email}, ${subject}, ${message}`, // Plain text body
-      html: `<h2>I can send html. I duplicate the inputs from the form: </h2> <b>name: ${fullname}, useremail: ${email}, subject: ${subject}, message: ${message}</b>`,
-    };
-
-    // Send the email
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        return res.json({
-          error: "Error occured while trying to send an email",
-        });
-      }
-      // if no error and return status of OK
-      user.updateOne({
+    await db.collection("users").updateOne(
+      { _id: new ObjectId(userId) },
+      {
         $push: {
           emailsSent: {
+            id: new ObjectId(userId),
             fullname: fullname,
             email: email,
             subject: subject,
             message: message,
-            created: Date.now,
+            status: false,
+            created: Date.now(),
           },
         },
-      });
-    });
+      }
+    );
+    // const transporter = nodemailer.createTransport({
+    //   service: "gmail", // e.g., Gmail, Outlook, etc.
+    //   host: "smtp.gmail.com",
+    //   port: 587,
+    //   secure: false,
+    //   auth: {
+    //     user: "edward885788@gmail.com", // Your email address
+    //     pass: "bzmj wlrd tifl ceid", // Your email password
+    //   },
+    // });
+
+    // Define the email options
+    // const mailOptions = {
+    //   from: {
+    //     name: "Empire TCG",
+    //     address: "empire-tcg.com",
+    //   }, // Sender address
+    //   to: "ash@empire-tcg.com", // List of receivers
+    //   subject: subject, // Subject line
+    //   text: `Hello Ashot. This is a test email just to see if everything works and you receive customer's message. Here are the details from the form (this is also saved in the database): ${fullname}, ${email}, ${subject}, ${message}`, // Plain text body
+    //   html: `<h2>I can send html. I duplicate the inputs from the form: </h2> <b>name: ${fullname}, useremail: ${email}, subject: ${subject}, message: ${message}</b>`,
+    // };
+
+    // Send the email
+    // transporter.sendMail(mailOptions, (error, info) => {
+    //   if (error) {
+    //     return res.json({
+    //       error: "Error occured while trying to send an email",
+    //     });
+    //   }
+    //   // if no error and return status of OK
+
+    // });
 
     return res.json({ success: "user is found and data is provided" });
   });

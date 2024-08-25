@@ -15,6 +15,7 @@ import LoginPage from "../views/LoginPage";
 import RegisterPage from "../views/RegisterPage";
 import ForgetPasswordPage from "../views/ForgetPasswordPage";
 import AdminPage from "@/views/AdminPage.vue";
+import AdminPanelEmails from "@/views/AdminPanelEmails.vue";
 
 const routes = [
   {
@@ -109,6 +110,18 @@ const routes = [
     path: "/products/:productId",
     name: "productDetails",
     component: ProductDetailPage,
+    beforeEnter: (to, from, next) => {
+      if (!store.getters.isAuthenticated) {
+        next("/login"); // Redirect to login page
+      } else {
+        next(); // Proceed to the route
+      }
+    },
+  },
+  {
+    path: "/admin/panel/:emailId",
+    name: "AdminPageEmailsReply",
+    component: AdminPanelEmails,
     beforeEnter: (to, from, next) => {
       if (!store.getters.isAuthenticated) {
         next("/login"); // Redirect to login page
