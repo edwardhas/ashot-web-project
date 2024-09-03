@@ -14,8 +14,8 @@ import MyAccountPage from "../views/MyAccountPage";
 import LoginPage from "../views/LoginPage";
 import RegisterPage from "../views/RegisterPage";
 import ForgetPasswordPage from "../views/ForgetPasswordPage";
-import AdminPage from "@/views/AdminPage.vue";
-import AdminPanelEmails from "@/views/AdminPanelEmails.vue";
+import AdminPage from "../views/AdminPage.vue";
+import AdminPanelEmails from "../views/AdminPanelEmails.vue";
 
 const routes = [
   {
@@ -119,14 +119,14 @@ const routes = [
     },
   },
   {
-    path: "/admin/panel/:emailId",
+    path: "/admin/panel/:userId/:emailId",
     name: "AdminPageEmailsReply",
     component: AdminPanelEmails,
     beforeEnter: (to, from, next) => {
-      if (!store.getters.isAuthenticated) {
-        next("/login"); // Redirect to login page
+      if (!store.getters.isAuthenticated || !store.state.user.isAdmin) {
+        next("/");
       } else {
-        next(); // Proceed to the route
+        next();
       }
     },
   },

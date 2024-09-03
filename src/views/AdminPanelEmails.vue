@@ -1,5 +1,5 @@
 <template>
-  <div v-if="product">
+  <div v-if="email">
     <AdminPageEmailReplyComponentVue :email="email" />
   </div>
 
@@ -19,6 +19,13 @@ export default {
     return {
       email: [],
     };
+  },
+  async created() {
+    const response = await axios.get(
+      `/api/emails/${this.$route.params.userId}/${this.$route.params.emailId}`
+    );
+    const email = response.data;
+    this.email = email;
   },
 };
 </script>

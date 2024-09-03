@@ -191,8 +191,7 @@
   <div class="deal-area bg-img pt-95 pb-100">
     <div class="container">
       <div class="section-title text-center mb-50">
-        <h4>Best Product</h4>
-        <h2>Deal of the Week</h2>
+        <h2>Deal of the Week Section</h2>
       </div>
       <div class="row">
         <div class="col-lg-6 col-md-6">
@@ -295,48 +294,46 @@
   <div class="product-area pt-95 pb-70 gray-bg">
     <div class="container">
       <div class="section-title text-center mb-55">
-        <h4>All emails</h4>
-        <h2>Not replied</h2>
+        <h2>All emails section</h2>
       </div>
       <div class="row" v-if="emails[0]">
-        <div
-          class="col-xl-3 col-lg-4 col-md-6 col-sm-6"
-          v-for="email in emails"
-          :key="email.id"
-        >
-          <div
-            class="product-wrapper mb-10"
-            v-for="eachEmail in email.emailsSent"
-            :key="eachEmail.id"
-          >
-            <div class="product-content">
-              <h4>
-                <a>User/Email ID: {{ eachEmail.id }}</a>
-              </h4>
-              <div class="product-price email-name-subject">
-                <span class="new"
-                  >{{ eachEmail.fullname }} ({{ eachEmail.email }})</span
-                >
-                <span class="new subject">{{ eachEmail.subject }}</span>
+        <div class="row-xl-3 row-lg-4 row-md-6 row-sm-6">
+          <div v-for="email in emails" :key="email.id">
+            <div
+              class="product-wrapper mb-10"
+              v-for="eachEmail in email.emails"
+              :key="eachEmail.id"
+            >
+              <div class="product-content">
+                <h4>
+                  <a>User ID: {{ email.id }}</a>
+                </h4>
+                <h4>
+                  <a>Email ID: {{ eachEmail.id }}</a>
+                </h4>
+                <div class="product-price email-name-subject">
+                  <span class="new"
+                    >{{ eachEmail.fullname }} ({{ eachEmail.email }})</span
+                  >
+                  <span class="new subject">{{ eachEmail.subject }}</span>
+                </div>
+                <div class="product-price email-message">
+                  <span class="new">{{ eachEmail.message }}</span>
+                </div>
               </div>
-              <div class="product-price email-message">
-                <span class="new">{{ eachEmail.message }}</span>
-              </div>
-            </div>
-            <div class="submit">
-              <div class="product-list-action-left">
-                <a
-                  class="addtocart-btn"
-                  href="https://mail.google.com/mail/u/0/#inbox?compose=new"
-                  target="_blank"
-                  title="Redirects to gmail.com"
-                >
-                  <i class="ion-bag"></i>
-                  Manual Reply
-                </a>
-              </div>
-              <div class="product-list-action-left">
-                <router-link :to="{ name: 'AdminPageEmailsReply' }">
+              <div class="submit submit-emails">
+                <div class="product-list-action-left">
+                  <a
+                    class="addtocart-btn"
+                    href="https://mail.google.com/mail/u/0/#inbox?compose=new"
+                    target="_blank"
+                    title="Redirects to gmail.com"
+                  >
+                    <i class="ion-bag"></i>
+                    Manual Reply
+                  </a>
+                </div>
+                <div class="product-list-action-left">
                   <a
                     class="addtocart-btn"
                     href="#"
@@ -345,7 +342,7 @@
                     <i class="ion-bag"></i>
                     Quick reply
                   </a>
-                </router-link>
+                </div>
               </div>
             </div>
           </div>
@@ -390,6 +387,7 @@ export default {
       // end of the best deal of the week section
       // start of the emails section
       emails: [],
+      emailsTotal: [],
       // end of the emails section
     };
   },
@@ -494,9 +492,10 @@ export default {
   },
   async created() {
     const response = await axios.get("/api/emails");
-    const emails = response.data;
-    console.log(emails);
+    const emails = response.data.emails;
+    const emailsTotal = response.data.userEmailsTotal;
     this.emails = emails;
+    this.emailsTotal = emailsTotal;
   },
 };
 </script>
@@ -637,6 +636,13 @@ a {
 .submit {
   display: flex;
   justify-content: center;
+  align-content: center;
+  margin-bottom: 100px;
+}
+
+.submit-emails {
+  display: flex;
+  justify-content: flex-start;
   align-content: center;
   margin-bottom: 100px;
 }

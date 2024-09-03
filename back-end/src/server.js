@@ -13,6 +13,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import Stripe from "stripe";
 import helmet from "helmet";
+import { v4 as uuid4 } from "uuid";
 import "dotenv/config";
 
 async function start() {
@@ -83,6 +84,10 @@ async function start() {
     );
   }
 
+  function generateRandomId() {
+    return Math.random().toString(36).substr(2, 9); // Generates a random alphanumeric string
+  }
+
   async function isInStock(id) {
     const product = await db
       .collection("products")
@@ -140,11 +145,45 @@ async function start() {
 
   //!! GET EMAILS
   app.get("/api/emails", async (req, res) => {
-    const emails = await db
-      .collection("users")
-      .find({ emailsSent: { $ne: [] } })
-      .toArray();
-    res.send(emails);
+    const users = await db.collection("users").find().toArray();
+    let total = 0;
+    const totalArray = [];
+
+    const ALL_EMAILS_INFO = [];
+
+    for (let i = 0; i < users.length; i++) {
+      const user = await users[i].emailsSent;
+      const userId = users[i]._id.toString();
+      const emailsAndIds = {
+        id: userId,
+        emails: user,
+      };
+      if (user.length > 0) {
+        // arrayOfUsersEmails.push(user);
+        // userIds.push(userId);
+        emailsAndIds.id = userId;
+        emailsAndIds.emails = user;
+        ALL_EMAILS_INFO.push(emailsAndIds);
+      }
+    }
+
+    for (let i = 0; i < ALL_EMAILS_INFO.length; i++) {
+      const email = ALL_EMAILS_INFO[i].emails;
+
+      total += email.length;
+    }
+
+    for (let i = 0; i < total; i++) {
+      totalArray.push(i);
+    }
+    /* 
+      in the loop return an array of objects.
+      because of scoping we need to store it in global variable (cover)
+      we return the first element of the global array variable
+      the first element contains all the emails
+    */
+
+    res.json({ emails: ALL_EMAILS_INFO, userEmailsTotal: totalArray });
   });
 
   // app.post("/api/users", async (req, res) => {
@@ -193,14 +232,18 @@ async function start() {
   });
 
   //!! GET THE SINGLE EMAIL FROM ADMIN PAGE
-  app.get("/api/emails/:emailId", async (req, res) => {
+  app.get("/api/emails/:userId/:emailId", async (req, res) => {
     const emailId = req.params.emailId;
-    const userId = emailId;
+    const userId = req.params.userId;
 
-    const email = await db
+    const user = await db
       .collection("users")
       .findOne({ _id: new ObjectId(userId) });
 
+    const email = user.emailsSent.find(
+      (email) => email.id.toString() === emailId
+    );
+    console.log(email);
     res.json(email);
   });
 
@@ -489,7 +532,7 @@ async function start() {
       {
         $push: {
           emailsSent: {
-            id: new ObjectId(userId),
+            id: generateRandomId(),
             fullname: fullname,
             email: email,
             subject: subject,
@@ -500,39 +543,38 @@ async function start() {
         },
       }
     );
-    // const transporter = nodemailer.createTransport({
-    //   service: "gmail", // e.g., Gmail, Outlook, etc.
-    //   host: "smtp.gmail.com",
-    //   port: 587,
-    //   secure: false,
-    //   auth: {
-    //     user: "edward885788@gmail.com", // Your email address
-    //     pass: "bzmj wlrd tifl ceid", // Your email password
-    //   },
-    // });
+    const transporter = nodemailer.createTransport({
+      service: "gmail", // e.g., Gmail, Outlook, etc.
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false,
+      auth: {
+        user: "edward885788@gmail.com", // Your email address
+        pass: "bzmj wlrd tifl ceid", // Your email password
+      },
+    });
 
-    // Define the email options
-    // const mailOptions = {
-    //   from: {
-    //     name: "Empire TCG",
-    //     address: "empire-tcg.com",
-    //   }, // Sender address
-    //   to: "ash@empire-tcg.com", // List of receivers
-    //   subject: subject, // Subject line
-    //   text: `Hello Ashot. This is a test email just to see if everything works and you receive customer's message. Here are the details from the form (this is also saved in the database): ${fullname}, ${email}, ${subject}, ${message}`, // Plain text body
-    //   html: `<h2>I can send html. I duplicate the inputs from the form: </h2> <b>name: ${fullname}, useremail: ${email}, subject: ${subject}, message: ${message}</b>`,
-    // };
+    // !! Define the email options
+    const mailOptions = {
+      from: {
+        name: "Empire TCG",
+        address: "empire-tcg.com",
+      }, // Sender address
+      to: "marat885788@gmail.com", // List of receivers
+      subject: subject, // Subject line
 
-    // Send the email
-    // transporter.sendMail(mailOptions, (error, info) => {
-    //   if (error) {
-    //     return res.json({
-    //       error: "Error occured while trying to send an email",
-    //     });
-    //   }
-    //   // if no error and return status of OK
+      html: `<h2>I can send html. I duplicate the inputs from the form: </h2> <b>name: ${fullname}, useremail: ${email}, subject: ${subject}, message: ${message}</b>`,
+    };
 
-    // });
+    // !! Send the email
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        return res.json({
+          error: "Error occured while trying to send an email",
+        });
+      }
+      // if no error and return status of OK
+    });
 
     return res.json({ success: "user is found and data is provided" });
   });

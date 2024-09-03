@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+
 const { Schema } = mongoose;
 
 mongoose.connect(
@@ -68,7 +69,7 @@ const userSchema = new Schema({
   emailsSent: [
     {
       id: {
-        type: Schema.Types.ObjectId,
+        type: String,
         required: true,
       },
       fullname: {
