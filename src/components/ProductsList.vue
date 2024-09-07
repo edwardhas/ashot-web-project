@@ -21,7 +21,7 @@
       </div>
       <div class="row" v-if="products[0]">
         <div
-          class="col-xl-3 col-lg-4 col-md-6 col-sm-6"
+          class="col-xl-3 col-lg-4 col-md-6 col-sm-2"
           v-for="product in products"
           :key="product._id"
         >

@@ -215,9 +215,14 @@ async function start() {
   app.get("/api/products/:productID", async (req, res) => {
     const productID = req.params.productID;
 
+    if (!productID || productID.length != 24)
+      return res.json({ error: "Incorrect Id" });
+
     const product = await db
       .collection("products")
       .findOne({ _id: new ObjectId(productID) });
+
+    if (product == null) return res.json({ error: "Incorrect Id" });
 
     const newViews = ++product.views;
 

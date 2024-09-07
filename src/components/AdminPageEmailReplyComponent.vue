@@ -19,49 +19,57 @@
     <div class="container">
       <div class="row">
         <div class="custom-row-wrap">
-          <p>Place The Product Name Here</p>
-          <input
+          <p>Place The Subject (Will appear at the top. Place a good hook)</p>
+          <textarea
             class="custom-edit-input"
-            :value="dealProductName"
-            @input="updateProductName($event.target.value, deal)"
+            :value="email_subject"
+            @input="updateEmailSubject($event.target.value)"
           />
 
-          <p>Place The Product Price Here</p>
+          <p>Place The Body Message</p>
 
-          <input
-            type="number"
+          <textarea
             class="custom-edit-input"
-            :value="dealProductPrice"
+            :value="email_message"
             min="0"
-            @input="updateProductPrice($event.target.value, 'deal')"
+            @input="updateEmailMessage($event.target.value)"
           />
 
-          <p>Place The Product Old Price Here</p>
+          <p>Place Image URL (will appear as an attachment)</p>
 
-          <input
-            type="number"
-            class="custom-edit-input"
-            :value="dealProductOldPrice"
-            min="0"
-            @input="updateProductOldPrice($event.target.value, 'deal')"
-          />
+          <input class="custom-edit-input" placeholder="URL goes here" />
+        </div>
+        <div class="product-list-action-left">
+          <a
+            class="addtocart-btn"
+            href="#"
+            title="Redirects to replying section"
+          >
+            <i class="ion-bag"></i>
+            Quick reply
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="row">
+        <h1>Appearence (Phone lock screen and Gmail app)</h1>
+        <h4>Attachments are not icnluded</h4>
+        <div class="email-wrap">
+          <div class="avatar-section">
+            <div class="email-avatar">
+              <img
+                src="https://w7.pngwing.com/pngs/722/101/png-transparent-computer-icons-user-profile-circle-abstract-miscellaneous-rim-account.png"
+                alt=""
+              />
+            </div>
+          </div>
 
-          <p>Place The Product Description Here</p>
-
-          <input
-            class="custom-edit-input"
-            :value="dealProductDescription"
-            @input="updateProductDescription($event.target.value, 'deal')"
-          />
-
-          <p>Place The Product Image Link Here</p>
-
-          <input
-            class="custom-edit-input"
-            :value="dealProductImageUrl"
-            placeholder="URL goes here"
-            @input="updateProductImageUrl($event.target.value, 'deal')"
-          />
+          <div class="body-section">
+            <h4 class="email-header">EmpireTCG.com</h4>
+            <h4 class="email-subject">{{ email_subject }}</h4>
+            <p class="email-message">{{ email_message }}</p>
+          </div>
         </div>
       </div>
     </div>
@@ -72,24 +80,17 @@
 export default {
   props: ["email"],
   data() {
-    return {};
+    return {
+      email_subject: "",
+      email_message: "",
+    };
   },
   methods: {
-    updateProductName(newValue, section) {
-      if (section == "adding") return (this.productName = newValue);
-      return (this.dealProductName = newValue);
+    updateEmailSubject(newValue) {
+      return (this.email_subject = newValue);
     },
-    updateProductDescription(newValue, section) {
-      if (section == "adding") return (this.productDescription = newValue);
-      return (this.dealProductDescription = newValue);
-    },
-    updateProductPrice(newValue, section) {
-      if (section == "adding") return (this.productPrice = Number(newValue));
-      return (this.dealProductPrice = Number(newValue));
-    },
-    updateProductOldPrice(newValue, section) {
-      if (section == "adding") return (this.productOldPrice = Number(newValue));
-      return (this.dealProductOldPrice = Number(newValue));
+    updateEmailMessage(newValue) {
+      return (this.email_message = newValue);
     },
   },
 };
@@ -114,5 +115,55 @@ h2 {
 
 .title {
   font-weight: 600;
+}
+
+.product-list-action-left {
+  display: flex;
+  margin: 0 auto;
+  margin-top: 20px;
+  justify-content: center;
+}
+
+.product-list-action-left a {
+  text-decoration: none;
+}
+
+.email-wrap {
+  display: flex;
+  width: 100%;
+}
+
+.avatar-section {
+  justify-content: center;
+  margin-right: 10px;
+}
+
+.email-avatar img {
+  width: 50px;
+  height: 40px;
+  opacity: 0.4;
+}
+
+.body-section h4 {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.row h1 {
+  display: flex;
+  justify-content: center;
+  margin-top: 100px;
+  margin-bottom: 40px;
+  font-size: 30px;
+}
+
+.row h4 {
+  display: flex;
+  justify-content: center;
+}
+
+.row .email-wrap {
+  display: flex;
+  justify-content: flex-start;
 }
 </style>

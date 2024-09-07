@@ -1,5 +1,4 @@
 <template>
-  <Header />
   <div class="custom-title-wrap">
     <h1>404: Page Not Found</h1>
     <span></span>
@@ -8,10 +7,8 @@
 </template>
 
 <script>
-import Header from "../components/Header.vue";
 export default {
   name: "NotFoundPage",
-  components: { Header },
 };
 </script>
 
@@ -49,5 +46,11 @@ span {
   width: 50%;
   border: 1px solid black;
   margin: 0 auto;
+}
+
+@media (max-width: 576px) {
+  h1 {
+    font-size: 30px;
+  }
 }
 </style>

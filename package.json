@@ -4,13 +4,16 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build"
+    "build": "vue-cli-service build",
+    "server": "cd back-end && npm run start",
+    "start": "concurrently \"npm run serve --prefix ./\" \"npm run start --prefix back-end\""
   },
   "dependencies": {
     "@formkit/auto-animate": "^0.8.2",
     "@stripe/stripe-js": "^4.3.0",
     "axios": "^1.7.2",
     "bootstrap": "^5.3.3",
+    "concurrently": "^8.2.2",
     "core-js": "^3.8.3",
     "jquery": "^1.12.0",
     "jquery.counterup": "^2.1.0",

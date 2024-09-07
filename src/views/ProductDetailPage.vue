@@ -1,6 +1,6 @@
 <template>
   <Header />
-  <div v-if="product">
+  <div v-if="product && !product_id_error_message">
     <ProductsDetails :product="product" />
   </div>
 
@@ -23,11 +23,15 @@ export default {
   data() {
     return {
       product: {},
+      product_id_error_message: null,
     };
   },
   components: { NotFoundPage, ProductsDetails, Header, Footer },
   async created() {
     const product = await getSingleProduct(this.$route.params.productId);
+    if (product.error) {
+      return (this.product_id_error_message = product.error);
+    }
     this.product = product;
   },
 };

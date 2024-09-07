@@ -298,7 +298,11 @@
       </div>
       <div class="row" v-if="emails[0]">
         <div class="row-xl-3 row-lg-4 row-md-6 row-sm-6">
-          <div v-for="email in emails" :key="email.id">
+          <div
+            class="above-product-wrapper"
+            v-for="email in emails"
+            :key="email.id"
+          >
             <div
               class="product-wrapper mb-10"
               v-for="eachEmail in email.emails"
@@ -667,6 +671,16 @@ a {
 
 .submit .product-list-action-left a {
   font-size: 11px;
+}
+
+.product-wrapper {
+  width: 50%;
+}
+
+.above-product-wrapper {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
 }
 
 /* end of email section */

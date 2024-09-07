@@ -973,3 +973,10 @@
     width: 100%;
   }
 }
+@media (max-width: 576px) {
+  .col-sm-2 {
+    flex: 0 0 auto;
+    width: 50%;
+    height: 300px;
+  }
+}
