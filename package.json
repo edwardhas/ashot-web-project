@@ -6,7 +6,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "server": "cd back-end && npm run start",
-    "start": "concurrently \"npm run serve --prefix ./\" \"npm run start --prefix back-end\""
+    "start": "concurrently \"npm run build --prefix ./\" \"npm run start --prefix back-end\""
   },
   "dependencies": {
     "@formkit/auto-animate": "^0.8.2",
