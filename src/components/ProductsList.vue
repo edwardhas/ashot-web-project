@@ -5,7 +5,7 @@
         <h2>Products</h2>
         <ul>
           <router-link :to="{ name: 'products' }">
-            <li><a>home</a></li>
+            <li class="text-white"><a>home</a></li>
           </router-link>
 
           <li class="active">Product Details</li>
@@ -83,7 +83,6 @@
       </div>
     </div>
   </div>
-
   <div class="deal-area bg-img pt-95 pb-100">
     <div class="container">
       <div class="section-title text-center mb-50">
@@ -93,25 +92,23 @@
       <div class="row">
         <div class="col-lg-6 col-md-6">
           <div class="deal-img wow fadeInLeft">
-            <a href=""
-              ><img src="../assets/img/banner/banner-2.png" alt=""
-            /></a>
+            <a href=""><img :src="dealImageUrl" alt="" /></a>
           </div>
         </div>
 
         <div class="col-lg-6 col-md-6">
           <div class="deal-content">
-            <h3><a href="">Product</a></h3>
+            <h3>
+              <a href="">{{ dealName }}</a>
+            </h3>
             <div class="deal-pro-price">
-              <span class="deal-old-price">$16.00 </span>
-              <span> $10.00</span>
+              <span class="deal-old-price">${{ dealOldPrice }}.00 </span>
+              <span> ${{ dealPrice }}.00</span>
             </div>
             <p>
-              Lorem ipsum dolor sit amet, co adipisicing elit, sed do eiusmod
-              tempor incididunt labore et dolore magna aliqua. Ut enim ad minim
-              veniam, quis nostrud exercita ullamco laboris nisi ut aliquip ex
-              ea commodo
+              {{ dealDescription }}
             </p>
+            <CountdownTimer />
             <div class="timer timer-style">
               <div data-countdown="2017/10/01"></div>
             </div>
@@ -233,11 +230,12 @@ import EventBus from "../eventBus";
 import store from "../store/index";
 
 import PopupQuickAdd from "./PopupQuickAdd.vue";
+import CountdownTimer from "./CountdownTimer.vue";
 
 export default {
   name: "ProductsList",
   props: ["products", "isDisplayed"],
-  components: { PopupQuickAdd },
+  components: { PopupQuickAdd, CountdownTimer },
 
   data() {
     return {
@@ -247,6 +245,13 @@ export default {
       productImageUrl: "",
       productId: "",
       isInStock: null,
+
+      // deal section
+      dealName: "",
+      dealPrice: 0,
+      dealOldPrice: 0,
+      dealDescription: "",
+      dealImageUrl: "",
     };
   },
 
@@ -268,6 +273,14 @@ export default {
     // this.cartItems = cartItems;
 
     // return (this.cartItemsAmount = cartItems.length);
+
+    const response = await axios.get("/api/deal");
+    // this.name = response.data.name;
+    this.dealName = response.data.name;
+    this.dealPrice = response.data.price;
+    this.dealOldPrice = response.data.oldPrice;
+    this.dealDescription = response.data.description;
+    this.dealImageUrl = response.data.imageUrl;
   },
 
   // methods: {
@@ -284,13 +297,33 @@ export default {
 
 <style scoped>
 .breadcrumb-area {
+  position: relative;
   width: 100%;
-  /* background-image: url(../assets/img/banner/banner-2.jpg); */
   aspect-ratio: 9/2;
-  filter: brightness(100%);
+  overflow: hidden; /* Ensure no overflow from pseudo-element */
+  background-size: cover;
+  background-position: center;
+}
+
+.breadcrumb-area::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background-image: url("https://www.empire-tcg.com/cdn/shop/files/IMG_2920.jpg?v=1723960927&width=3840");
-  background-size: 120%;
+  background-size: cover;
+  background-position: center;
+  filter: brightness(50%);
+  z-index: -1; /* Place behind the content */
   animation: zoom-in-out 40s infinite;
+}
+
+.breadcrumb-content {
+  position: relative;
+  color: white; /* Ensure text is visible */
+  text-align: center;
 }
 
 @keyframes zoom-in-out {

@@ -31,6 +31,8 @@ import router from "./router";
 import store from "./store/index.js";
 import mitt from "mitt";
 import axios from "axios";
+import ElementPlus from "element-plus";
+import "element-plus/dist/index.css";
 
 // Vue.config.productionTip = false;
 
@@ -47,4 +49,9 @@ axios.interceptors.request.use(
   }
 );
 
-createApp(App).use(router).use(store).use(autoAnimatePlugin).mount("#app");
+createApp(App)
+  .use(router)
+  .use(store)
+  .use(autoAnimatePlugin)
+  .use(ElementPlus)
+  .mount("#app");

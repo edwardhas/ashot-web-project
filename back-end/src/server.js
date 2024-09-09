@@ -236,6 +236,102 @@ async function start() {
     res.json(product);
   });
 
+  //!! GET THE SINGLE PRODUCT TO EDIT OR DELETE
+  app.get(
+    "/api/admin/panel/edit_delete_product/:productId",
+    async (req, res) => {
+      const productId = req.params.productId;
+
+      const product = await db
+        .collection("products")
+        .findOne({ _id: new ObjectId(productId) });
+
+      res.json(product);
+    }
+  );
+
+  //!! EDIT OR DELETE PRODUCT FROM ADMIN PAGE
+  app.post(
+    "/api/admin/panel/edit_delete_product/:productId",
+    async (req, res) => {
+      const productId = req.params.productId;
+      const {
+        productName,
+        productDescription,
+        productQuantity,
+        productPrice,
+        productOldPrice,
+        productIsInStock,
+        productImageUrl,
+      } = req.body;
+
+      const originalProperties = {
+        name: productName.toString(),
+        description: productDescription.toString(),
+        quantity: Number(productQuantity),
+        price: productPrice.toString(),
+        oldPrice: productOldPrice.toString(),
+        isInStock: Boolean(productIsInStock),
+        image: productImageUrl.toString(),
+      };
+
+      if (productId.toString().length != 24)
+        return res.json({ error: "Incorrect product ID" });
+
+      const product = await db
+        .collection("products")
+        .findOne({ _id: new ObjectId(productId) });
+
+      function findNonMatchingValues(obj1, obj2) {
+        const nonMatchingValues = [];
+
+        // Iterate through keys in obj1
+        for (const key in obj1) {
+          if (obj1.hasOwnProperty(key)) {
+            // Check if key exists in obj2 and if the values are different
+            if (obj2.hasOwnProperty(key) && obj1[key] !== obj2[key]) {
+              nonMatchingValues.push({
+                key: key,
+                originalProperties: obj1[key],
+                product: obj2[key],
+              });
+            }
+          }
+        }
+
+        return nonMatchingValues;
+      }
+
+      const result = findNonMatchingValues(originalProperties, product);
+
+      if (result.length == 0) {
+        return res.json({ error: "No Changes Were Made" });
+      }
+
+      async function updateProducts(updates, productId) {
+        for (const update of updates) {
+          const filter = { _id: new ObjectId(productId) };
+          // const filter = { [update.key]: update.product };
+          const updateDoc = {
+            $set: { [update.key]: update.originalProperties },
+          };
+          console.log(filter, updateDoc);
+          try {
+            const result = await db
+              .collection("products")
+              .updateOne(filter, updateDoc);
+          } catch (error) {
+            console.error("Error updating: ", error);
+          }
+        }
+      }
+
+      updateProducts(result, productId);
+
+      res.json({ success: "Product Updated Successfuly" });
+    }
+  );
+
   //!! GET THE SINGLE EMAIL FROM ADMIN PAGE
   app.get("/api/emails/:userId/:emailId", async (req, res) => {
     const emailId = req.params.emailId;
@@ -259,7 +355,7 @@ async function start() {
 
     const productIsInStock = await isInStock(productId);
     if (!productIsInStock) {
-      return res.json({ error: "The product is not in stock" });
+      return res.json({ error: "The Product Is Not In Stock" });
     }
 
     // await updateUserCartById(userId, productId, true);
@@ -340,17 +436,42 @@ async function start() {
   //!! ADD BEST DEAL FROM ADMIN PANEL
   app.post("/api/admin/deal/add", async (req, res) => {
     // Get data
-    const { name, price, oldPrice, description, image } = req.body;
+    const { name, price, oldPrice, description, imageUrl } = req.body;
 
-    const deal = {
-      createdAt: new Date(),
-      name: name,
-      price: price,
-      oldPrice: oldPrice,
-      description: description,
-      imageUrl: image,
-    };
-    await db.collection("dealOfTheWeek").insertOne(deal);
+    try {
+      const now = new Date();
+      const dealEnd = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours from now
+
+      const deal = {
+        timestamp: now,
+        name: name,
+        price: price,
+        oldPrice: oldPrice,
+        description: description,
+        imageUrl: imageUrl,
+        endTimestamp: dealEnd,
+      };
+
+      await db.collection("dealOfTheWeek").insertOne(deal);
+      res.json({ success: "Deal Added Successfully" });
+    } catch (error) {
+      res.json({ error: `Error Adding The Deal: ${error}` });
+    }
+  });
+
+  //!! GET THE BEST DEAL
+  app.get("/api/deal", async (req, res) => {
+    try {
+      const latestDeal = await db
+        .collection("dealOfTheWeek")
+        .find()
+        .sort({ timestamp: -1 })
+        .limit(1)
+        .toArray();
+      res.json(latestDeal[0]);
+    } catch (error) {
+      res.status(500).json({ error: "Internal Server Error" });
+    }
   });
 
   //!! LOG IN USER

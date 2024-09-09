@@ -55,12 +55,24 @@
       </div>
     </div>
   </div>
+
+  <el-alert
+    :class="[showAlert ? 'fixed-alert' : 'none-alert']"
+    :title="alert_title"
+    :type="alert_type"
+    :description="alert_description"
+    show-icon
+    center
+  />
 </template>
 
 <script>
 import axios from "axios";
 import store from "../store/index";
 import EventBus from "../eventBus";
+
+import { ElAlert } from "element-plus";
+import "element-plus/dist/index.css";
 
 export default {
   name: "popupQuickAdd",
@@ -90,6 +102,12 @@ export default {
     return {
       quantity: 1,
       cartItemsAmount: 0,
+
+      // Alert Section
+      showAlert: false,
+      alert_title: "",
+      alert_type: "",
+      alert_description: "",
     };
   },
   methods: {
@@ -112,9 +130,27 @@ export default {
         quantity: this.quantity,
       };
 
-      await axios.post(`/api/users/${store.state.user.id}/cart`, data);
+      const response = await axios.post(
+        `/api/users/${store.state.user.id}/cart`,
+        data
+      );
       EventBus.emit("add-to-cart", ++this.cartItemsAmount);
-      alert("Added");
+
+      if (response.data.success) {
+        return (
+          (this.showAlert = true),
+          (this.alert_title = "Success!"),
+          (this.alert_description = response.data.success),
+          (this.alert_type = "success")
+        );
+      } else {
+        return (
+          (this.showAlert = true),
+          (this.alert_title = "Error!"),
+          (this.alert_description = response.data.error),
+          (this.alert_type = "error")
+        );
+      }
     },
   },
   async created() {
@@ -263,6 +299,19 @@ export default {
   padding: 12px 22px;
   text-transform: uppercase;
   transition: 0.7s;
+}
+
+/* Alert Section */
+.fixed-alert {
+  position: fixed;
+  right: 20px; /* Distance from the right edge */
+  bottom: 150px; /* Distance from the bottom edge */
+  width: 300px; /* Set a fixed width for the alert */
+  z-index: 9999; /* Ensure it's on top of other content */
+}
+
+.none-alert {
+  display: none;
 }
 
 @media screen and (max-width: 700px) {

@@ -236,7 +236,7 @@
           <input
             class="custom-edit-input"
             :value="dealProductName"
-            @input="updateProductName($event.target.value, deal)"
+            @input="updateProductName($event.target.value, 'deal')"
           />
 
           <p>Place The Product Price Here</p>
@@ -282,7 +282,12 @@
 
   <div class="submit">
     <div class="product-list-action-left">
-      <a @click="addProduct" class="addtocart-btn" href="#" title="Add to cart">
+      <a
+        @click="addBestDeal"
+        class="addtocart-btn"
+        href="#"
+        title="Add to cart"
+      >
         <i class="ion-bag"></i>
         Add To DataBase
       </a>
@@ -291,7 +296,7 @@
 
   <!-- !! END OF DEAL OF THE WEEK PRODUCT SECTION -->
   <!-- !!  START OF EMAILS SECTION -->
-  <div class="product-area pt-95 pb-70 gray-bg">
+  <div class="product-area pt-95 gray-bg">
     <div class="container">
       <div class="section-title text-center mb-55">
         <h2>All emails section</h2>
@@ -338,14 +343,18 @@
                   </a>
                 </div>
                 <div class="product-list-action-left">
-                  <a
-                    class="addtocart-btn"
-                    href="#"
-                    title="Redirects to replying section"
+                  <router-link
+                    :to="{ path: `/admin/panel/${email.id}/${eachEmail.id}` }"
                   >
-                    <i class="ion-bag"></i>
-                    Quick reply
-                  </a>
+                    <a
+                      class="addtocart-btn"
+                      href="#"
+                      title="Redirects to replying section"
+                    >
+                      <i class="ion-bag"></i>
+                      Quick reply
+                    </a>
+                  </router-link>
                 </div>
               </div>
             </div>
@@ -357,10 +366,67 @@
       </div>
     </div>
   </div>
+  <!-- !!  END OF EMAILS SECTION -->
+  <!-- !!  START OF PRODUCTS VIEWS/CHANGES SECTION -->
+  <div class="product-area adding-deleting-area pt-95 pb-70 gray-bg">
+    <div class="container">
+      <div class="section-title text-center mb-55">
+        <h4>Most Popular</h4>
+        <h2>Recent Products</h2>
+      </div>
+      <div class="row" v-if="edit_delete_products[0]">
+        <div
+          class="col-xl-3 col-lg-4 col-md-6 col-sm-2"
+          v-for="product in edit_delete_products"
+          :key="product._id"
+        >
+          <div class="product-wrapper mb-10">
+            <div class="product-img">
+              <router-link
+                :to="{
+                  path: `/admin/panel/edit_delete_product/${product._id}`,
+                }"
+              >
+                <a href="">
+                  <img class="custom-image" :src="product.image" alt="" />
+                </a>
+              </router-link>
+
+              <!-- "../assets/img/product/product-4.jpg" -->
+            </div>
+            <div class="product-content">
+              <h4>
+                <router-link
+                  :to="{
+                    path: `/admin/panel/edit_delete_product/${product._id}`,
+                  }"
+                >
+                  <a href="">{{ product.name }}</a>
+                </router-link>
+                <h4 class="inStock" v-if="product.isInStock">In Stock</h4>
+                <h4 class="outOfStock" v-else>Out Of Stock</h4>
+              </h4>
+              <div class="product-price">
+                <span class="new">${{ product.price }}.00</span>
+                <span class="old" v-if="product.oldPrice"
+                  >${{ product.oldPrice }}.00</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="custom-empty-products-list" v-else>
+        <h3>Products are coming soon...</h3>
+      </div>
+    </div>
+  </div>
+  <!-- !!  END OF PRODUCTS VIEWS/CHANGES SECTION -->
 </template>
 
 <script>
 import ValidationComponent from "@/components/ValidationComponent.vue";
+import { getProducts } from "../db_queries";
 import axios from "axios";
 
 export default {
@@ -393,6 +459,9 @@ export default {
       emails: [],
       emailsTotal: [],
       // end of the emails section
+      //start of adding/deleting products
+      edit_delete_products: [],
+      //end of adding/deleting products
     };
   },
   methods: {
@@ -482,7 +551,7 @@ export default {
         price: this.dealProductPrice,
         oldPrice: this.dealProductOldPrice,
         description: this.dealProductDescription,
-        image: this.dealProductImageUrl,
+        imageUrl: this.dealProductImageUrl,
       };
 
       await axios.post("/api/admin/deal/add", dealData);
@@ -500,6 +569,9 @@ export default {
     const emailsTotal = response.data.userEmailsTotal;
     this.emails = emails;
     this.emailsTotal = emailsTotal;
+
+    const products = await getProducts();
+    this.edit_delete_products = products;
   },
 };
 </script>
@@ -507,18 +579,34 @@ export default {
 <style scoped>
 @import "../assets/css/responsive.css";
 
-/* .breadcrumb-area {
-  background-image: url("https://wallpaperswide.com/download/amazing_asiatic_landscape_art-wallpaper-2732x768.jpg");
-} */
-
 .breadcrumb-area {
+  position: relative;
   width: 100%;
-  /* background-image: url(../assets/img/banner/banner-2.jpg); */
   aspect-ratio: 9/2;
-  filter: brightness(50%);
+  overflow: hidden; /* Ensure no overflow from pseudo-element */
+  background-size: cover;
+  background-position: center;
+}
+
+.breadcrumb-area::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background-image: url("https://www.empire-tcg.com/cdn/shop/files/IMG_2920.jpg?v=1723960927&width=3840");
-  background-size: 120%;
+  background-size: cover;
+  background-position: center;
+  filter: brightness(50%);
+  z-index: -1; /* Place behind the content */
   animation: zoom-in-out 40s infinite;
+}
+
+.breadcrumb-content {
+  position: relative;
+  color: white; /* Ensure text is visible */
+  text-align: center;
 }
 
 @keyframes zoom-in-out {
@@ -601,7 +689,7 @@ a {
 .outOfStock {
   color: #ff3131;
   font-family: sans-serif;
-  font-size: 18px;
+  font-size: 15px;
 }
 
 .disabled {
@@ -614,7 +702,7 @@ a {
 .inStock {
   color: rgb(34, 170, 46);
   font-family: sans-serif;
-  font-size: 18px;
+  font-size: 15px;
 }
 
 .custom-edit-input {
@@ -684,6 +772,43 @@ a {
 }
 
 /* end of email section */
+/* start of adding/deleting products section */
+
+.product-action a {
+  text-decoration: none;
+}
+
+.custom-empty-products-list {
+  display: flex;
+  justify-content: center;
+}
+
+.custom-image {
+  aspect-ratio: 3/3;
+}
+
+.ti-plus-a {
+  cursor: pointer;
+}
+
+.ti-shopping-cart-a {
+  cursor: pointer;
+}
+
+hr {
+  width: 85%;
+  margin: 1rem 0;
+  color: inherit;
+  background-color: currentColor;
+  border: 1px solid rgb(166, 162, 162);
+  opacity: 0.25;
+  margin: 0 auto;
+}
+
+.section-title h4 {
+  margin-top: 100px;
+}
+/* end of adding/deleting products section */
 
 @media screen and (max-width: 700px) {
   .adding-product-section {
@@ -691,6 +816,14 @@ a {
     -webkit-box-shadow: none;
     -moz-box-shadow: none;
     box-shadow: none;
+  }
+}
+
+@media (max-width: 576px) {
+  .product-wrapper {
+    flex: 0 0 auto;
+    flex-wrap: wrap;
+    width: 100%;
   }
 }
 </style>
