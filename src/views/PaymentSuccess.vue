@@ -1,10 +1,10 @@
 <template>
   <div class="container">
-    <h1>404</h1>
-    <h2>UH OH! You're lost.</h2>
+    <el-result icon="success"></el-result>
+    <h2>Payment Done!</h2>
     <p>
-      The page you are looking for does not exist. How you got here is a
-      mystery. But you can click the button below to go back to the homepage.
+      Thank you for completing your secure online payment. You can click the
+      button below to go back to the homepage.
     </p>
   </div>
   <router-link :to="{ path: '/' }">
@@ -14,7 +14,7 @@
 
 <script>
 export default {
-  name: "NotFoundPage",
+  name: "PaymentSuccess",
 };
 </script>
 
@@ -42,13 +42,14 @@ h1 {
 }
 h2 {
   font-weight: bold;
+  margin-top: 20px;
 }
 
 p {
   margin-top: 20px;
 }
 
-.btn {
+button {
   display: flex;
   margin: 0 auto;
   margin-top: 40px;

@@ -27,7 +27,11 @@
         <div class="row">
           <div class="col-lg-6 col-md-6">
             <div class="product-details-img">
-              <img v-if="productImageUrl" id="zoompro" :src="productImageUrl" />
+              <img
+                v-if="productImageUrlOne"
+                id="zoompro"
+                :src="productImageUrlOne"
+              />
               <p v-else>
                 Picture will be displayed here after you place the link in the
                 corresponding field below
@@ -162,8 +166,43 @@
 
             <input
               class="custom-edit-input"
-              :value="productImageUrl"
-              @input="updateProductImageUrl($event.target.value, 'adding')"
+              :value="productImageUrlOne"
+              placeholder="URL goes here"
+              @input="
+                updateProductImageUrl($event.target.value, 'adding', 'one')
+              "
+            />
+            <input
+              class="custom-edit-input"
+              :value="productImageUrlTwo"
+              placeholder="OK to leave blank"
+              @input="
+                updateProductImageUrl($event.target.value, 'adding', 'two')
+              "
+            />
+            <input
+              class="custom-edit-input"
+              :value="productImageUrlThree"
+              placeholder="OK to leave blank"
+              @input="
+                updateProductImageUrl($event.target.value, 'adding', 'three')
+              "
+            />
+            <input
+              class="custom-edit-input"
+              :value="productImageUrlFour"
+              placeholder="OK to leave blank"
+              @input="
+                updateProductImageUrl($event.target.value, 'adding', 'four')
+              "
+            />
+            <input
+              class="custom-edit-input"
+              :value="productImageUrlFive"
+              placeholder="OK to leave blank"
+              @input="
+                updateProductImageUrl($event.target.value, 'adding', 'five')
+              "
             />
           </div>
         </div>
@@ -196,7 +235,7 @@
       <div class="row">
         <div class="col-lg-6 col-md-6">
           <div class="deal-img wow fadeInLeft">
-            <img v-if="dealProductImageUrl" :src="dealProductImageUrl" />
+            <img v-if="dealProductImageUrlOne" :src="dealProductImageUrlOne" />
             <p v-else>
               Picture will be displayed here after you place the link in the
               corresponding field below
@@ -267,13 +306,40 @@
             @input="updateProductDescription($event.target.value, 'deal')"
           />
 
-          <p>Place The Product Image Link Here</p>
+          <p>
+            Place The Product Image Link Here (Only the first one shows up on
+            this page)
+          </p>
 
           <input
             class="custom-edit-input"
-            :value="dealProductImageUrl"
+            :value="dealProductImageUrlOne"
             placeholder="URL goes here"
-            @input="updateProductImageUrl($event.target.value, 'deal')"
+            @input="updateProductImageUrl($event.target.value, 'deal', 'one')"
+          />
+          <input
+            class="custom-edit-input"
+            :value="dealProductImageUrlTwo"
+            placeholder="OK to leave blank"
+            @input="updateProductImageUrl($event.target.value, 'deal', 'two')"
+          />
+          <input
+            class="custom-edit-input"
+            :value="dealProductImageUrlThree"
+            placeholder="OK to leave blank"
+            @input="updateProductImageUrl($event.target.value, 'deal', 'three')"
+          />
+          <input
+            class="custom-edit-input"
+            :value="dealProductImageUrlFour"
+            placeholder="OK to leave blank"
+            @input="updateProductImageUrl($event.target.value, 'deal', 'four')"
+          />
+          <input
+            class="custom-edit-input"
+            :value="dealProductImageUrlFive"
+            placeholder="OK to leave blank"
+            @input="updateProductImageUrl($event.target.value, 'deal', 'five')"
           />
         </div>
       </div>
@@ -434,6 +500,8 @@ export default {
   components: { ValidationComponent },
   data() {
     return {
+      // global active users amount variable
+      activeUsers: 0,
       // start of adding product section
       productName: "Product Name",
       productDescription: "Product Description",
@@ -442,7 +510,12 @@ export default {
       quantity: 1,
       inStock: null,
       outOfStock: null,
-      productImageUrl: null,
+      productImageUrlOne: null,
+      productImageUrlTwo: null,
+      productImageUrlThree: null,
+      productImageUrlFour: null,
+      productImageUrlFive: null,
+      productImages: [],
       page: "Admin",
       message: "",
       status: false,
@@ -453,7 +526,12 @@ export default {
       dealProductDescription: "Product Description",
       dealProductPrice: 0,
       dealProductOldPrice: 0,
-      dealProductImageUrl: null,
+      dealProductImageUrlOne: null,
+      dealProductImageUrlTwo: null,
+      dealProductImageUrlThree: null,
+      dealProductImageUrlFour: null,
+      dealProductImageUrlFive: null,
+      dealImages: [],
       // end of the best deal of the week section
       // start of the emails section
       emails: [],
@@ -489,9 +567,32 @@ export default {
         this.inStock = false;
       }
     },
-    updateProductImageUrl(newValue, section) {
-      if (section == "adding") return (this.productImageUrl = newValue);
-      return (this.dealProductImageUrl = newValue);
+    updateProductImageUrl(newValue, section, variable) {
+      if (section == "adding") {
+        if (variable == "one") {
+          console.log(this.productImageUrlOne);
+          return (this.productImageUrlOne = newValue);
+        } else if (variable == "two")
+          return (this.productImageUrlTwo = newValue);
+        else if (variable == "three")
+          return (this.productImageUrlThree = newValue);
+        else if (variable == "four")
+          return (this.productImageUrlFour = newValue);
+        else if (variable == "five")
+          return (this.productImageUrlFive = newValue);
+      } else {
+        if (variable == "one") {
+          console.log(this.dealProductImageUrlOne);
+          return (this.dealProductImageUrlOne = newValue);
+        } else if (variable == "two")
+          return (this.dealProductImageUrlTwo = newValue);
+        else if (variable == "three")
+          return (this.dealProductImageUrlThree = newValue);
+        else if (variable == "four")
+          return (this.dealProductImageUrlFour = newValue);
+        else if (variable == "five")
+          return (this.dealProductImageUrlFive = newValue);
+      }
     },
 
     manageQuantity(operation) {
@@ -506,16 +607,34 @@ export default {
     },
 
     async addProduct() {
+      this.productImageUrlOne == null
+        ? null
+        : this.productImages.push(this.productImageUrlOne);
+      this.productImageUrlTwo == null
+        ? null
+        : this.productImages.push(this.productImageUrlTwo);
+      this.productImageUrlThree == null
+        ? null
+        : this.productImages.push(this.productImageUrlThree);
+      this.productImageUrlFour == null
+        ? null
+        : this.productImages.push(this.productImageUrlFour);
+      this.productImageUrlFive == null
+        ? null
+        : this.productImages.push(this.productImageUrlFive);
+
+      return console.log(this.productImages);
+
       const productData = {
         name: this.productName,
         price: this.productPrice,
         oldPrice: this.productOldPrice,
         description: this.productDescription,
         isInStock: this.inStock,
-        image: this.productImageUrl,
+        image: this.productImages,
         quantity: this.quantity,
       };
-      console.log(productData);
+
       const response = await axios.post("/api/admin/products/add", productData);
       const message = response.data.message;
       const errorMessage = response.data.error;
@@ -529,7 +648,11 @@ export default {
       this.productOldPrice = 0;
       this.inStock = null;
       this.outOfStock = null;
-      this.productImageUrl = null;
+      this.productImageUrlOne = null;
+      this.productImageUrlTwo = null;
+      this.productImageUrlThree = null;
+      this.productImageUrlFour = null;
+      this.productImageUrlFive = null;
 
       if (message == undefined)
         return (
@@ -546,12 +669,28 @@ export default {
     },
 
     async addBestDeal() {
+      this.dealProductImageUrlOne == null
+        ? null
+        : this.dealImages.push(this.dealProductImageUrlOne);
+      this.dealProductImageUrlTwo == null
+        ? null
+        : this.dealImages.push(this.dealProductImageUrlTwo);
+      this.dealProductImageUrlThree == null
+        ? null
+        : this.dealImages.push(this.dealProductImageUrlThree);
+      this.dealProductImageUrlFour == null
+        ? null
+        : this.dealImages.push(this.dealProductImageUrlFour);
+      this.dealProductImageUrlFive == null
+        ? null
+        : this.dealImages.push(this.dealProductImageUrlFive);
+
       const dealData = {
         name: this.dealProductName,
         price: this.dealProductPrice,
         oldPrice: this.dealProductOldPrice,
         description: this.dealProductDescription,
-        imageUrl: this.dealProductImageUrl,
+        imageUrls: this.dealImages,
       };
 
       await axios.post("/api/admin/deal/add", dealData);
@@ -560,15 +699,27 @@ export default {
       this.dealProductDescription = "Product Description";
       this.dealProductPrice = 0;
       this.dealProductOldPrice = 0;
-      this.dealProductImageUrl = null;
+      this.dealProductImageUrlOne = null;
+      this.dealProductImageUrlTwo = null;
+      this.dealProductImageUrlThree = null;
+      this.dealProductImageUrlFour = null;
+      this.dealProductImageUrlFive = null;
     },
   },
   async created() {
-    const response = await axios.get("/api/emails");
-    const emails = response.data.emails;
-    const emailsTotal = response.data.userEmailsTotal;
+    const emails_response = await axios.get("/api/emails");
+    const activeUsers_response = await axios.get(
+      "/api/admin/page/users-active"
+    );
+    // working with emails_response
+    const emails = emails_response.data.emails;
+    const emailsTotal = emails_response.data.userEmailsTotal;
     this.emails = emails;
     this.emailsTotal = emailsTotal;
+
+    // working with activeUsers_response
+    const usersAmount = activeUsers_response.data.activeUsers;
+    this.activeUsers = usersAmount;
 
     const products = await getProducts();
     this.edit_delete_products = products;

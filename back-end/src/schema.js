@@ -95,14 +95,14 @@ const userSchema = new Schema({
       created: {
         type: Date,
         required: true,
-        default: Date.now,
+        default: Date.now(),
       },
     },
   ],
   created: {
     type: Date,
     required: true,
-    default: Date.now,
+    default: Date.now(),
   },
 });
 
@@ -110,7 +110,7 @@ const ProductsSchema = new Schema({
   created: {
     type: Date,
     required: true,
-    default: Date.now,
+    default: Date.now(),
   },
   name: {
     type: String,
@@ -137,7 +137,7 @@ const ProductsSchema = new Schema({
     required: true,
   },
   image: {
-    type: String,
+    type: Array,
     required: true,
   },
   views: {
@@ -172,6 +172,25 @@ const bestDealSchema = new Schema({
   },
 });
 
+const monthlyActiveUsersSchema = new Schema({
+  year: {
+    type: Number,
+    required: true,
+  },
+  month: {
+    type: Number,
+    required: true,
+  },
+  activeUsers: {
+    type: Array,
+    required: true,
+  },
+});
+
 const User = mongoose.model("Users", userSchema);
 const Products = mongoose.model("Products", ProductsSchema);
-export { User, Products };
+const MonthlyActiveUsers = mongoose.model(
+  "MonthlyActiveUsers",
+  monthlyActiveUsersSchema
+);
+export { User, Products, MonthlyActiveUsers };

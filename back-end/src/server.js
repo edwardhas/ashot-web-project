@@ -5,14 +5,16 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import { WebSocketServer } from "ws";
+import { Server } from "socket.io";
 import { MongoClient, ObjectId } from "mongodb";
-import { User, Products } from "./schema.js";
+import { User, Products, MonthlyActiveUsers } from "./schema.js";
 // import { error } from "console";
 import nodemailer from "nodemailer";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import Stripe from "stripe";
 import helmet from "helmet";
+import cors from "cors";
 import { v4 as uuid4 } from "uuid";
 import "dotenv/config";
 
@@ -34,6 +36,15 @@ async function start() {
     })
   );
 
+  app.use(
+    cors({
+      origin: "https://localhost:8080",
+      methods: ["GET", "POST"],
+      allowedHeaders: ["Content-Type", "Authorization", "users-active"],
+      credentials: true,
+    })
+  );
+
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
   const assetsDir = path.join(__dirname, "../assets");
@@ -46,11 +57,31 @@ async function start() {
   };
 
   const server = https.createServer(options, app);
-  const stripe = new Stripe(
-    "sk_test_51PYwiSRqy7S2QG3uFvutnATahFAikR7lkfRBRDXTK0QG7Xj1tSFxSxeZcO7ivmLlwRycqlrwtCIhlWYBTib5teRW00HqNqHw84"
-  );
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
   const wss = new WebSocketServer({ server });
+
+  let activeUsers = 0;
+
+  const io = new Server(server, {
+    cors: {
+      origin: "https://localhost:8080",
+      methods: ["GET", "POST"],
+      allowedHeaders: ["users-active"],
+      credentials: true,
+    },
+  });
+
+  io.on("connection", (socket) => {
+    activeUsers++;
+
+    io.emit("activeUsers", activeUsers);
+
+    socket.on("disconnect", () => {
+      activeUsers--;
+      io.emit("activeUsers", activeUsers);
+    });
+  });
 
   wss.on("connection", (ws) => {
     console.log("WebSocket connection established");
@@ -69,7 +100,6 @@ async function start() {
 
   await client.connect();
   const db = client.db("test");
-
   async function populatedCartIds(cartItems) {
     return Promise.all(
       cartItems.map((item) =>
@@ -137,10 +167,28 @@ async function start() {
   //   });
   // };
 
-  //!! GET PRODUCTS
-  app.get("/api/products", async (req, res) => {
+  //!! GET PRODUCTS (actually post cuz we need userID for MUA)
+  app.post("/api/products", async (req, res) => {
     const products = await db.collection("products").find({}).toArray();
-    res.send(products);
+
+    const { userId } = req.body;
+
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1; // Months are 0-indexed in JS
+
+    try {
+      await db
+        .collection("monthlyactiveusers")
+        .updateOne(
+          { year: year, month: month },
+          { $push: { activeUsers: userId } }
+        );
+    } catch (error) {
+      console.error("Error adding user to monthly active users:", error);
+      res.json({ error: error });
+    }
+    res.json({ products: products });
   });
 
   //!! GET EMAILS
@@ -211,6 +259,18 @@ async function start() {
     res.json(populatedCart);
   });
 
+  app.get("/api/users/:userId/cartQuantity", async (req, res) => {
+    const user = await db
+      .collection("users")
+      .findOne({ _id: new ObjectId(req.params.userId) });
+
+    if (user.cartItems == null) {
+      res.json({ message: "The cart is empty" });
+    }
+
+    res.json(user.cartItems.quantity);
+  });
+
   // !! GET SINGLE PRODUCT
   app.get("/api/products/:productID", async (req, res) => {
     const productID = req.params.productID;
@@ -234,6 +294,11 @@ async function start() {
       );
 
     res.json(product);
+  });
+
+  //!! REQUEST THE AMOUNT OF USERS ACTIVE IN ADMIN PAGE
+  app.get("/api/admin/page/users-active", (req, res) => {
+    res.json({ activeUsers: activeUsers });
   });
 
   //!! GET THE SINGLE PRODUCT TO EDIT OR DELETE
@@ -305,7 +370,7 @@ async function start() {
       const result = findNonMatchingValues(originalProperties, product);
 
       if (result.length == 0) {
-        return res.json({ error: "No Changes Were Made" });
+        return res.json({ error: "Ashot Brat Please Make Changes first" });
       }
 
       async function updateProducts(updates, productId) {
@@ -315,13 +380,12 @@ async function start() {
           const updateDoc = {
             $set: { [update.key]: update.originalProperties },
           };
-          console.log(filter, updateDoc);
           try {
             const result = await db
               .collection("products")
               .updateOne(filter, updateDoc);
           } catch (error) {
-            console.error("Error updating: ", error);
+            res.json({ error: "Error Adding Changes" });
           }
         }
       }
@@ -344,7 +408,7 @@ async function start() {
     const email = user.emailsSent.find(
       (email) => email.id.toString() === emailId
     );
-    console.log(email);
+    // console.log(email);
     res.json(email);
   });
 
@@ -359,18 +423,21 @@ async function start() {
     }
 
     // await updateUserCartById(userId, productId, true);
-
-    await db.collection("users").updateOne(
-      { _id: new ObjectId(userId) },
-      {
-        $push: {
-          cartItems: {
-            productId: new ObjectId(productId),
-            quantity: quantity,
+    try {
+      await db.collection("users").updateOne(
+        { _id: new ObjectId(userId) },
+        {
+          $push: {
+            cartItems: {
+              productId: new ObjectId(productId),
+              quantity: quantity,
+            },
           },
-        },
-      }
-    );
+        }
+      );
+    } catch (error) {
+      res.json({ error: error });
+    }
 
     // const user = findUserByInput(userId, true);
 
@@ -436,7 +503,7 @@ async function start() {
   //!! ADD BEST DEAL FROM ADMIN PANEL
   app.post("/api/admin/deal/add", async (req, res) => {
     // Get data
-    const { name, price, oldPrice, description, imageUrl } = req.body;
+    const { name, price, oldPrice, description, imageUrls } = req.body;
 
     try {
       const now = new Date();
@@ -448,7 +515,7 @@ async function start() {
         price: price,
         oldPrice: oldPrice,
         description: description,
-        imageUrl: imageUrl,
+        imageUrl: imageUrls,
         endTimestamp: dealEnd,
       };
 
@@ -603,38 +670,45 @@ async function start() {
 
   //!! STRIPE CHECKOUT SESSION
   app.post("/api/create-checkout-session", async (req, res) => {
-    const { cartItems } = req.body;
+    const { products } = req.body;
 
-    const lineItems = cartItems.map((item) => ({
-      price_data: {
-        currency: "usd",
-        product_data: {
-          name: item.name,
-          images: [item.image],
+    const lineItems = products.map((product) => {
+      return {
+        price_data: {
+          currency: "usd",
+          product_data: {
+            name: product.name,
+            images: [product.image],
+          },
+          unit_amount: product.price * 100, // convert to cents
         },
-        unit_amount: Math.round(item.price * 100),
-      },
-      quantity: 1,
-    }));
-
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      line_items: lineItems,
-      mode: "payment",
-      success_url: "https://localhost:8080/success",
-      cancel_url: "https://localhost:8080/cancel",
+        quantity: product.quantity,
+      };
     });
 
-    res.json({ id: session.id });
+    try {
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        line_items: lineItems,
+        mode: "payment",
+        success_url: `https://localhost:8080/success`,
+        cancel_url: `https://localhost:8080/cancel`,
+      });
+
+      res.json({ id: session.id });
+    } catch (error) {
+      console.error("Error creating checkout session:", error);
+      res.status(500).send("Server error");
+    }
   });
 
-  app.get("/success", (req, res) => {
-    res.send("Success");
-  });
+  // app.get("/success", (req, res) => {
+  //   res.send("Success");
+  // });
 
-  app.get("/cancel", (req, res) => {
-    res.send("Cancel");
-  });
+  // app.get("/cancel", (req, res) => {
+  //   res.send("Cancel");
+  // });
 
   // !! REVEIVING EMAILS FROM USERS
   app.post("/api/:userId/contact-us", async (req, res) => {

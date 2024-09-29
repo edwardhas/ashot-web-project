@@ -17,6 +17,9 @@ import { deleteProductFromCart, getCartItems } from "../db_queries";
 import Header from "../components/Header.vue";
 import store from "../store/index";
 
+import { ElNotification } from "element-plus";
+import "element-plus/dist/index.css";
+
 export default {
   data() {
     return {
@@ -37,7 +40,12 @@ export default {
         (item) => item.productId !== productId
       );
       this.cartItemsAmount--;
-
+      ElNotification({
+        title: "Success!",
+        message: "Product was successfuly removed",
+        type: "success",
+        duration: 3000,
+      });
       EventBus.emit("remove-from-cart", this.cartItemsAmount);
     },
     // handleUpdate(amount) {

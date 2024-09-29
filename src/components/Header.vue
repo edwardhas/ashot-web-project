@@ -132,7 +132,7 @@
               </div>
             </div>
           </div>
-          <div
+          <!-- <div
             class="mobile-menu-area electro-menu d-md-block col-md-12 col-lg-12 col-12 d-lg-none d-xl-none"
           >
             <div class="mobile-menu">
@@ -144,7 +144,8 @@
                 <div>Contact Us</div>
               </nav>
             </div>
-          </div>
+          </div> -->
+          <mobileMenuComponent />
         </div>
       </div>
     </div>
@@ -156,8 +157,11 @@ import axios from "axios";
 import EventBus from "../eventBus";
 import store from "../store/index";
 
+import mobileMenuComponent from "./mobileMenuComponent.vue";
+
 export default {
   name: "Header",
+  components: { mobileMenuComponent },
   data() {
     return {
       cartItems: [],

@@ -68,7 +68,7 @@
               <div class="col-lg-12">
                 <div class="cart-shiping-update-wrapper">
                   <div class="cart-shiping-update">
-                    <router-link :to="{ name: 'products' }">
+                    <router-link :to="{ path: '/' }">
                       <a>Continue Shopping</a>
                     </router-link>
                   </div>
@@ -86,9 +86,8 @@
               <div class="grand-totall">
                 <span>Subtotal: ${{ calculateTotal() }}.00</span>
                 <h5>Grand Total: ${{ calculateTax(calculateTotal()) }}</h5>
-                <router-link :to="{ name: 'checkout' }">
-                  <a>Proceed To Checkout</a>
-                </router-link>
+
+                <a @click="handleCheckout">Proceed To Checkout</a>
               </div>
             </div>
           </div>
@@ -97,9 +96,13 @@
     </div>
   </div>
   <div class="custom-empty-cart" v-else>
-    <div>
+    <!-- <div>
       <h2>Your cart is empty</h2>
-    </div>
+    </div> -->
+    <el-empty
+      description="Your cart is empty"
+      image="https://cdn-icons-png.flaticon.com/512/11329/11329060.png"
+    />
 
     <div class="cart-shiping-update">
       <router-link :to="{ name: 'products' }">
@@ -110,6 +113,9 @@
 </template>
 
 <script>
+import axios from "axios";
+import { loadStripe } from "@stripe/stripe-js";
+
 export default {
   name: "ShoppingCartList",
 
@@ -132,6 +138,31 @@ export default {
       const taxAmount = totalPrice * taxRate;
       const totalPriceWithTax = totalPrice + taxAmount;
       return totalPriceWithTax.toFixed(2);
+    },
+
+    async handleCheckout() {
+      try {
+        const stripe = await loadStripe(
+          "pk_test_51PYwiSRqy7S2QG3uV7ey7QqsvqBcQ2NSENraON2BlBJZxmcS1JNzWFTuhmVDIxS7Ueri65eeU4C05HFl8cHonYiN00aTgLcsk9"
+        );
+
+        const { data } = await axios.post(
+          "https://localhost:8000/api/create-checkout-session",
+          {
+            products: this.cartItems,
+          }
+        );
+
+        const result = await stripe.redirectToCheckout({
+          sessionId: data.id,
+        });
+
+        if (result.error) {
+          console.error(result.error.message);
+        }
+      } catch (error) {
+        console.error("Error during checkout:", error);
+      }
     },
   },
 };

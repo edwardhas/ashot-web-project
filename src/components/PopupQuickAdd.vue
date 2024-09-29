@@ -46,24 +46,24 @@
           </div>
           <!-- <p class="mt-30">Please select the amount</p> -->
           <div class="addtocart-btn btn" v-if="productIsInStock">
-            <a @click="addToCart">Add to cart</a>
+            <el-button plain @click="addToCart"> Submit </el-button>
           </div>
-          <div class="addtocart-btn btn disabled" v-else>
-            <a>Add to cart</a>
+          <div class="addtocart-btn btn" v-else>
+            <el-button class="prohibited-btn" disabled> Submit </el-button>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <el-alert
+  <!-- <el-alert
     :class="[showAlert ? 'fixed-alert' : 'none-alert']"
     :title="alert_title"
     :type="alert_type"
     :description="alert_description"
     show-icon
     center
-  />
+  /> -->
 </template>
 
 <script>
@@ -71,7 +71,7 @@ import axios from "axios";
 import store from "../store/index";
 import EventBus from "../eventBus";
 
-import { ElAlert } from "element-plus";
+import { ElNotification } from "element-plus";
 import "element-plus/dist/index.css";
 
 export default {
@@ -141,14 +141,24 @@ export default {
           (this.showAlert = true),
           (this.alert_title = "Success!"),
           (this.alert_description = response.data.success),
-          (this.alert_type = "success")
+          (this.alert_type = "success"),
+          ElNotification({
+            title: this.alert_title,
+            message: this.alert_description,
+            type: "success",
+          })
         );
       } else {
         return (
           (this.showAlert = true),
           (this.alert_title = "Error!"),
           (this.alert_description = response.data.error),
-          (this.alert_type = "error")
+          (this.alert_type = "error"),
+          ElNotification({
+            title: this.alert_title,
+            message: this.alert_description,
+            type: "error",
+          })
         );
       }
     },

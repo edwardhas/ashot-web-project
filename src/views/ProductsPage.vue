@@ -27,9 +27,12 @@ export default {
   },
   components: { ProductsList, Header, Footer },
   async created() {
-    const products = await getProducts();
+    // const products = await getProducts(store.state.user.id);
+    const products = await axios.post("/api/products", {
+      userId: store.state.user.id,
+    });
     // const cartItems = await getCartItems(store.state.user.id);
-    this.products = products;
+    this.products = products.data.products;
     // this.cartItems = cartItems;
 
     // this.cartItemsAmount = cartItems.length;

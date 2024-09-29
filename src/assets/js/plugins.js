@@ -2946,7 +2946,7 @@
       scrollTitle: !1,
       scrollImg: !1,
       activeOverlay: !1,
-      zIndex: 2147483647,
+      zIndex: 998,
     }),
     (l.fn.scrollUp.destroy = function (r) {
       l.removeData(e.body, "scrollUp"),

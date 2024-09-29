@@ -122,15 +122,17 @@
 
             <div class="product-list-action">
               <div class="product-list-action-left">
-                <a
+                <!-- <a
                   @click="submitChanges(product._id)"
                   class="addtocart-btn"
                   href="#"
                   title="Submit Change"
-                >
-                  <i class="ion-bag"></i>
-                  Submit Changes
-                </a>
+                > -->
+                <el-button plain @click="submitChanges(product._id)">
+                  Submit
+                </el-button>
+
+                <!-- </a> -->
               </div>
             </div>
           </div>
@@ -138,20 +140,21 @@
       </div>
     </div>
 
-    <el-alert
+    <!-- <el-alert
       :class="[showAlert ? 'fixed-alert' : 'none-alert']"
       :title="alert_title"
       :type="alert_type"
       :description="alert_description"
       show-icon
       center
-    />
+    /> -->
   </div>
 </template>
 
 <script>
 import axios from "axios";
 import { ElAlert } from "element-plus";
+import { ElNotification } from "element-plus";
 import "element-plus/dist/index.css";
 
 export default {
@@ -243,14 +246,24 @@ export default {
           (this.showAlert = true),
           (this.alert_title = "Success!"),
           (this.alert_description = response.data.success),
-          (this.alert_type = "success")
+          (this.alert_type = "success"),
+          ElNotification({
+            title: this.alert_title,
+            message: this.alert_description,
+            type: "success",
+          })
         );
       } else {
         return (
           (this.showAlert = true),
           (this.alert_title = "Error!"),
           (this.alert_description = response.data.error),
-          (this.alert_type = "error")
+          (this.alert_type = "error"),
+          ElNotification({
+            title: this.alert_title,
+            message: this.alert_description,
+            type: "error",
+          })
         );
       }
     },

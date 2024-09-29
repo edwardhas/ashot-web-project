@@ -14,9 +14,12 @@ import MyAccountPage from "../views/MyAccountPage";
 import LoginPage from "../views/LoginPage";
 import RegisterPage from "../views/RegisterPage";
 import ForgetPasswordPage from "../views/ForgetPasswordPage";
+import PaymentCancel from "@/views/PaymentCancel.vue";
+import PaymentSuccess from "@/views/PaymentSuccess.vue";
 import AdminPage from "../views/AdminPage.vue";
 import AdminPanelEmails from "../views/AdminPanelEmails.vue";
 import AdminEditDeleteProductComponent from "../components/AdminEditDeleteProductComponent.vue";
+import AdminPanelStatistics from "../views/AdminPanelStatistics.vue";
 
 const routes = [
   {
@@ -67,6 +70,35 @@ const routes = [
         next(); // Proceed to the route
       }
     },
+  },
+  {
+    path: "/cancel",
+    name: "PaymentCancel",
+    component: PaymentCancel,
+    beforeEnter: (to, from, next) => {
+      if (!store.getters.isAuthenticated) {
+        next("/login");
+      } else {
+        next();
+      }
+    },
+  },
+  {
+    path: "/success",
+    name: "PaymentSuccess",
+    component: PaymentSuccess,
+    beforeEnter: (to, from, next) => {
+      if (!store.getters.isAuthenticated) {
+        next("/login");
+      } else {
+        next();
+      }
+    },
+  },
+  {
+    path: "/test",
+    name: "Stats",
+    component: AdminPanelStatistics,
   },
   {
     path: "/my-account",
