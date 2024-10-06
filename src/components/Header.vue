@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="assets/css/responsive.css" /> -->
 
   <header class="header-area">
+    <MenuTest />
     <div class="header-top theme-bg">
       <div class="container">
         <div class="row">
@@ -35,7 +36,7 @@
     <div class="header-bottom transparent-bar">
       <div class="container">
         <div class="row">
-          <div class="col-xl-2 col-lg-3 col-md-4 col-sm-4 col-5">
+          <div class="col-xl-2 col-lg-3 col-md-4 col-sm-4 col-6">
             <div class="logo pt-39">
               <a href="/"><img alt="Logo goes here" src="" /></a>
             </div>
@@ -100,7 +101,7 @@
               </nav>
             </div>
           </div>
-          <div class="col-xl-2 col-lg-2 col-md-8 col-sm-8 col-7">
+          <div class="col-xl-2 col-lg-2 col-md-8 col-sm-8 col-6">
             <div class="search-login-cart-wrapper">
               <div class="header-search same-style">
                 <button class="search-toggle">
@@ -154,35 +155,26 @@
 
 <script>
 import axios from "axios";
-import EventBus from "../eventBus";
-import store from "../store/index";
+import { useAuthStore } from "@/store/authStore";
 
 import mobileMenuComponent from "./mobileMenuComponent.vue";
+import MenuTest from "./MenuTest.vue";
 
 export default {
   name: "Header",
-  components: { mobileMenuComponent },
+  components: { mobileMenuComponent, MenuTest },
   data() {
     return {
-      cartItems: [],
-      cartItemsAmount: 0,
-      user: store.state.user.username || null,
+      user: useAuthStore().user.username || null,
     };
   },
-  async created() {
-    const response = await axios.get(`/api/users/${store.state.user.id}/cart`);
-    const cartItems = response.data;
-    this.cartItems = cartItems;
-    this.cartItemsAmount = cartItems.length;
-
-    EventBus.on("remove-from-cart", (data) => {
-      this.cartItemsAmount = data;
-    });
-    EventBus.on("add-to-cart", (data) => {
-      console.log(data);
-      this.cartItemsAmount = data;
-    });
-  },
+  // async created() {
+  //   const authStore = useAuthStore();
+  //   const response = await axios.get(`/api/users/${authStore.user.id}/cart`);
+  //   const cartItems = response.data;
+  //   this.cartItems = cartItems;
+  //   this.cartItemsAmount = cartItems.length;
+  // },
   methods: {
     welcomeUser() {
       if (this.user == null || this.user == undefined)
@@ -190,18 +182,11 @@ export default {
       return `Welcome, ${this.user}!`;
     },
   },
-  beforeUnmount() {
-    EventBus.off("update-cart");
+  computed: {
+    cartItemsAmount() {
+      return useAuthStore().cartItemsAmount; // Reference the store directly
+    },
   },
-  // methods: {
-  //   countAmountOfItems() {
-  //     let counter = 0;
-  //     for (let i = 1; i <= this.cartItems.length; i++) {
-  //       counter = i;
-  //     }
-  //     return (this.cartItemsAmount = counter);
-  //   },
-  // },
 };
 </script>
 
@@ -244,5 +229,10 @@ export default {
 }
 .custom-submit.custom-btn-style:hover {
   background-color: #242424;
+}
+
+.logo {
+  display: flex;
+  justify-content: flex-end;
 }
 </style>

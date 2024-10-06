@@ -110,7 +110,6 @@ const ProductsSchema = new Schema({
   created: {
     type: Date,
     required: true,
-    default: Date.now(),
   },
   name: {
     type: String,
@@ -136,7 +135,7 @@ const ProductsSchema = new Schema({
     type: Number,
     required: true,
   },
-  image: {
+  images: {
     type: Array,
     required: true,
   },
@@ -183,6 +182,10 @@ const monthlyActiveUsersSchema = new Schema({
   },
   activeUsers: {
     type: Array,
+    required: true,
+  },
+  totalTransactions: {
+    type: Number,
     required: true,
   },
 });

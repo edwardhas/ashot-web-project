@@ -1,7 +1,6 @@
 <template>
-  <el-container>
-    <!-- Toggle button for mobile -->
-    <!-- <el-button class="toggle-sidebar" @click="toggleSidebar" v-if="isMobile"> -->
+  <!-- <el-container>
+    
     <el-affix :offset="120">
       <el-button
         type="primary"
@@ -11,11 +10,7 @@
         ><el-icon><Menu /></el-icon
       ></el-button>
     </el-affix>
-    <!-- <i class="el-icon-menu"></i> -->
-
-    <!-- </el-button> -->
-
-    <!-- Sidebar -->
+    
     <el-aside
       :class="{ 'mobile-sidebar': isMobile, 'show-sidebar': isSidebarVisible }"
       width="200px"
@@ -57,9 +52,9 @@
       </el-menu>
     </el-aside>
 
-    <!-- Main Content -->
-    <!-- <el-main>Main Content Area</el-main> -->
-  </el-container>
+    
+  </el-container> -->
+  <p style="display: none"></p>
 </template>
 
 <script>

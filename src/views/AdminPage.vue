@@ -10,7 +10,7 @@
     </div>
   </div>
 
-  <ValidationComponentVue
+  <!-- <ValidationComponentVue
     :page="page"
     :message="message"
     :status="status"
@@ -80,7 +80,7 @@
               </div>
               <div class="product-list-action">
                 <div class="product-list-action-left">
-                  <!-- Chekc is is in stock-->
+                  
                   <a
                     v-if="inStock"
                     @click="addToCart"
@@ -90,7 +90,7 @@
                     <i class="ion-bag"></i>
                     Add to cart
                   </a>
-                  <!-- Put v-else -->
+                  
                   <a class="disabled addtocart-btn" v-else title="Add to cart">
                     <i class="ion-bag"></i>
                     Out of stock
@@ -163,45 +163,45 @@
             />
 
             <p>Place The Product Image Link Here</p>
-
+            
             <input
-              class="custom-edit-input"
+              :class="inputClass"
               :value="productImageUrlOne"
-              placeholder="URL goes here"
+              placeholder="Primary URL"
               @input="
                 updateProductImageUrl($event.target.value, 'adding', 'one')
               "
             />
             <input
-              class="custom-edit-input"
-              :value="productImageUrlTwo"
+              :class="inputClass"
+              :value="productImageUrlOne"
               placeholder="OK to leave blank"
               @input="
-                updateProductImageUrl($event.target.value, 'adding', 'two')
+                updateProductImageUrl($event.target.value, 'adding', 'one')
               "
             />
             <input
-              class="custom-edit-input"
-              :value="productImageUrlThree"
+              :class="inputClass"
+              :value="productImageUrlOne"
               placeholder="OK to leave blank"
               @input="
-                updateProductImageUrl($event.target.value, 'adding', 'three')
+                updateProductImageUrl($event.target.value, 'adding', 'one')
               "
             />
             <input
-              class="custom-edit-input"
-              :value="productImageUrlFour"
+              :class="inputClass"
+              :value="productImageUrlOne"
               placeholder="OK to leave blank"
               @input="
-                updateProductImageUrl($event.target.value, 'adding', 'four')
+                updateProductImageUrl($event.target.value, 'adding', 'one')
               "
             />
             <input
-              class="custom-edit-input"
-              :value="productImageUrlFive"
+              :class="inputClass"
+              :value="productImageUrlOne"
               placeholder="OK to leave blank"
               @input="
-                updateProductImageUrl($event.target.value, 'adding', 'five')
+                updateProductImageUrl($event.target.value, 'adding', 'one')
               "
             />
           </div>
@@ -222,7 +222,7 @@
         </a>
       </div>
     </div>
-  </div>
+  </div> -->
   <div class="hr"></div>
   <!-- !! END OF ADDING-PRODUCT-SECTION -->
   <!-- !!  START OF DEAL OF THE WEEK PRODUCT SECTION -->
@@ -503,23 +503,24 @@ export default {
       // global active users amount variable
       activeUsers: 0,
       // start of adding product section
-      productName: "Product Name",
-      productDescription: "Product Description",
-      productPrice: 0,
-      productOldPrice: 0,
-      quantity: 1,
-      inStock: null,
-      outOfStock: null,
-      productImageUrlOne: null,
-      productImageUrlTwo: null,
-      productImageUrlThree: null,
-      productImageUrlFour: null,
-      productImageUrlFive: null,
-      productImages: [],
-      page: "Admin",
-      message: "",
-      status: false,
-      isDisplayed: false,
+      // productName: "Product Name",
+      // productDescription: "Product Description",
+      // productPrice: 0,
+      // productOldPrice: 0,
+      // quantity: 1,
+      // inStock: null,
+      // outOfStock: null,
+      // productImageUrlOne: null,
+      // productImageUrlTwo: null,
+      // productImageUrlThree: null,
+      // productImageUrlFour: null,
+      // productImageUrlFive: null,
+      // productImages: [],
+      // inputClass: "custom-edit-input",
+      // page: "Admin",
+      // message: "",
+      // status: false,
+      // isDisplayed: false,
       // end of adding product section
       // start of the best deal of the week section
       dealProductName: "Product Name",

@@ -68,7 +68,7 @@
 
 <script>
 import axios from "axios";
-import store from "../store/index";
+import { useAuthStore } from "@/store/authStore";
 import EventBus from "../eventBus";
 
 import { ElNotification } from "element-plus";
@@ -125,13 +125,14 @@ export default {
       }
     },
     async addToCart() {
+      const authStore = useAuthStore();
       const data = {
         productId: this.productId,
         quantity: this.quantity,
       };
 
       const response = await axios.post(
-        `/api/users/${store.state.user.id}/cart`,
+        `/api/users/${authStore.user.id}/cart`,
         data
       );
       EventBus.emit("add-to-cart", ++this.cartItemsAmount);
@@ -164,7 +165,9 @@ export default {
     },
   },
   async created() {
-    const response = await axios.get(`/api/users/${store.state.user.id}/cart`);
+    const authStore = useAuthStore();
+
+    const response = await axios.get(`/api/users/${authStore.user.id}/cart`);
     const cartItems = response.data;
 
     this.cartItemsAmount = cartItems.length;

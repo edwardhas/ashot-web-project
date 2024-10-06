@@ -155,7 +155,7 @@
 // import { registerUser } from "../db_queries";
 import axios from "axios";
 import ValidationComponentVue from "../components/ValidationComponent.vue";
-import store from "../store/index";
+import { useAuthStore } from "@/store/authStore";
 
 export default {
   name: "registerPage",
@@ -181,7 +181,8 @@ export default {
   },
   methods: {
     async sendForm() {
-      store.commit("logout");
+      const authStore = useAuthStore();
+      authStore.logout();
 
       const userData = {
         userName: this.firstName,
@@ -216,8 +217,8 @@ export default {
         (this.message = message),
         (this.status = true),
         (this.isDisplayed = true),
-        store.commit("setToken", token),
-        store.commit("setUser", user)
+        authStore.setToken(token),
+        authStore.setUser(user)
       );
     },
   },

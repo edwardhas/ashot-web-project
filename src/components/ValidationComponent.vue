@@ -4,7 +4,8 @@
     :style="[toggleDisplay]"
     :class="[status ? 'alert-success' : 'alert-danger']"
   >
-    <strong>{{ status == true ? "Success!" : "Error!" }}</strong> {{ message }}
+    <strong>{{ status == true ? "Success! " : "Error! " }}</strong>
+    {{ message }}
   </div>
 </template>
 

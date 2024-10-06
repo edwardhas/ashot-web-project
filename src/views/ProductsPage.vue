@@ -14,8 +14,7 @@ import EventBus from "../eventBus";
 import ProductsList from "../components/ProductsList.vue";
 import Footer from "../components/Footer.vue";
 import Header from "../components/Header.vue";
-import { getProducts, getCartItems } from "../db_queries";
-import store from "../store/index";
+import { useAuthStore } from "@/store/authStore";
 
 export default {
   data() {
@@ -27,9 +26,10 @@ export default {
   },
   components: { ProductsList, Header, Footer },
   async created() {
+    const authStore = useAuthStore();
     // const products = await getProducts(store.state.user.id);
     const products = await axios.post("/api/products", {
-      userId: store.state.user.id,
+      userId: authStore.user.id,
     });
     // const cartItems = await getCartItems(store.state.user.id);
     this.products = products.data.products;

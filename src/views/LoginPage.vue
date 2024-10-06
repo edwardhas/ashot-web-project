@@ -76,7 +76,8 @@
 <script>
 import ValidationComponentVue from "../components/ValidationComponent.vue";
 import axios from "axios";
-import store from "../store/index";
+// import store from "../store/index";
+import { useAuthStore } from "@/store/authStore";
 
 export default {
   name: "LoginPage",
@@ -93,32 +94,38 @@ export default {
   },
   methods: {
     async sendForm() {
-      store.commit("logout");
+      // store.commit("logout");
+      const authStore = useAuthStore();
+      authStore.logout();
       const userData = {
         userEmail: this.email,
         userPassword: this.password,
       };
 
       const response = await axios.post("/api/users/get", userData);
-      const message = response.data.message;
-      const errorMessage = response.data.error;
+      const success = response.data.success;
+      const error = response.data.error;
       const { token, user } = response.data;
-      store.commit("setToken", token);
-      store.commit("setUser", user);
+      const cartItemsAmount = user.cartItems.length;
+      // store.commit("setToken", token);
+      // store.commit("setUser", user);
       // console.log(`This is the console log: ${message}`);
       // console.log(`This is the console log: ${errorMessage}`);
 
       this.email = "";
       this.password = "";
-      if (message == undefined)
+      if (success == undefined)
         return (
-          (this.message = errorMessage),
+          (this.message = error),
           (this.status = false),
           (this.isDisplayed = true)
         );
 
       return (
-        (this.message = message),
+        authStore.setToken(token),
+        authStore.setUser(user),
+        authStore.setCartItemsAmount(cartItemsAmount),
+        (this.message = success),
         (this.status = true),
         (this.isDisplayed = true)
       );

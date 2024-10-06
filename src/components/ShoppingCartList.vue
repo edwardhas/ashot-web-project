@@ -34,7 +34,7 @@
                 <tbody v-auto-animate>
                   <tr v-for="item in cartItems" :key="item._id">
                     <td class="product-thumbnail">
-                      <a href="#"><img :src="item.image" alt="" /></a>
+                      <a><img :src="item.images[0]" alt="" /></a>
                     </td>
                     <td class="product-name">
                       <router-link :to="{ path: `/products/${item._id}` }">
@@ -237,5 +237,9 @@ a {
 
 .cart-plus-minus-box {
   pointer-events: none;
+}
+
+.product-thumbnail a {
+  cursor: default;
 }
 </style>

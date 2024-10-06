@@ -141,7 +141,7 @@
 import Header from "../components/Header.vue";
 import Footer from "../components/Footer.vue";
 import axios from "axios";
-import store from "../store/index";
+import { useAuthStore } from "@/store/authStore";
 
 export default {
   components: { Header, Footer },
@@ -157,6 +157,8 @@ export default {
   },
   methods: {
     async sendForm() {
+      const authStore = useAuthStore();
+
       const data = {
         fullname: this.fullname,
         email: this.email,
@@ -164,7 +166,7 @@ export default {
         message: this.message,
       };
       const response = await axios.post(
-        `/api/${store.state.user.id}/contact-us`,
+        `/api/${authStore.user.id}/contact-us`,
         data
       );
       const error = response.data.error;

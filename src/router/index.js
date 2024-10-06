@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import App from "../App.vue";
-import store from "../store/index";
+
+import { useAuthStore } from "@/store/authStore";
 
 import ShoppingCartPage from "../views/ShoppingCartPage";
 import ProductDetailPage from "../views/ProductDetailPage";
@@ -20,6 +21,8 @@ import AdminPage from "../views/AdminPage.vue";
 import AdminPanelEmails from "../views/AdminPanelEmails.vue";
 import AdminEditDeleteProductComponent from "../components/AdminEditDeleteProductComponent.vue";
 import AdminPanelStatistics from "../views/AdminPanelStatistics.vue";
+import AddingProductsComponent from "../components/AddingProductsComponent.vue";
+import MenuTest from "@/components/MenuTest.vue";
 
 const routes = [
   {
@@ -27,7 +30,7 @@ const routes = [
     name: "products",
     component: ProductsPage,
     beforeEnter: (to, from, next) => {
-      if (!store.getters.isAuthenticated) {
+      if (!useAuthStore().isAuthenticated) {
         next("/login"); // Redirect to login page
       } else {
         next(); // Proceed to the route
@@ -40,7 +43,7 @@ const routes = [
     name: "about-us",
     component: AboutUsPage,
     beforeEnter: (to, from, next) => {
-      if (!store.getters.isAuthenticated) {
+      if (!useAuthStore().isAuthenticated) {
         next("/login"); // Redirect to login page
       } else {
         next(); // Proceed to the route
@@ -52,7 +55,7 @@ const routes = [
     name: "contact-us",
     component: ContactUsPage,
     beforeEnter: (to, from, next) => {
-      if (!store.getters.isAuthenticated) {
+      if (!useAuthStore().isAuthenticated) {
         next("/login"); // Redirect to login page
       } else {
         next(); // Proceed to the route
@@ -64,7 +67,7 @@ const routes = [
     name: "checkout",
     component: CheckoutPage,
     beforeEnter: (to, from, next) => {
-      if (!store.getters.isAuthenticated) {
+      if (!useAuthStore().isAuthenticated) {
         next("/login"); // Redirect to login page
       } else {
         next(); // Proceed to the route
@@ -76,7 +79,7 @@ const routes = [
     name: "PaymentCancel",
     component: PaymentCancel,
     beforeEnter: (to, from, next) => {
-      if (!store.getters.isAuthenticated) {
+      if (!useAuthStore().isAuthenticated) {
         next("/login");
       } else {
         next();
@@ -88,7 +91,7 @@ const routes = [
     name: "PaymentSuccess",
     component: PaymentSuccess,
     beforeEnter: (to, from, next) => {
-      if (!store.getters.isAuthenticated) {
+      if (!useAuthStore().isAuthenticated) {
         next("/login");
       } else {
         next();
@@ -101,11 +104,21 @@ const routes = [
     component: AdminPanelStatistics,
   },
   {
+    path: "/test1",
+    name: "Menu",
+    component: MenuTest,
+  },
+  {
+    path: "/adding-products",
+    name: "adding-products",
+    component: AddingProductsComponent,
+  },
+  {
     path: "/my-account",
     name: "my-account",
     component: MyAccountPage,
     beforeEnter: (to, from, next) => {
-      if (!store.getters.isAuthenticated) {
+      if (!useAuthStore().isAuthenticated) {
         next("/login"); // Redirect to login page
       } else {
         next(); // Proceed to the route
@@ -132,7 +145,7 @@ const routes = [
     name: "cart",
     component: ShoppingCartPage,
     beforeEnter: (to, from, next) => {
-      if (!store.getters.isAuthenticated) {
+      if (!useAuthStore().isAuthenticated) {
         next("/login"); // Redirect to login page
       } else {
         next(); // Proceed to the route
@@ -144,7 +157,7 @@ const routes = [
     name: "productDetails",
     component: ProductDetailPage,
     beforeEnter: (to, from, next) => {
-      if (!store.getters.isAuthenticated) {
+      if (!useAuthStore().isAuthenticated) {
         next("/login"); // Redirect to login page
       } else {
         next(); // Proceed to the route
@@ -156,7 +169,7 @@ const routes = [
     name: "AdminPageEmailsReply",
     component: AdminPanelEmails,
     beforeEnter: (to, from, next) => {
-      if (!store.getters.isAuthenticated || !store.state.user.isAdmin) {
+      if (!useAuthStore().isAuthenticated || !useAuthStore().user.isAdmin) {
         next("/");
       } else {
         next();
@@ -168,7 +181,7 @@ const routes = [
     name: AdminEditDeleteProductComponent,
     component: AdminEditDeleteProductComponent,
     beforeEnter: (to, from, next) => {
-      if (!store.getters.isAuthenticated || !store.state.user.isAdmin) {
+      if (!useAuthStore().isAuthenticated || !useAuthStore().user.isAdmin) {
         next("/");
       } else {
         next();
@@ -180,7 +193,7 @@ const routes = [
     name: "AdminPage",
     component: AdminPage,
     beforeEnter: (to, from, next) => {
-      if (!store.getters.isAuthenticated || !store.state.user.isAdmin) {
+      if (!useAuthStore().isAuthenticated || !useAuthStore().user.isAdmin) {
         next("/");
       } else {
         next();
@@ -203,7 +216,7 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
-  const isAuthenticated = store.getters.isAuthenticated;
+  const isAuthenticated = useAuthStore().isAuthenticated;
 
   if (requiresAuth && isAuthenticated) {
     next("/login");

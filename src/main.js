@@ -28,17 +28,19 @@ import { createApp } from "vue";
 import { autoAnimatePlugin } from "@formkit/auto-animate/vue";
 import App from "./App.vue";
 import router from "./router";
-import store from "./store/index.js";
 import mitt from "mitt";
 import axios from "axios";
+import { createPinia } from "pinia";
+import { useAuthStore } from "./store/authStore";
 import ElementPlus from "element-plus";
 import "element-plus/dist/index.css";
 
+const pinia = createPinia();
 // Vue.config.productionTip = false;
 
 axios.interceptors.request.use(
   (config) => {
-    const token = store.state.token;
+    const token = useAuthStore().token;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -51,7 +53,7 @@ axios.interceptors.request.use(
 
 createApp(App)
   .use(router)
-  .use(store)
   .use(autoAnimatePlugin)
   .use(ElementPlus)
+  .use(pinia)
   .mount("#app");

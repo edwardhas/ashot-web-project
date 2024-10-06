@@ -18,33 +18,19 @@
       <div class="row">
         <div class="col-lg-6 col-md-6">
           <div class="product-details-img">
+            <el-carousel height="400px" arrow="always" interval="5000">
+              <el-carousel-item v-for="image in product.images" :key="image">
+                <!-- <h3 class="small justify-center" text="2xl">{{ item }}</h3> -->
+                <img :src="image" alt="carousel image" class="carousel-image" />
+              </el-carousel-item>
+            </el-carousel>
             <!-- <img
+              v-else
               id="zoompro"
-              :src="product.image"
+              :src="product.images[0]"
               data-zoom-image="assets/img/product-details/bl1.jpg"
               alt="zoom"
             /> -->
-
-            <!-- <el-carousel
-              :interval="0"
-              arrow="always"
-              class="carousel-container"
-            >
-              <el-carousel-item
-                class="carousel-item"
-                v-for="item in items"
-                :key="item"
-              >
-                <img :src="item" alt="carousel image" class="carousel-image" />
-              </el-carousel-item>
-            </el-carousel> -->
-
-            <el-carousel height="400px" arrow="always" interval="5000">
-              <el-carousel-item v-for="item in items" :key="item">
-                <!-- <h3 class="small justify-center" text="2xl">{{ item }}</h3> -->
-                <img :src="item" alt="carousel image" class="carousel-image" />
-              </el-carousel-item>
-            </el-carousel>
           </div>
         </div>
         <div class="col-lg-6 col-md-6">
@@ -127,8 +113,7 @@
 <script>
 import axios from "axios";
 import "../assets/css/style.css";
-import store from "../store/index";
-import { getCartItems } from "../db_queries";
+import { useAuthStore } from "@/store/authStore";
 import EventBus from "../eventBus";
 
 import { ElNotification } from "element-plus";
@@ -151,13 +136,15 @@ export default {
   },
   methods: {
     async addToCart() {
+      const authStore = useAuthStore();
+
       const data = {
         productId: this.$route.params.productId,
         quantity: this.quantity,
       };
 
       const response = await axios.post(
-        `/api/users/${store.state.user.id}/cart`,
+        `/api/users/${authStore.user.id}/cart`,
         data
       );
 
@@ -189,12 +176,11 @@ export default {
     },
   },
   async created() {
-    const cartItems = axios.get(
-      `/api/users/${store.state.user.id}/cartQuantity`
-    );
+    const authStore = useAuthStore();
+    this.cartItemsAmount = authStore.getCartItemsAmount;
+    // const cartItems = axios.get(`/api/users/${authStore.user.id}/cartQuantity`);
 
-    console.log(cartItems.length);
-    return (this.cartItemsAmount = cartItems.length);
+    // return (this.cartItemsAmount = cartItems.length);
   },
 };
 </script>
@@ -272,6 +258,7 @@ export default {
 .input-group-text {
   border: none;
   cursor: pointer;
+  background-color: #fff;
 }
 
 .form-control {
@@ -281,6 +268,10 @@ export default {
   margin: 0;
   padding: 0;
   height: 100%;
+}
+
+.cart-plus-minus {
+  border-radius: 20px;
 }
 
 .inStock {
@@ -316,11 +307,9 @@ export default {
   text-align: center;
 }
 
-/* .el-carousel__item:nth-child(2n) {
-  background-color: #99a9bf;
+@media screen and (max-width: 700px) {
+  .breadcrumb-area {
+    height: 200px;
+  }
 }
-
-.el-carousel__item:nth-child(2n + 1) {
-  background-color: #d3dce6;
-} */
 </style>

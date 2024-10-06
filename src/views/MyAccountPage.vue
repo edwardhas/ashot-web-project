@@ -201,22 +201,23 @@
 <script>
 import Header from "../components/Header.vue";
 import Footer from "../components/Footer.vue";
-import store from "../store/index";
+import { useAuthStore } from "@/store/authStore";
 
 export default {
   name: "MyAccountPage",
   data() {
     return {
-      firstname: store.state.user.username,
-      lastname: store.state.user.userlastname,
-      email: store.state.user.email,
-      shippingAddress: store.state.user.shippingAddress,
+      firstname: useAuthStore().user.username,
+      lastname: useAuthStore().user.userlastname,
+      email: useAuthStore().user.email,
+      shippingAddress: useAuthStore().user.shippingAddress,
     };
   },
   components: { Header, Footer },
   methods: {
     logoutHandler() {
-      store.commit("logout");
+      const authStore = useAuthStore();
+      authStore.logout();
       this.$router.push({ name: "login" });
     },
   },

@@ -125,6 +125,27 @@ async function start() {
     return product.isInStock;
   }
 
+  async function getTotalTransactions() {
+    let totalTransactions = 0;
+    let hasMore = true;
+    let lastChargeId = 0;
+
+    while (hasMore) {
+      const charges = await stripe.charges.list({
+        limit: 100,
+        starting_after: lastChargeId,
+      });
+
+      totalTransactions += charges.data.length;
+      hasMore = charges.has_more;
+      if (hasMore) {
+        lastChargeId = charges.data[charges.data.length - 1].id;
+      }
+    }
+
+    return totalTransactions;
+  }
+
   //!! findUserByInput()
   // async function findUserByInput(userData, isId) {
   //   if (!isId) {
@@ -178,6 +199,9 @@ async function start() {
     const month = date.getMonth() + 1; // Months are 0-indexed in JS
 
     try {
+      if (userId == null || undefined) {
+        return;
+      }
       await db
         .collection("monthlyactiveusers")
         .updateOne(
@@ -244,7 +268,7 @@ async function start() {
   //   return user;
   // });
 
-  // !! GET THE CART
+  // !! GET CART
   app.get("/api/users/:userId/cart", async (req, res) => {
     const user = await db
       .collection("users")
@@ -446,7 +470,7 @@ async function start() {
       .findOne({ _id: new ObjectId(userId) });
 
     const populatedCart = await populatedCartIds(user.cartItems);
-    res.json({ success: "Product successfully added", populatedCart });
+    res.json({ success: "Product successfully added", populatedCart, user });
   });
 
   // !! DELETE FROM CART
@@ -466,15 +490,22 @@ async function start() {
       .findOne({ _id: new ObjectId(userId) });
     const populatedCart = await populatedCartIds(user.cartItems);
 
-    res.json(populatedCart);
+    res.json({ populatedCart, user });
   });
 
   //!! ADD PRODUCTS FROM ADMIN PANEL
   app.post("/api/admin/products/add", async (req, res) => {
-    const { name, description, price, oldPrice, isInStock, image, quantity } =
+    const { name, description, price, oldPrice, isInStock, images, quantity } =
       req.body;
 
-    if (!name || !description || !price || !oldPrice || !isInStock || !image) {
+    if (
+      !name ||
+      !description ||
+      !price ||
+      !oldPrice ||
+      !isInStock ||
+      !images.length
+    ) {
       return res.json({ error: "Missing Fiels" });
     }
 
@@ -489,14 +520,14 @@ async function start() {
         description: description,
         isInStock: isInStock,
         quantity: quantity,
-        image: image,
+        images: images,
         views: "0",
       });
 
       await newProduct.save();
-      return res.json({ message: "Product Added Successfully" });
+      return res.json({ success: "Product Added Successfully" });
     } catch (e) {
-      return res.json({ error: e.message });
+      return res.json({ error: "Error Occured While Adding Product" });
     }
   });
 
@@ -575,8 +606,9 @@ async function start() {
           email: userDb.email,
           isAdmin: userDb.isAdmin,
           shippingAddress: userDb.shippingAddress,
+          cartItems: userDb.cartItems,
         },
-        message: "User successfuly logged in",
+        success: "User successfuly logged in",
       });
     } catch (e) {
       return res.json({ error: e.message });
@@ -666,6 +698,19 @@ async function start() {
       // console.log("error");
       res.json({ error: error.message });
     }
+  });
+
+  //!! ADMIN PANEL STATISTICS
+  app.get("/api/statistics", async (req, res) => {
+    const currentMonth = new Date().getMonth() + 1; // cuz starts with 0
+    // MUA PART
+    const MUA = await db
+      .collection("monthlyactiveusers")
+      .findOne({ month: currentMonth });
+
+    // STRIPE TRANSACTION PART
+
+    res.json({ monthlyactiveusers: MUA });
   });
 
   //!! STRIPE CHECKOUT SESSION

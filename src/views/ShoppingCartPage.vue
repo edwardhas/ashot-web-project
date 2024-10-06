@@ -15,9 +15,8 @@ import axios from "axios";
 import { ref } from "vue";
 import { deleteProductFromCart, getCartItems } from "../db_queries";
 import Header from "../components/Header.vue";
-import store from "../store/index";
-
-import { ElNotification } from "element-plus";
+import { useAuthStore } from "@/store/authStore";
+import { ElNotification, ElLoading } from "element-plus";
 import "element-plus/dist/index.css";
 
 export default {
@@ -25,37 +24,60 @@ export default {
     return {
       cartItems: [],
       cartItemsAmount: 0,
+      loading: true,
     };
   },
   components: { ShoppingCartList, Header, Footer },
   methods: {
     async removeFromCart(productId) {
-      const updatedCart = await deleteProductFromCart(
-        store.state.user.id,
-        productId
+      const authStore = useAuthStore();
+
+      const response = await axios.delete(
+        `/api/users/${authStore.user.id}/cart/${productId}`
       );
+      const updatedCart = response.data.populatedCart;
+      const cartItemsAmount = response.data.user.cartItems.length;
+      console.log(cartItemsAmount);
+
       this.cartItems = updatedCart;
+      authStore.setCartItemsAmount(cartItemsAmount);
       // cartItems.value = cartItems.value.filter((item) => item !== productId);
       this.cartItems = this.cartItems.filter(
         (item) => item.productId !== productId
       );
-      this.cartItemsAmount--;
       ElNotification({
         title: "Success!",
         message: "Product was successfuly removed",
         type: "success",
         duration: 3000,
       });
-      EventBus.emit("remove-from-cart", this.cartItemsAmount);
     },
-    // handleUpdate(amount) {
-    //   this.cartItemsAmount = amount;
-    // },
   },
 
   async created() {
-    const cartItems = await getCartItems(store.state.user.id);
-    this.cartItems = cartItems;
+    const loadingComponent = ElLoading.service({
+      lock: true,
+      text: "Loading...",
+      background: "rgba(0, 0, 0, 0.8)",
+    });
+
+    if (!this.isLoading) {
+      loadingComponent.close();
+    }
+    const authStore = useAuthStore();
+    try {
+      const cartItems = await getCartItems(authStore.user.id);
+      this.cartItems = cartItems;
+    } catch (error) {
+      ElNotification({
+        title: "Error!",
+        message: "Error occured when loading items",
+        type: "danger",
+        duration: 3000,
+      });
+    } finally {
+      this.loading = false;
+    }
 
     return (this.cartItemsAmount = this.cartItems.length);
   },

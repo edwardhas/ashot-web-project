@@ -29,7 +29,7 @@
             <div class="product-img">
               <a href="">
                 <router-link :to="{ path: `/products/${product._id}` }">
-                  <img class="custom-image" :src="product.image" alt="" />
+                  <img class="custom-image" :src="product.images[0]" alt="" />
                 </router-link>
               </a>
               <!-- "../assets/img/product/product-4.jpg" -->
@@ -46,20 +46,6 @@
                   </a>
                 </router-link>
 
-                <!-- <a
-                  class="ti-shopping-cart-a"
-                  title="Add To Cart"
-                  @click="
-                    toggleModal(
-                      product.name,
-                      product.image,
-                      product.isInStock,
-                      product._id
-                    )
-                  "
-                >
-                  <i class="ti-shopping-cart"></i>
-                </a> -->
                 <a class="ti-shopping-cart-a" title="Add To Cart">
                   <el-button
                     text
@@ -224,14 +210,6 @@
     </div>
   </div>
   <!-- !! Component -->
-  <PopupQuickAdd
-    v-if="showModal"
-    :productName="productName"
-    :productImageUrl="productImageUrl"
-    :productIsInStock="isInStock"
-    :productId="productId"
-    :toggleModal="toggleModal"
-  />
 
   <el-drawer
     v-model="isDisplayingTable"
@@ -281,7 +259,7 @@
       <el-table-column label="Image" width="100">
         <template #default="scope">
           <img
-            :src="scope.row.image"
+            :src="scope.row.images[0]"
             alt="Item Image"
             style="width: 100px; height: auto"
           />
@@ -296,7 +274,13 @@
         <el-button @click="isDisplayingTable = !isDisplayingTable"
           >Cancel</el-button
         >
-        <el-button type="primary" @click="addToCart">Add To Cart</el-button>
+        <el-button
+          @click="addToCart"
+          class="el-button-bg"
+          v-if="drawerShowCurrentItem('isInStock')"
+          >Add To Cart</el-button
+        >
+        <el-button type="danger" disabled v-else>Not in stock</el-button>
       </div>
     </template>
   </el-drawer>
@@ -305,10 +289,10 @@
 <script>
 import axios from "axios";
 import EventBus from "../eventBus";
-import store from "../store/index";
+import { useAuthStore } from "@/store/authStore";
 
-import PopupQuickAdd from "./PopupQuickAdd.vue";
 import CountdownTimer from "./CountdownTimer.vue";
+import MenuTest from "./MenuTest.vue";
 
 import { reactive, ref } from "vue";
 import { ElDrawer, ElMessageBox } from "element-plus";
@@ -318,7 +302,7 @@ import "element-plus/dist/index.css";
 export default {
   name: "ProductsList",
   props: ["products", "isDisplayed"],
-  components: { PopupQuickAdd, CountdownTimer },
+  components: { CountdownTimer, MenuTest },
 
   data() {
     return {
@@ -344,13 +328,6 @@ export default {
   },
 
   methods: {
-    toggleModal(name, image, isInStock, id) {
-      this.showModal = !this.showModal; // Toggles the visibility
-      this.productName = name;
-      this.productImageUrl = image;
-      this.isInStock = isInStock;
-      this.productId = id;
-    },
     passCurrentProductToDrawer(product) {
       this.currentProduct = product;
     },
@@ -382,6 +359,8 @@ export default {
     },
 
     async addToCart() {
+      const authStore = useAuthStore();
+
       const productId = this.currentProduct._id;
       const quantity = this.quantity;
 
@@ -391,13 +370,14 @@ export default {
       };
 
       const response = await axios.post(
-        `/api/users/${store.state.user.id}/cart`,
+        `/api/users/${authStore.user.id}/cart`,
         data
       );
-      EventBus.emit("add-to-cart", ++this.cartItemsAmount);
 
+      const cartItemsAmount = response.data.user.cartItems.length;
       if (response.data.success) {
         return (
+          authStore.setCartItemsAmount(cartItemsAmount),
           (this.isDisplayingTable = false),
           (this.showAlert = true),
           (this.alert_title = "Success!"),
@@ -459,8 +439,10 @@ export default {
   },
 
   async created() {
+    const authStore = useAuthStore();
+
     const cartItemsResponse = await axios.get(
-      `/api/users/${store.state.user.id}/cart`
+      `/api/users/${authStore.user.id}/cart`
     );
 
     this.gridData = cartItemsResponse.data;
@@ -672,5 +654,10 @@ hr {
 .grid-content {
   border-radius: 4px;
   min-height: 36px;
+}
+
+.el-button-bg {
+  color: white;
+  background: #7e4c4f;
 }
 </style>
