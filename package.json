@@ -12,6 +12,7 @@
     "@element-plus/icons-vue": "^2.3.1",
     "@formkit/auto-animate": "^0.8.2",
     "@stripe/stripe-js": "^4.3.0",
+    "@vue/cli-service": "~5.0.0",
     "@vue-stripe/vue-stripe": "^4.5.0",
     "axios": "^1.7.2",
     "bootstrap": "^5.3.3",
@@ -34,7 +35,6 @@
   "devDependencies": {
     "@vue/cli-plugin-babel": "~5.0.0",
     "@vue/cli-plugin-router": "~5.0.0",
-    "@vue/cli-service": "~5.0.0",
     "webpack": "^5.93.0"
   }
 }
