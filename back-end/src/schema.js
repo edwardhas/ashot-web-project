@@ -123,6 +123,22 @@ const ProductsSchema = new Schema({
     type: String,
     required: true,
   },
+  generation: {
+    type: String,
+    required: true,
+  },
+  type: {
+    type: String,
+    required: true,
+  },
+  rarity: {
+    type: String,
+    required: true,
+  },
+  stage: {
+    type: String,
+    required: true,
+  },
   description: {
     type: String,
     required: true,
@@ -171,29 +187,47 @@ const bestDealSchema = new Schema({
   },
 });
 
-const monthlyActiveUsersSchema = new Schema({
-  year: {
-    type: Number,
+// const monthlyActiveUsersSchema = new Schema({
+//   year: {
+//     type: Number,
+//     required: true,
+//   },
+//   month: {
+//     type: Number,
+//     required: true,
+//   },
+//   activeUsers: {
+//     type: Array,
+//     required: true,
+//   },
+//   totalTransactions: {
+//     type: Number,
+//     required: true,
+//   },
+// });
+
+const userActivitySchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
     required: true,
+    unique: true,
   },
-  month: {
-    type: Number,
-    required: true,
+  lastActive: {
+    type: Date,
   },
-  activeUsers: {
-    type: Array,
-    required: true,
+  dailyActiveDates: {
+    type: [Date],
   },
-  totalTransactions: {
-    type: Number,
-    required: true,
+  monthlyActiveDates: {
+    type: [Date],
   },
 });
 
 const User = mongoose.model("Users", userSchema);
 const Products = mongoose.model("Products", ProductsSchema);
-const MonthlyActiveUsers = mongoose.model(
-  "MonthlyActiveUsers",
-  monthlyActiveUsersSchema
-);
-export { User, Products, MonthlyActiveUsers };
+// const MonthlyActiveUsers = mongoose.model(
+//   "MonthlyActiveUsers",
+//   monthlyActiveUsersSchema
+// );
+const UserActivity = mongoose.model("UserActivity", userActivitySchema);
+export { User, Products, UserActivity };

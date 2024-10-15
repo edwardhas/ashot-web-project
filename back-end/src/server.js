@@ -7,7 +7,7 @@ import { dirname } from "path";
 import { WebSocketServer } from "ws";
 import { Server } from "socket.io";
 import { MongoClient, ObjectId } from "mongodb";
-import { User, Products, MonthlyActiveUsers } from "./schema.js";
+import { User, Products, UserActivity } from "./schema.js";
 // import { error } from "console";
 import nodemailer from "nodemailer";
 import bcrypt from "bcrypt";
@@ -15,6 +15,7 @@ import jwt from "jsonwebtoken";
 import Stripe from "stripe";
 import helmet from "helmet";
 import cors from "cors";
+import bodyParser from "body-parser";
 import { v4 as uuid4 } from "uuid";
 import "dotenv/config";
 
@@ -125,26 +126,23 @@ async function start() {
     return product.isInStock;
   }
 
-  async function getTotalTransactions() {
-    let totalTransactions = 0;
-    let hasMore = true;
-    let lastChargeId = 0;
+  const isSameDay = (date1, date2) => {
+    return (
+      date1.getFullYear() === date2.getFullYear() &&
+      date1.getMonth() === date2.getMonth() &&
+      date1.getDate() === date2.getDate()
+    );
+  };
 
-    while (hasMore) {
-      const charges = await stripe.charges.list({
-        limit: 100,
-        starting_after: lastChargeId,
-      });
+  const formatDate = (date) => {
+    return date.toISOString().split("T")[0];
+  };
 
-      totalTransactions += charges.data.length;
-      hasMore = charges.has_more;
-      if (hasMore) {
-        lastChargeId = charges.data[charges.data.length - 1].id;
-      }
-    }
-
-    return totalTransactions;
-  }
+  const formatMonth = (date) => {
+    const year = date.getFullYear();
+    const month = ("0" + (date.getMonth() + 1)).slice(-2); // Ensure month is two digits
+    return `${year}-${month}`; // Format as YYYY-MM
+  };
 
   //!! findUserByInput()
   // async function findUserByInput(userData, isId) {
@@ -188,30 +186,10 @@ async function start() {
   //   });
   // };
 
-  //!! GET PRODUCTS (actually post cuz we need userID for MUA)
-  app.post("/api/products", async (req, res) => {
+  //!! GET PRODUCTS
+  app.get("/api/products", async (req, res) => {
     const products = await db.collection("products").find({}).toArray();
 
-    const { userId } = req.body;
-
-    const date = new Date();
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1; // Months are 0-indexed in JS
-
-    try {
-      if (userId == null || undefined) {
-        return;
-      }
-      await db
-        .collection("monthlyactiveusers")
-        .updateOne(
-          { year: year, month: month },
-          { $push: { activeUsers: userId } }
-        );
-    } catch (error) {
-      console.error("Error adding user to monthly active users:", error);
-      res.json({ error: error });
-    }
     res.json({ products: products });
   });
 
@@ -448,17 +426,38 @@ async function start() {
 
     // await updateUserCartById(userId, productId, true);
     try {
-      await db.collection("users").updateOne(
-        { _id: new ObjectId(userId) },
-        {
-          $push: {
-            cartItems: {
-              productId: new ObjectId(productId),
-              quantity: quantity,
-            },
-          },
-        }
+      const user = await db
+        .collection("users")
+        .findOne({ _id: new ObjectId(userId) });
+      const existingCartItem = user.cartItems.find(
+        (item) => item.productId.toString() === productId
       );
+
+      if (existingCartItem) {
+        // If the product already exists, update the quantity
+        await db.collection("users").updateOne(
+          {
+            _id: new ObjectId(userId),
+            "cartItems.productId": new ObjectId(productId),
+          },
+          {
+            $inc: { "cartItems.$.quantity": quantity },
+          }
+        );
+      } else {
+        // If the product does not exist, add it to the cart
+        await db.collection("users").updateOne(
+          { _id: new ObjectId(userId) },
+          {
+            $push: {
+              cartItems: {
+                productId: new ObjectId(productId),
+                quantity: quantity,
+              },
+            },
+          }
+        );
+      }
     } catch (error) {
       res.json({ error: error });
     }
@@ -700,17 +699,142 @@ async function start() {
     }
   });
 
+  app.post("/api/track-activity", async (req, res) => {
+    // let userId = req.body.userId;
+    // // userId = new ObjectId(userId);
+    // const currentDate = new Date();
+    // const currentFormattedDate = formatDate(currentDate);
+    // const currentFormattedMonth = formatMonth(currentDate); // Format the current month (YYYY-MM)
+    // try {
+    //   let userActivity = await UserActivity.findOne({ userId });
+    //   if (!userActivity) {
+    //     userActivity = new UserActivity({
+    //       userId,
+    //       dailyActiveDates: [currentFormattedDate],
+    //       lastActive: currentDate,
+    //     });
+    //     await userActivity.save();
+    //     return res.json({ message: "User activity tracked successfully." });
+    //   }
+    //   // Sanitize and format all dates in dailyActiveDates before comparing
+    //   const formattedDailyActiveDates = userActivity.dailyActiveDates.map(
+    //     (date) => formatDate(new Date(date))
+    //   );
+    //   // Check if the user has already been active today
+    //   const alreadyActiveToday =
+    //     formattedDailyActiveDates.includes(currentFormattedDate);
+    //   // Sanitize and format all dates in monthlyActiveDates before comparing
+    //   const formattedMonthlyActiveDates = userActivity.monthlyActiveDates.map(
+    //     (month) => formatMonth(new Date(month))
+    //   );
+    //   // Check if the user has already been active this month (monthly)
+    //   const alreadyActiveThisMonth = formattedMonthlyActiveDates.includes(
+    //     currentFormattedMonth
+    //   );
+    //   if (!alreadyActiveToday) {
+    //     // Add today's date to the array and update last active date
+    //     userActivity.dailyActiveDates.push(currentFormattedDate);
+    //     // userActivity.lastActive = currentDate;
+    //     // await userActivity.save();
+    //     // return res.json({ message: "User activity tracked successfully." });
+    //   }
+    //   // If the user has not been active this month, add this month to the monthlyActiveDates
+    //   if (!alreadyActiveThisMonth) {
+    //     userActivity.monthlyActiveDates.push(currentFormattedMonth); // Push this month's formatted date
+    //   }
+    //   // Update last active date
+    //   userActivity.lastActive = currentDate;
+    //   await userActivity.save();
+    //   // If the user has already been active today, don't add them again
+    //   res.json({ message: "User already tracked for today." });
+    // } catch (error) {
+    //   res.json({ message: "Error tracking user activity." });
+    // }
+    const { userId } = req.body; // Assuming the frontend sends userId
+    const currentDate = new Date();
+    const currentFormattedDate = formatDate(currentDate); // Format the current date (YYYY-MM-DD)
+    const currentFormattedMonth = formatMonth(currentDate); // Format the current month (YYYY-MM)
+
+    try {
+      // Find the user's activity record
+      let userActivity = await UserActivity.findOne({ userId });
+
+      if (!userActivity) {
+        // If no activity exists for the user, create a new record with today's date and month
+        userActivity = new UserActivity({
+          userId,
+          dailyActiveDates: [currentDate], // Add the current date for daily tracking
+          monthlyActiveDates: [currentDate], // Add the current month for monthly tracking
+          lastActive: currentDate, // Full date for last activity
+        });
+        await userActivity.save();
+        return res.status(200).json({
+          message: "User activity tracked successfully (new record).",
+        });
+      }
+
+      // DAILY ACTIVITY: Check if the user has been active today
+      const alreadyActiveToday = userActivity.dailyActiveDates.some((date) => {
+        return formatDate(date) === currentFormattedDate; // Compare only YYYY-MM-DD
+      });
+
+      // MONTHLY ACTIVITY: Check if the user has been active this month
+      const alreadyActiveThisMonth = userActivity.monthlyActiveDates.some(
+        (date) => {
+          return formatMonth(date) === currentFormattedMonth; // Compare only YYYY-MM
+        }
+      );
+
+      // If the user has not been active today, add today's date to dailyActiveDates
+      if (!alreadyActiveToday) {
+        userActivity.dailyActiveDates.push(currentDate); // Add current date
+      }
+
+      // If the user has not been active this month, add this month to monthlyActiveDates
+      if (!alreadyActiveThisMonth) {
+        userActivity.monthlyActiveDates.push(currentDate); // Add current date
+      }
+
+      // Update last active date
+      userActivity.lastActive = currentDate;
+      await userActivity.save();
+
+      res.status(200).json({ message: "User activity tracked successfully." });
+    } catch (error) {
+      console.error("Error tracking user activity:", error);
+      res.status(500).json({ message: "Error tracking user activity." });
+    }
+  });
+
   //!! ADMIN PANEL STATISTICS
-  app.get("/api/statistics", async (req, res) => {
-    const currentMonth = new Date().getMonth() + 1; // cuz starts with 0
-    // MUA PART
-    const MUA = await db
-      .collection("monthlyactiveusers")
-      .findOne({ month: currentMonth });
+  app.get("/api/daily-statistics", async (req, res) => {
+    const today = new Date();
+    const startOfDay = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    );
 
-    // STRIPE TRANSACTION PART
+    const dailyActiveUsers = await UserActivity.countDocuments({
+      dailyActiveDates: { $elemMatch: { $gte: startOfDay } },
+    });
 
-    res.json({ monthlyactiveusers: MUA });
+    res.json({ dailyActiveUsers });
+  });
+
+  app.get("/api/monthly-statistics", async (req, res) => {
+    const today = new Date();
+    const startOfDay = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    );
+
+    const dailyActiveUsers = await UserActivity.countDocuments({
+      dailyActiveDates: { $elemMatch: { $gte: startOfDay } },
+    });
+
+    res.json({ dailyActiveUsers });
   });
 
   //!! STRIPE CHECKOUT SESSION
@@ -746,6 +870,40 @@ async function start() {
       res.status(500).send("Server error");
     }
   });
+
+  //!! STRIPE WEBHOOKS
+  app.post(
+    "/api/webhook",
+    bodyParser.raw({ type: "application/json" }),
+    (req, res) => {
+      const sig = req.header["stripe-signature"];
+      let event;
+
+      try {
+        event = stripe.webhooks.constructEvent(
+          req.body,
+          sig,
+          process.env.STRIPE_SECRET_KEY
+        );
+        console.log(event);
+      } catch (error) {
+        console.error("Webhook verification failed");
+        res.status(400).send(`Webhook error: ${error.message}`);
+      }
+
+      if (event.type === "payment_intent.succeeded") {
+        const paymentIntent = event.data.object;
+
+        // save to database
+
+        console.log("PaymentIntent was successful:", paymentIntent);
+      } else {
+        console.log(`Unhandled event type ${event.type}`);
+      }
+
+      res.json({ received: true });
+    }
+  );
 
   // app.get("/success", (req, res) => {
   //   res.send("Success");
