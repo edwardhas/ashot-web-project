@@ -128,10 +128,200 @@
             <p>Place The Product Description Here</p>
 
             <textarea
+              rows="10"
               class="custom-edit-input"
               :value="productDescription"
               @input="updateProductDescription($event.target.value)"
             />
+            <el-dropdown>
+              <el-button type="primary" class="dropdown-margin">
+                Generation
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item @click="setGeneration('I')"
+                    >I</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="setGeneration('II')"
+                    >II</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="setGeneration('III')"
+                    >III</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="setGeneration('IV')"
+                    >IV</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="setGeneration('V')"
+                    >V</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="setGeneration('VI')"
+                    >VI</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="setGeneration('VII')"
+                    >VII</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="setGeneration('VIII')"
+                    >VIII</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="setGeneration('IX')"
+                    >IX</el-dropdown-item
+                  >
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+
+            <el-dropdown>
+              <el-button type="success" class="dropdown-margin">
+                Type
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item @click="setType('Normal')"
+                    >Normal</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="setType('Fairy')"
+                    >Fairy</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="setType('Flying')"
+                    >Flying</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="setType('Ground')"
+                    >Ground</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="setType('Poison')"
+                    >Poison</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="setType('Steel')"
+                    >Steel</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="setType('Dark')"
+                    >Dark</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="setType('Fighting')"
+                    >Fighting</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="setType('Ghost')"
+                    >Ghost</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="setType('ICE')"
+                    >ICE</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="setType('Psychic')"
+                    >Psychic</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="setType('Water')"
+                    >Water</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="setType('Dragon')"
+                    >Dragon</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="setType('Fire')"
+                    >Fire</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="setType('Grass')"
+                    >Grass</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="setType('Rock')"
+                    >Rock</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="setType('Bug')"
+                    >Bug</el-dropdown-item
+                  >
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+
+            <el-dropdown>
+              <el-button type="warning" class="dropdown-margin">
+                Rarity
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item @click="setRarity('Common')"
+                    >Common</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="setRarity('Uncommon')"
+                    >Uncommon</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="setRarity('Rare')"
+                    >Rare</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="setRarity('Holo Rare')"
+                    >Holo Rare</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="setRarity('Ultra Rare')"
+                    >Ultra Rare</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="setRarity('Secret Rare')"
+                    >Secret Rare</el-dropdown-item
+                  >
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+
+            <el-dropdown>
+              <el-button type="danger" class="dropdown-margin">
+                Stage
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item @click="setStage('Basic Pokémon')"
+                    >Basic Pokémon</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="setStage('Stage 1 Pokémon')"
+                    >Stage 1 Pokémon</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="setStage('Stage 2 Pokémon')"
+                    >Stage 2 Pokémon</el-dropdown-item
+                  >
+                  <el-dropdown-item @click="setStage('Baby Pokémon')"
+                    >Baby Pokémon</el-dropdown-item
+                  >
+                  <el-dropdown-item
+                    @click="setStage('Legendary & Mythical Pokémon')"
+                    >Legendary & Mythical Pokémon</el-dropdown-item
+                  >
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+            <div class="dropdown-tags">
+              <el-tag
+                type="primary"
+                class="dropdown-tag"
+                size="large"
+                effect="plain"
+                round
+              >
+                Generation {{ generation }}
+              </el-tag>
+              <el-tag
+                type="success"
+                size="large"
+                class="dropdown-tag"
+                effect="plain"
+                round
+              >
+                {{ type }}
+              </el-tag>
+              <el-tag
+                type="warning"
+                size="large"
+                class="dropdown-tag"
+                effect="plain"
+                round
+              >
+                {{ rarity }}
+              </el-tag>
+              <el-tag
+                type="danger"
+                size="large"
+                class="dropdown-tag"
+                effect="plain"
+                round
+              >
+                {{ stage }}
+              </el-tag>
+            </div>
 
             <p>Place The Product Image Link Here</p>
             <!-- !! ADDING SECTION INPUTS -->
@@ -201,9 +391,25 @@ export default {
       productImageUrlFive: "",
       productImages: [],
       inputClass: "custom-edit-input",
+      type: "Type",
+      generation: "",
+      stage: "Stage",
+      rarity: "Rarity",
     };
   },
   methods: {
+    setGeneration(value) {
+      this.generation = value;
+    },
+    setType(value) {
+      this.type = value;
+    },
+    setRarity(value) {
+      this.rarity = value;
+    },
+    setStage(value) {
+      this.stage = value;
+    },
     updateProductName(newValue) {
       this.productName = newValue;
     },
@@ -489,6 +695,21 @@ hr {
   margin-top: 100px;
 }
 /* end of adding/deleting products section */
+
+.dropdown-margin {
+  margin-top: 20px;
+  margin-right: 20px;
+  margin-bottom: 20px;
+}
+
+.dropdown-tags {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.dropdown-tag {
+  margin-right: 40px;
+}
 
 @media screen and (max-width: 700px) {
   .adding-product-section {

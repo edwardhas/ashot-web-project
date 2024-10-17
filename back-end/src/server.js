@@ -872,35 +872,35 @@ async function start() {
   });
 
   //!! STRIPE WEBHOOKS
+  const endpointSecret =
+    "whsec_3ea0d009d6e3bf7f3bddc6f63c91ac71e5fdab1c0b235fea5d67e3fc25659edf";
   app.post(
-    "/api/webhook",
-    bodyParser.raw({ type: "application/json" }),
+    "/webhook",
+    express.raw({ type: "application/json" }),
     (req, res) => {
+      res.status(200).send("Received");
       const sig = req.header["stripe-signature"];
       let event;
-
+      console.log("ENDPOINT REACHED");
       try {
-        event = stripe.webhooks.constructEvent(
-          req.body,
-          sig,
-          process.env.STRIPE_SECRET_KEY
-        );
+        event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+        res.status(200).send("Received");
         console.log(event);
       } catch (error) {
         console.error("Webhook verification failed");
         res.status(400).send(`Webhook error: ${error.message}`);
       }
 
-      if (event.type === "payment_intent.succeeded") {
-        const paymentIntent = event.data.object;
-
-        // save to database
-
-        console.log("PaymentIntent was successful:", paymentIntent);
-      } else {
-        console.log(`Unhandled event type ${event.type}`);
+      switch (event.type) {
+        case "payment_intent.succeeded":
+          const paymentIntentSucceeded = event.data.object;
+          console.log(paymentIntentSucceeded);
+          break;
+        // ... handle other event types
+        default:
+          console.log(`Unhandled event type ${event.type}`);
       }
-
+      res.status(200).send("Received");
       res.json({ received: true });
     }
   );

@@ -2,14 +2,7 @@
   <div class="breadcrumb-area pt-95 pb-95 bg-img">
     <div class="container">
       <div class="breadcrumb-content text-center">
-        <h2>Products</h2>
-        <ul>
-          <router-link :to="{ name: 'products' }">
-            <li class="text-white"><a>home</a></li>
-          </router-link>
-
-          <li class="active">Product Details</li>
-        </ul>
+        <h1 class="text-flicker-in-glow">A Place where it begins</h1>
       </div>
     </div>
   </div>
@@ -79,7 +72,7 @@
       </div>
     </div>
   </div>
-  <div class="deal-area bg-img pt-95 pb-100">
+  <!-- <div class="deal-area bg-img pt-95 pb-100">
     <div class="container">
       <div class="section-title text-center mb-50">
         <h4>Best Product</h4>
@@ -105,11 +98,45 @@
               {{ dealDescription }}
             </p>
             <CountdownTimer />
-            <div class="timer timer-style">
-              <div data-countdown="2017/10/01"></div>
-            </div>
             <div class="discount-btn mt-35">
               <a class="btn-style" href="">SHOP NOW</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div> -->
+  <div class="deal-area bg-img deal-style-white pt-95 pb-100 bg-img">
+    <div class="container">
+      <div class="section-title section-title-white text-center mb-50">
+        <h4>Best Product</h4>
+        <h2>Deal of the Week</h2>
+      </div>
+      <div class="row">
+        <div class="col-lg-6 col-md-6">
+          <div class="deal-img wow fadeInLeft">
+            <a><img :src="dealImageUrl[0]" alt="" /></a>
+          </div>
+        </div>
+        <div class="col-lg-6 col-md-6">
+          <div class="deal-content">
+            <h3>
+              <h4 style="color: whitesmoke">{{ dealName }}</h4>
+            </h3>
+            <div class="deal-pro-price">
+              <span class="deal-old-price">${{ dealOldPrice }}.00</span>
+              <span>${{ dealPrice }}.00</span>
+            </div>
+            <p style="font-size: 16px">
+              {{ dealDescription }}
+            </p>
+            <CountdownTimer />
+            <div class="discount-btn mt-35">
+              <router-link :to="{ path: `/products/${dealProductId}` }">
+                <a class="btn-style" href="#" style="text-decoration: none"
+                  >SHOP NOW</a
+                >
+              </router-link>
             </div>
           </div>
         </div>
@@ -220,7 +247,7 @@
     z-index="999"
   >
     <div class="drawer-adding-product">
-      <img :src="drawerShowCurrentItem('image')" />
+      <img :src="drawerShowCurrentItem('images')" />
       <div class="drawer-adding-data">
         <div class="drawer-adding-data-name">
           <p>{{ drawerShowCurrentItem("name") }}</p>
@@ -288,8 +315,8 @@
 
 <script>
 import axios from "axios";
-import EventBus from "../eventBus";
 import { useAuthStore } from "@/store/authStore";
+import { useActivityStore } from "@/store/activityStore";
 
 import CountdownTimer from "./CountdownTimer.vue";
 import MenuTest from "./MenuTest.vue";
@@ -314,6 +341,7 @@ export default {
       isInStock: null,
 
       // deal section
+      dealProductId: null,
       dealName: "",
       dealPrice: 0,
       dealOldPrice: 0,
@@ -336,6 +364,9 @@ export default {
       const productObject = this.currentProduct;
       const objectKeysArray = Object.keys(productObject);
       // iterating through array of object keys
+      if (string == "images") {
+        return productObject["images"][0];
+      }
       for (let i = 0; i <= objectKeysArray.length - 1; i++) {
         if (string == objectKeysArray[i]) {
           // returning the value of the key if equal to the string provided
@@ -438,27 +469,35 @@ export default {
     // },
   },
 
+  watch: {
+    userId: {
+      immediate: true,
+      async handler(newUserId, oldUserId) {
+        // Only reset and track activity if the userId has changed
+        if (newUserId !== oldUserId) {
+          useActivityStore.resetTracking();
+        }
+      },
+    },
+  },
   async created() {
     const authStore = useAuthStore();
-
+    const activityStore = useActivityStore();
+    await activityStore.trackUserActivity(authStore.user.id);
     const cartItemsResponse = await axios.get(
       `/api/users/${authStore.user.id}/cart`
     );
 
     this.gridData = cartItemsResponse.data;
 
-    // const cartItems = cartItemsResponse.data;
-    // this.cartItems = cartItems;
-
-    // return (this.cartItemsAmount = cartItems.length);
-
-    const response = await axios.get("/api/deal");
+    const dealResponse = await axios.get("/api/deal");
     // this.name = response.data.name;
-    this.dealName = response.data.name;
-    this.dealPrice = response.data.price;
-    this.dealOldPrice = response.data.oldPrice;
-    this.dealDescription = response.data.description;
-    this.dealImageUrl = response.data.imageUrl;
+    this.dealProductId = dealResponse.data._id;
+    this.dealName = dealResponse.data.name;
+    this.dealPrice = dealResponse.data.price;
+    this.dealOldPrice = dealResponse.data.oldPrice;
+    this.dealDescription = dealResponse.data.description;
+    this.dealImageUrl = dealResponse.data.imageUrl;
   },
 
   // methods: {
@@ -474,6 +513,8 @@ export default {
 </script>
 
 <style scoped>
+@import "../assets/css/text-flicker-in-grow.css";
+
 .breadcrumb-area {
   position: relative;
   width: 100%;
@@ -514,6 +555,58 @@ export default {
   100% {
     background-size: 100%; /* Zoom out back to original size */
   }
+}
+.deal-area {
+  position: relative;
+  width: 100%;
+  padding: 95px 0 100px; /* Ensure padding matches your design */
+  overflow: hidden; /* Ensure no overflow from pseudo-element */
+}
+
+.deal-area::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("https://images7.alphacoders.com/592/thumb-1920-592678.jpg");
+  background-size: cover;
+  background-position: center;
+  z-index: -2; /* Place behind the content */
+  animation: zoom-in-out-deal 40s infinite;
+}
+
+.deal-area::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7); /* Black overlay with 50% opacity */
+  z-index: -1; /* Place above the background image but below the content */
+}
+
+.deal-content {
+  position: relative;
+  color: white;
+}
+
+@keyframes zoom-in-out-deal {
+  0% {
+    background-size: 150%; /* Initial size */
+  }
+  50% {
+    background-size: 200%; /* Zoom in at the halfway point */
+  }
+  100% {
+    background-size: 150%; /* Zoom out back to original size */
+  }
+}
+
+.product-area {
+  padding-bottom: 100px;
 }
 
 .product-action a {
@@ -659,5 +752,11 @@ hr {
 .el-button-bg {
   color: white;
   background: #7e4c4f;
+}
+
+@media screen and (max-width: 700px) {
+  .deal-area {
+    background: url("https://i.pinimg.com/736x/bb/54/3f/bb543feec97c5d66dfd0551d55034032.jpg");
+  }
 }
 </style>

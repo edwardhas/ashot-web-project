@@ -7,7 +7,7 @@
     <el-row class="container-row" :gutter="16">
       <el-col :span="8">
         <div class="statistic-card">
-          <el-statistic :value="98500">
+          <el-statistic :value="dailyActiveUsers">
             <template #title>
               <div style="display: inline-flex; align-items: center">
                 Daily active users
@@ -24,7 +24,7 @@
       </el-col>
       <el-col :span="8">
         <div class="statistic-card">
-          <el-statistic :value="693700">
+          <el-statistic :value="monthlyActiveUsers">
             <template #title>
               <div style="display: inline-flex; align-items: center">
                 Monthly Active Users
@@ -60,19 +60,22 @@
   </div>
 </template>
 
-<script>
-import axios from "axios";
-export default {
-  data() {
-    return {
-      monthlyActiveUsers: 0,
-    };
-  },
-  async created() {
-    const response = await axios.get("/api/statistics");
-    this.monthlyActiveUsers = response.data.monthlyactiveusers;
-  },
-};
+<script setup>
+import { ref, onMounted } from "vue";
+import { useActivityStore } from "../store/activityStore";
+
+// Declare reactive variables
+const dailyActiveUsers = ref(0);
+const monthlyActiveUsers = ref(0);
+
+// Pinia store instances
+const activityStore = useActivityStore();
+
+onMounted(async () => {
+  // Fetch daily and monthly statistics
+  dailyActiveUsers.value = await activityStore.fetchDailyStats();
+  monthlyActiveUsers.value = await activityStore.fetchMonthlyStats();
+});
 </script>
 
 <style scoped>

@@ -1,16 +1,32 @@
-<template>
-  <!-- <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
-  <link rel="stylesheet" href="assets/css/animate.css" />
-  <link rel="stylesheet" href="assets/css/simple-line-icons.css" />
-  <link rel="stylesheet" href="assets/css/themify-icons.css" />
-  <link rel="stylesheet" href="assets/css/owl.carousel.min.css" />
-  <link rel="stylesheet" href="assets/css/slick.css" />
-  <link rel="stylesheet" href="assets/css/meanmenu.min.css" />
-  <link rel="stylesheet" href="assets/css/style.css" />
-  <link rel="stylesheet" href="assets/css/responsive.css" /> -->
+<script setup>
+import { useAuthStore } from "@/store/authStore";
 
+import { computed } from "vue";
+import { ref } from "vue";
+
+import mobileMenuComponent from "./mobileMenuComponent.vue";
+import MenuTest from "./MenuTest.vue";
+import search from "./search.vue";
+
+const authStore = useAuthStore();
+
+const user = authStore.user.username || null;
+const isModalOpen = ref(false);
+
+const cartItemsAmount = computed(() => authStore.cartItemsAmount);
+
+const toggleModal = () => {
+  isModalOpen.value = !isModalOpen.value;
+};
+
+const welcomeUser = () => {
+  user == null || undefined ? "Log In" : `Welcome ${user}`;
+};
+</script>
+
+<template>
   <header class="header-area">
-    <MenuTest />
+    <menu-test />
     <div class="header-top theme-bg">
       <div class="container">
         <div class="row">
@@ -104,18 +120,10 @@
           <div class="col-xl-2 col-lg-2 col-md-8 col-sm-8 col-6">
             <div class="search-login-cart-wrapper">
               <div class="header-search same-style">
-                <button class="search-toggle">
+                <button class="search-toggle" @click="isModalOpen = true">
+                  <search v-if="isModalOpen" />
                   <i class="icon-magnifier s-open"></i>
-                  <i class="ti-close s-close"></i>
                 </button>
-                <div class="search-content">
-                  <form action="#">
-                    <input type="text" placeholder="Search" />
-                    <button>
-                      <i class="icon-magnifier"></i>
-                    </button>
-                  </form>
-                </div>
               </div>
               <div class="header-login same-style">
                 <router-link :to="{ name: 'my-account' }">
@@ -146,49 +154,12 @@
               </nav>
             </div>
           </div> -->
-          <mobileMenuComponent />
+          <mobile-menu-component />
         </div>
       </div>
     </div>
   </header>
 </template>
-
-<script>
-import axios from "axios";
-import { useAuthStore } from "@/store/authStore";
-
-import mobileMenuComponent from "./mobileMenuComponent.vue";
-import MenuTest from "./MenuTest.vue";
-
-export default {
-  name: "Header",
-  components: { mobileMenuComponent, MenuTest },
-  data() {
-    return {
-      user: useAuthStore().user.username || null,
-    };
-  },
-  // async created() {
-  //   const authStore = useAuthStore();
-  //   const response = await axios.get(`/api/users/${authStore.user.id}/cart`);
-  //   const cartItems = response.data;
-  //   this.cartItems = cartItems;
-  //   this.cartItemsAmount = cartItems.length;
-  // },
-  methods: {
-    welcomeUser() {
-      if (this.user == null || this.user == undefined)
-        return "Your name is supposed to be here. You have to log in!";
-      return `Welcome, ${this.user}!`;
-    },
-  },
-  computed: {
-    cartItemsAmount() {
-      return useAuthStore().cartItemsAmount; // Reference the store directly
-    },
-  },
-};
-</script>
 
 <style scoped>
 .account-curr-lang-wrap {

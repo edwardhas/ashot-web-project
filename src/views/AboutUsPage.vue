@@ -56,13 +56,13 @@
       <div class="row">
         <div class="col-lg-3 col-md-3 col-sm-6 col-12">
           <div class="single-count mb-30 text-center wow flip">
-            <h2 class="count wow flip">18</h2>
+            <h2 class="count">18</h2>
             <span>Years in Business</span>
           </div>
         </div>
         <div class="col-lg-3 col-md-3 col-sm-6 col-12">
           <div class="single-count mb-30 text-center wow flip">
-            <h2 class="count wow flip">290</h2>
+            <h2 class="count">290</h2>
             <span>Happy People</span>
           </div>
         </div>
@@ -204,6 +204,7 @@ export default {
 </script>
 
 <style scoped>
+@import "../assets/css/bounce-in-top.css";
 .breadcrumb-area {
   position: relative;
   width: 100%;

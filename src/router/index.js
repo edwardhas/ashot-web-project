@@ -22,9 +22,14 @@ import AdminPanelEmails from "../views/AdminPanelEmails.vue";
 import AdminEditDeleteProductComponent from "../components/AdminEditDeleteProductComponent.vue";
 import AdminPanelStatistics from "../views/AdminPanelStatistics.vue";
 import AddingProductsComponent from "../components/AddingProductsComponent.vue";
-import MenuTest from "@/components/MenuTest.vue";
+import search from "@/components/search.vue";
 
 const routes = [
+  {
+    path: "/search",
+    name: "search",
+    component: search,
+  },
   {
     path: "/",
     name: "products",
@@ -102,11 +107,6 @@ const routes = [
     path: "/test",
     name: "Stats",
     component: AdminPanelStatistics,
-  },
-  {
-    path: "/test1",
-    name: "Menu",
-    component: MenuTest,
   },
   {
     path: "/adding-products",

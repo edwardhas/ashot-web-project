@@ -2,7 +2,7 @@ import axios from "axios";
 
 export async function getProducts(userId) {
   const response = await axios.post("/api/products", userId);
-  const products = response.data;
+  const products = await response.data.products;
   return products;
 }
 

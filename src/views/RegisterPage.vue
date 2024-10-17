@@ -66,9 +66,11 @@
                       <input
                         name="user-phone"
                         placeholder="Phone"
-                        type="number"
+                        type="text"
                         required
+                        maxlength="14"
                         v-model="phone"
+                        @input="formatPhone"
                       />
 
                       <input
@@ -166,6 +168,7 @@ export default {
       lastName: "",
       email: "",
       phone: "",
+      formattedPhone: "",
       password: "",
       shippingAddress: {
         street: "",
@@ -197,8 +200,7 @@ export default {
       const message = response.data.message;
       const errorMessage = response.data.error;
       const { token, user } = response.data;
-      // console.log(`This is the console log: ${message}`);
-      // console.log(`This is the console log: ${errorMessage}`);
+
       this.name = "";
       this.email = "";
       this.password = "";
@@ -206,20 +208,48 @@ export default {
       this.shippingAddress.userCity = "";
       this.shippingAddress.userState = "";
       this.shippingAddress.userZip = "";
-      if (message == undefined)
-        return (
-          (this.message = errorMessage),
-          (this.status = false),
-          (this.isDisplayed = true)
-        );
 
-      return (
-        (this.message = message),
-        (this.status = true),
-        (this.isDisplayed = true),
-        authStore.setToken(token),
-        authStore.setUser(user)
-      );
+      message == undefined
+        ? ((this.message = errorMessage),
+          (this.status = false),
+          (this.isDisplayed = true))
+        : ((this.message = message),
+          (this.status = false),
+          (this.isDisplayed = true),
+          authStore.setToken(token),
+          authStore.setUser(user));
+
+      // if (message == undefined)
+      //   return (
+      //     (this.message = errorMessage),
+      //     (this.status = false),
+      //     (this.isDisplayed = true)
+      //   );
+
+      // return (
+      //   (this.message = message),
+      //   (this.status = true),
+      //   (this.isDisplayed = true),
+      //   authStore.setToken(token),
+      //   authStore.setUser(user)
+      // );
+    },
+    formatPhone() {
+      // Remove all non-digit characters
+      const cleaned = this.phone.replace(/\D/g, "");
+
+      // Match and format the phone number
+      if (cleaned.length <= 10) {
+        const match = cleaned.match(/^(\d{0,3})(\d{0,3})(\d{0,4})$/);
+
+        if (match) {
+          let formatted = "";
+          if (match[1]) formatted = `(${match[1]}`;
+          if (match[2]) formatted += `)-${match[2]}`;
+          if (match[3]) formatted += `-${match[3]}`;
+          this.phone = formatted; // Update input with formatted value
+        }
+      }
     },
   },
 };

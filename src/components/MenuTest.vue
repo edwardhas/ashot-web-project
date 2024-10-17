@@ -22,13 +22,57 @@
           <span>Products</span>
         </template>
         <el-menu-item-group>
-          <el-menu-item index="1-1">category one</el-menu-item>
-          <el-menu-item index="1-2">category two</el-menu-item>
+          <el-sub-menu index="1-1">
+            <template #title><span>Generation</span></template>
+            <el-menu-item index="1-1-1">Generation I</el-menu-item>
+            <el-menu-item index="1-1-2">Generation II</el-menu-item>
+            <el-menu-item index="1-1-3">Generation III</el-menu-item>
+            <el-menu-item index="1-1-4">Generation IV</el-menu-item>
+            <el-menu-item index="1-1-5">Generation V</el-menu-item>
+            <el-menu-item index="1-1-6">Generation VI</el-menu-item>
+            <el-menu-item index="1-1-6">Generation XII</el-menu-item>
+            <el-menu-item index="1-1-6">Generation XIII</el-menu-item>
+            <el-menu-item index="1-1-6">Generation IX</el-menu-item>
+          </el-sub-menu>
+          <el-sub-menu index="1-2">
+            <template #title><span>Type</span></template>
+            <el-menu-item index="1-2-1">Normal</el-menu-item>
+            <el-menu-item index="1-2-2">Fairy</el-menu-item>
+            <el-menu-item index="1-2-3">Flying</el-menu-item>
+            <el-menu-item index="1-2-4">Ground</el-menu-item>
+            <el-menu-item index="1-2-5">Poison</el-menu-item>
+            <el-menu-item index="1-2-6">Steel</el-menu-item>
+            <el-menu-item index="1-2-7">Dark</el-menu-item>
+            <el-menu-item index="1-2-8">Fighting</el-menu-item>
+            <el-menu-item index="1-2-9">Ghost</el-menu-item>
+            <el-menu-item index="1-2-10">ICE</el-menu-item>
+            <el-menu-item index="1-2-11">Psychic</el-menu-item>
+            <el-menu-item index="1-2-12">Water</el-menu-item>
+            <el-menu-item index="1-2-13">Dragon</el-menu-item>
+            <el-menu-item index="1-2-14">Fire</el-menu-item>
+            <el-menu-item index="1-2-15">Grass</el-menu-item>
+            <el-menu-item index="1-2-16">Rock</el-menu-item>
+            <el-menu-item index="1-2-17">Bug</el-menu-item>
+          </el-sub-menu>
         </el-menu-item-group>
-        <el-menu-item index="1-3">category three</el-menu-item>
+        <el-sub-menu index="1-3">
+          <template #title><span>Rarity</span></template>
+          <el-menu-item index="1-3-1">Common</el-menu-item>
+          <el-menu-item index="1-3-2">Uncommon</el-menu-item>
+          <el-menu-item index="1-3-3">Rare</el-menu-item>
+          <el-menu-item index="1-3-4">Holo Rare</el-menu-item>
+          <el-menu-item index="1-3-5">Ultra Rare</el-menu-item>
+          <el-menu-item index="1-3-6">Secret Rare</el-menu-item>
+        </el-sub-menu>
         <el-sub-menu index="1-4">
-          <template #title><span>category four</span></template>
-          <el-menu-item index="1-4-1">category one</el-menu-item>
+          <template #title><span>Evolutionary Stage</span></template>
+          <el-menu-item index="1-4-1">Basic Pokémon</el-menu-item>
+          <el-menu-item index="1-4-2">Stage 1 Pokémon</el-menu-item>
+          <el-menu-item index="1-4-3">Stage 2 Pokémon</el-menu-item>
+          <el-menu-item index="1-4-4">Baby Pokémon</el-menu-item>
+          <el-menu-item index="1-4-5"
+            >Legendary & Mythical Pokémon</el-menu-item
+          >
         </el-sub-menu>
       </el-sub-menu>
       <router-link :to="{ path: '/about-us' }">
@@ -66,6 +110,7 @@ const isCollapse = ref(true);
 
 const handleOpen = (key, keyPath) => {
   console.log(key, keyPath);
+  document.body.style.overflow = "hidden";
 };
 
 const handleClose = (key, keyPath) => {
@@ -78,6 +123,7 @@ const toggleMenu = () => {
 
 const closeMenu = () => {
   isCollapse.value = true; // Collapse the menu when overlay is clicked
+  document.body.style.overflow = "";
 };
 </script>
 
