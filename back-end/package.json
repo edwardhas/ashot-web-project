@@ -13,8 +13,10 @@
   "license": "ISC",
   "dependencies": {
     "@babel/runtime": "^7.24.8",
+    "axios": "^1.7.7",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.3",
+    "cohere-ai": "^7.14.0",
     "concurrently": "^8.2.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",

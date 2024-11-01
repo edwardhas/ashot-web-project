@@ -2,10 +2,11 @@
   <div class="breadcrumb-area pt-95 pb-95 bg-img">
     <div class="container">
       <div class="breadcrumb-content text-center">
-        <h1 class="text-flicker-in-glow">A Place where it begins</h1>
+        <h1 class="text-flicker-in-glow">A Place Where It Begins</h1>
       </div>
     </div>
   </div>
+
   <div class="product-area pt-95 pb-70 gray-bg">
     <div class="container">
       <div class="section-title text-center mb-55">
@@ -18,14 +19,15 @@
           v-for="product in products"
           :key="product._id"
         >
-          <div class="product-wrapper mb-10">
+          <ProductCard :product="product" />
+          <!-- <div class="product-wrapper mb-10">
             <div class="product-img">
               <a href="">
                 <router-link :to="{ path: `/products/${product._id}` }">
                   <img class="custom-image" :src="product.images[0]" alt="" />
                 </router-link>
               </a>
-              <!-- "../assets/img/product/product-4.jpg" -->
+
               <div class="product-action">
                 <router-link :to="{ path: `/products/${product._id}` }">
                   <a
@@ -35,7 +37,6 @@
                     data-target="#exampleModal"
                   >
                     <el-button text class="ti-plus"></el-button>
-                    <!-- <i class="ti-plus"></i> -->
                   </a>
                 </router-link>
 
@@ -64,7 +65,7 @@
                 >
               </div>
             </div>
-          </div>
+          </div> -->
         </div>
       </div>
       <div class="custom-empty-products-list" v-else>
@@ -72,40 +73,7 @@
       </div>
     </div>
   </div>
-  <!-- <div class="deal-area bg-img pt-95 pb-100">
-    <div class="container">
-      <div class="section-title text-center mb-50">
-        <h4>Best Product</h4>
-        <h2>Deal of the Week</h2>
-      </div>
-      <div class="row">
-        <div class="col-lg-6 col-md-6">
-          <div class="deal-img wow fadeInLeft">
-            <a href=""><img :src="dealImageUrl" alt="" /></a>
-          </div>
-        </div>
 
-        <div class="col-lg-6 col-md-6">
-          <div class="deal-content">
-            <h3>
-              <a href="">{{ dealName }}</a>
-            </h3>
-            <div class="deal-pro-price">
-              <span class="deal-old-price">${{ dealOldPrice }}.00 </span>
-              <span> ${{ dealPrice }}.00</span>
-            </div>
-            <p>
-              {{ dealDescription }}
-            </p>
-            <CountdownTimer />
-            <div class="discount-btn mt-35">
-              <a class="btn-style" href="">SHOP NOW</a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div> -->
   <div class="deal-area bg-img deal-style-white pt-95 pb-100 bg-img">
     <div class="container">
       <div class="section-title section-title-white text-center mb-50">
@@ -238,7 +206,7 @@
   </div>
   <!-- !! Component -->
 
-  <el-drawer
+  <!-- <el-drawer
     v-model="isDisplayingTable"
     title="This is your Cart. You can add an item to it!"
     direction="rtl"
@@ -310,7 +278,7 @@
         <el-button type="danger" disabled v-else>Not in stock</el-button>
       </div>
     </template>
-  </el-drawer>
+  </el-drawer> -->
 </template>
 
 <script>
@@ -318,10 +286,10 @@ import axios from "axios";
 import { useAuthStore } from "@/store/authStore";
 import { useActivityStore } from "@/store/activityStore";
 
+import ProductCard from "./ProductCard.vue";
 import CountdownTimer from "./CountdownTimer.vue";
 import MenuTest from "./MenuTest.vue";
 
-import { reactive, ref } from "vue";
 import { ElDrawer, ElMessageBox } from "element-plus";
 import { ElNotification } from "element-plus";
 import "element-plus/dist/index.css";
@@ -329,7 +297,7 @@ import "element-plus/dist/index.css";
 export default {
   name: "ProductsList",
   props: ["products", "isDisplayed"],
-  components: { CountdownTimer, MenuTest },
+  components: { CountdownTimer, MenuTest, ProductCard },
 
   data() {
     return {
@@ -514,7 +482,6 @@ export default {
 
 <style scoped>
 @import "../assets/css/text-flicker-in-grow.css";
-
 .breadcrumb-area {
   position: relative;
   width: 100%;
@@ -605,7 +572,7 @@ export default {
   }
 }
 
-.product-area {
+/* .product-area {
   padding-bottom: 100px;
 }
 
@@ -619,7 +586,7 @@ export default {
 }
 
 .custom-image {
-  aspect-ratio: 3/3;
+  aspect-ratio: 2.7/3;
 }
 
 .ti-plus-a {
@@ -636,7 +603,7 @@ export default {
 
 .ti-shopping-cart-a > .el-button {
   border: none;
-}
+} */
 
 hr {
   width: 85%;
@@ -650,108 +617,6 @@ hr {
 
 .section-title h4 {
   margin-top: 100px;
-}
-
-/* drawer section */
-.drawer-adding-product {
-  width: 100%;
-  height: 200px;
-  margin-bottom: 100px;
-  display: flex;
-  justify-content: center;
-  flex-direction: row;
-}
-
-.drawer-adding-data {
-  width: 20%;
-  margin-left: 30px;
-}
-
-.drawer-adding-data-prices {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.drawer-adding-data-quantity {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.cart-plus-minus {
-  width: auto;
-  border-radius: 20px;
-}
-
-.form-control {
-  border: none;
-  text-align: center;
-  pointer-events: none;
-  margin: 0;
-  padding: 0;
-  height: 100%;
-}
-
-.input-group-text {
-  border: none;
-  cursor: pointer;
-  background-color: #fff;
-}
-
-.prevent-select {
-  -webkit-user-select: none; /* Safari */
-  -ms-user-select: none; /* IE 10 and IE 11 */
-  user-select: none; /* Standard syntax */
-}
-
-.drawer-adding-data-name {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 40px;
-  font-weight: 500;
-}
-
-.drawer-adding-product img {
-  object-fit: fill;
-}
-
-.drawer-new-price {
-  color: #686868;
-  font-size: 20px;
-  font-weight: 500;
-  margin: 0 12px 0 0;
-}
-
-.drawer-old-price {
-  color: #7e4c4f;
-  font-size: 20px;
-  font-weight: 500;
-  text-decoration: line-through;
-}
-
-/* drawer layout */
-.el-row {
-  display: flex;
-  justify-content: space-around;
-  margin-bottom: 100px;
-}
-.el-row:last-child {
-  margin-bottom: 0;
-}
-.el-col {
-  border-radius: 4px;
-}
-
-.grid-content {
-  border-radius: 4px;
-  min-height: 36px;
-}
-
-.el-button-bg {
-  color: white;
-  background: #7e4c4f;
 }
 
 @media screen and (max-width: 700px) {

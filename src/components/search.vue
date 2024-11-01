@@ -15,7 +15,7 @@
       style="width: 100%"
       v-if="matchedProduct.length > 0"
     >
-      <el-table-column label="Image" width="100">
+      <el-table-column label="Image" width="160">
         <template #default="scope">
           <img
             :src="scope.row.images[0]"
@@ -28,7 +28,11 @@
       <el-table-column prop="price" label="Price" />
       <el-table-column prop="isInStock" label="Availablity" />
       <el-table-column label="View">
-        <button class="button-17">View</button>
+        <template #default="scope">
+          <router-link :to="{ path: `/products/${scope.row._id}` }">
+            <button class="button-17">View</button>
+          </router-link>
+        </template>
       </el-table-column>
     </el-table>
   </el-dialog>

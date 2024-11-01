@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="main-container">
     <!-- Burger Icon to toggle menu -->
     <div class="burger-icon" @click="toggleMenu">
       <img src="../assets/img/logo/burger-menu.png" alt="" />

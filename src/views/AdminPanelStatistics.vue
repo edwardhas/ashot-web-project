@@ -57,25 +57,40 @@
         </div>
       </el-col>
     </el-row>
+    <p>{{ onlineUserCountStore.onlineUserCount }}</p>
+    <Button label="Primary" raised class="custom-prime" />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+// import { io } from "socket.io-client";
+import { ref, onMounted, onUnmounted } from "vue";
 import { useActivityStore } from "../store/activityStore";
+import { useOnlineUsersCountStore } from "@/store/onlineUsersCount";
+
+import "primeicons/primeicons.css";
+import Button from "primevue/button";
 
 // Declare reactive variables
 const dailyActiveUsers = ref(0);
 const monthlyActiveUsers = ref(0);
+const userCount = ref(0);
+// let socket;
 
 // Pinia store instances
 const activityStore = useActivityStore();
+const onlineUserCountStore = useOnlineUsersCountStore();
 
 onMounted(async () => {
   // Fetch daily and monthly statistics
   dailyActiveUsers.value = await activityStore.fetchDailyStats();
   monthlyActiveUsers.value = await activityStore.fetchMonthlyStats();
 });
+
+// onUnmounted(() => {
+//   socket.off("activeUsers");
+//   socket.close();
+// });
 </script>
 
 <style scoped>

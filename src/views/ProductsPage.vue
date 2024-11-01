@@ -10,10 +10,9 @@
 
 <script>
 import axios from "axios";
-import EventBus from "../eventBus";
-import ProductsList from "../components/ProductsList.vue";
 import Footer from "../components/Footer.vue";
 import Header from "../components/Header.vue";
+import ProductsList from "../components/ProductsList.vue";
 import { useAuthStore } from "@/store/authStore";
 
 export default {
@@ -28,6 +27,7 @@ export default {
   async created() {
     const authStore = useAuthStore();
     const products = await axios.get("/api/products");
+    console.log(products);
     this.products = products.data.products;
   },
   methods: {

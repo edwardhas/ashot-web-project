@@ -1680,7 +1680,7 @@ textarea:focus {
 }
 .same-style button i {
   color: #545454;
-  font-size: 24px;
+  font-size: 22px;
   transition: all 0.3s ease 0s;
 }
 .same-style button:hover i,

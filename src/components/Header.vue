@@ -20,7 +20,7 @@ const toggleModal = () => {
 };
 
 const welcomeUser = () => {
-  user == null || undefined ? "Log In" : `Welcome ${user}`;
+  return user == null || undefined ? "Log In" : `Welcome ${user}`;
 };
 </script>
 
@@ -66,53 +66,24 @@ const welcomeUser = () => {
                       <a>HOME</a>
                     </router-link>
                   </li>
-                  <li>
-                    <a>PAGES</a>
-                    <ul class="submenu">
-                      <li>
-                        <router-link :to="{ name: 'about-us' }">
-                          <a>about us</a>
-                        </router-link>
-                      </li>
 
-                      <li>
-                        <router-link :to="{ name: 'cart' }">
-                          <a>cart page</a>
-                        </router-link>
-                      </li>
-                      <li>
-                        <router-link :to="{ name: 'checkout' }">
-                          <a>checkout</a>
-                        </router-link>
-                      </li>
-                      <li>
-                        <router-link :to="{ name: 'contact-us' }">
-                          <a>contact us</a>
-                        </router-link>
-                      </li>
-                      <li>
-                        <router-link :to="{ name: 'my-account' }"
-                          ><a>my account</a>
-                        </router-link>
-                      </li>
-                      <li>
-                        <router-link :to="{ name: 'login' }">
-                          <a>login</a>
-                        </router-link>
-                      </li>
-                      <li>
-                        <router-link :to="{ name: 'register' }">
-                          <a>register</a>
-                        </router-link>
-                      </li>
-                    </ul>
+                  <li>
+                    <router-link :to="{ name: 'shop-list' }">
+                      <a>SHOP</a>
+                    </router-link>
                   </li>
-                  <router-link :to="{ name: 'about-us' }">
-                    <li><a>ABOUT</a></li>
-                  </router-link>
-                  <router-link :to="{ name: 'contact-us' }">
-                    <li><a>contact us</a></li>
-                  </router-link>
+
+                  <li>
+                    <router-link :to="{ name: 'about-us' }"
+                      ><a>ABOUT</a></router-link
+                    >
+                  </li>
+
+                  <li>
+                    <router-link :to="{ name: 'contact-us' }"
+                      ><a>contact us</a></router-link
+                    >
+                  </li>
                 </ul>
               </nav>
             </div>

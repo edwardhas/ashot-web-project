@@ -1,360 +1,362 @@
 <template>
   <div class="adding-product-section">
-    <div class="section-title text-center mb-50 mt-90">
-      <h2>Adding Products Section</h2>
-    </div>
-
-    <div class="shop-area pt-95 pb-100">
-      <div class="container">
-        <div class="row">
-          <div class="col-lg-6 col-md-6">
-            <div class="product-details-img">
-              <img
-                v-if="productImageUrlOne"
-                id="zoompro"
-                :src="productImageUrlOne"
-              />
-              <p v-else>
-                Picture will be displayed here after you place the link in the
-                corresponding field below
-              </p>
+    <div class="product-section">
+      <div class="deal-area pt-95 pb-100">
+        <div class="container">
+          <div class="row">
+            <div class="col-lg-6 col-md-6">
+              <div class="product-details-img">
+                <img
+                  v-if="productImageUrlOne"
+                  id="zoompro"
+                  :src="productImageUrlOne"
+                />
+                <p v-else>
+                  Picture will be displayed here after you place the link in the
+                  corresponding field below
+                </p>
+              </div>
             </div>
-          </div>
-          <div class="col-lg-6 col-md-6">
-            <div class="product-details-content">
-              <h2>{{ productName }}</h2>
+            <div class="col-lg-6 col-md-6">
+              <div class="product-details-content">
+                <h2>{{ productName }}</h2>
 
-              <div class="product-price">
-                <span class="new">${{ productPrice }}.00</span>
-                <span class="old">${{ productOldPrice }}.00</span>
-              </div>
-              <div class="in-stock">
-                <span class="inStock" v-if="inStock"
-                  ><i class="ion-android-checkbox-outline"></i>In Stock</span
-                >
-                <span class="outOfStock" v-else
-                  ><i class="ion-android-checkbox-outline"></i> Out Of
-                  Stock</span
-                >
-              </div>
-              <p>{{ productDescription }}</p>
-
-              <div class="quality-wrapper mt-30 product-quantity">
-                <label>Qty:</label>
-                <div class="cart-plus-minus">
-                  <span
-                    class="input-group-text prevent-select"
-                    @click="manageQuantity(false)"
-                    >-</span
+                <div class="product-price">
+                  <span class="new">${{ productPrice }}.00</span>
+                  <span class="old">${{ productOldPrice }}.00</span>
+                </div>
+                <div class="in-stock">
+                  <span class="inStock" v-if="inStock"
+                    ><i class="ion-android-checkbox-outline"></i>In Stock</span
                   >
-                  <input
-                    type="text"
-                    class="form-control prevent-select"
-                    v-model="quantity"
-                    @change="updateQuantity"
-                  />
-                  <span
-                    class="input-group-text prevent-select"
-                    @click="manageQuantity(true)"
-                    >+</span
+                  <span class="outOfStock" v-else
+                    ><i class="ion-android-checkbox-outline"></i> Out Of
+                    Stock</span
                   >
                 </div>
-              </div>
-              <div class="product-list-action">
-                <div class="product-list-action-left">
-                  <!-- Chekc is is in stock-->
-                  <a
-                    v-if="inStock"
-                    @click="addToCart"
-                    class="addtocart-btn"
-                    title="Add to cart"
-                  >
-                    <i class="ion-bag"></i>
-                    Add to cart
-                  </a>
-                  <!-- Put v-else -->
-                  <a class="disabled addtocart-btn" v-else title="Add to cart">
-                    <i class="ion-bag"></i>
-                    Out of stock
-                  </a>
+                <p>{{ productDescription }}</p>
+
+                <div class="quality-wrapper mt-30 product-quantity">
+                  <label>Qty:</label>
+                  <div class="cart-plus-minus">
+                    <span
+                      class="input-group-text prevent-select"
+                      @click="manageQuantity(false)"
+                      >-</span
+                    >
+                    <input
+                      type="text"
+                      class="form-control prevent-select"
+                      v-model="quantity"
+                      @change="updateQuantity"
+                    />
+                    <span
+                      class="input-group-text prevent-select"
+                      @click="manageQuantity(true)"
+                      >+</span
+                    >
+                  </div>
+                </div>
+                <div class="product-list-action">
+                  <div class="product-list-action-left">
+                    <!-- Chekc is is in stock-->
+                    <a
+                      v-if="inStock"
+                      @click="addToCart"
+                      class="addtocart-btn"
+                      title="Add to cart"
+                    >
+                      <i class="ion-bag"></i>
+                      Add to cart
+                    </a>
+                    <!-- Put v-else -->
+                    <a
+                      class="disabled addtocart-btn"
+                      v-else
+                      title="Add to cart"
+                    >
+                      <i class="ion-bag"></i>
+                      Out of stock
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="shop-area pt-95 pb-100">
-      <div class="container">
-        <div class="row">
-          <div class="custom-row-wrap">
-            <p>Place The Product Name Here</p>
-            <input
-              class="custom-edit-input"
-              :value="productName"
-              @input="updateProductName($event.target.value)"
-            />
+      <div class="shop-area pt-95 pb-100">
+        <div class="container">
+          <div class="row">
+            <div class="custom-row-wrap">
+              <p>Place The Product Name Here</p>
+              <input
+                class="custom-edit-input"
+                :value="productName"
+                @input="updateProductName($event.target.value)"
+              />
 
-            <p>Place The Product Price Here</p>
+              <p>Place The Product Price Here</p>
 
-            <input
-              type="number"
-              class="custom-edit-input"
-              :value="productPrice"
-              min="0"
-              @input="updateProductPrice($event.target.value)"
-            />
+              <input
+                type="number"
+                class="custom-edit-input"
+                :value="productPrice"
+                min="0"
+                @input="updateProductPrice($event.target.value)"
+              />
 
-            <p>Place The Product Old Price Here</p>
+              <p>Place The Product Old Price Here</p>
 
-            <input
-              type="number"
-              class="custom-edit-input"
-              :value="productOldPrice"
-              min="0"
-              @input="updateProductOldPrice($event.target.value)"
-            />
+              <input
+                type="number"
+                class="custom-edit-input"
+                :value="productOldPrice"
+                min="0"
+                @input="updateProductOldPrice($event.target.value)"
+              />
 
-            <p>Click if the product is in stock</p>
+              <p>Click if the product is in stock</p>
 
-            <input
-              class="custom-edit-input custom-edit-checkbox"
-              type="checkbox"
-              :checked="inStock"
-              @change="updateProductAvailability('inStock', $event)"
-            />
+              <input
+                class="custom-edit-input custom-edit-checkbox"
+                type="checkbox"
+                :checked="inStock"
+                @change="updateProductAvailability('inStock', $event)"
+              />
 
-            <p>Place The Product Description Here</p>
+              <p>Place The Product Description Here</p>
 
-            <textarea
-              rows="10"
-              class="custom-edit-input"
-              :value="productDescription"
-              @input="updateProductDescription($event.target.value)"
-            />
-            <el-dropdown>
-              <el-button type="primary" class="dropdown-margin">
-                Generation
-              </el-button>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item @click="setGeneration('I')"
-                    >I</el-dropdown-item
-                  >
-                  <el-dropdown-item @click="setGeneration('II')"
-                    >II</el-dropdown-item
-                  >
-                  <el-dropdown-item @click="setGeneration('III')"
-                    >III</el-dropdown-item
-                  >
-                  <el-dropdown-item @click="setGeneration('IV')"
-                    >IV</el-dropdown-item
-                  >
-                  <el-dropdown-item @click="setGeneration('V')"
-                    >V</el-dropdown-item
-                  >
-                  <el-dropdown-item @click="setGeneration('VI')"
-                    >VI</el-dropdown-item
-                  >
-                  <el-dropdown-item @click="setGeneration('VII')"
-                    >VII</el-dropdown-item
-                  >
-                  <el-dropdown-item @click="setGeneration('VIII')"
-                    >VIII</el-dropdown-item
-                  >
-                  <el-dropdown-item @click="setGeneration('IX')"
-                    >IX</el-dropdown-item
-                  >
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
+              <textarea
+                rows="10"
+                class="custom-edit-input"
+                :value="productDescription"
+                @input="updateProductDescription($event.target.value)"
+              />
+              <el-dropdown>
+                <el-button type="primary" class="dropdown-margin">
+                  Generation
+                </el-button>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item @click="setGeneration('I')"
+                      >I</el-dropdown-item
+                    >
+                    <el-dropdown-item @click="setGeneration('II')"
+                      >II</el-dropdown-item
+                    >
+                    <el-dropdown-item @click="setGeneration('III')"
+                      >III</el-dropdown-item
+                    >
+                    <el-dropdown-item @click="setGeneration('IV')"
+                      >IV</el-dropdown-item
+                    >
+                    <el-dropdown-item @click="setGeneration('V')"
+                      >V</el-dropdown-item
+                    >
+                    <el-dropdown-item @click="setGeneration('VI')"
+                      >VI</el-dropdown-item
+                    >
+                    <el-dropdown-item @click="setGeneration('VII')"
+                      >VII</el-dropdown-item
+                    >
+                    <el-dropdown-item @click="setGeneration('VIII')"
+                      >VIII</el-dropdown-item
+                    >
+                    <el-dropdown-item @click="setGeneration('IX')"
+                      >IX</el-dropdown-item
+                    >
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
 
-            <el-dropdown>
-              <el-button type="success" class="dropdown-margin">
-                Type
-              </el-button>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item @click="setType('Normal')"
-                    >Normal</el-dropdown-item
-                  >
-                  <el-dropdown-item @click="setType('Fairy')"
-                    >Fairy</el-dropdown-item
-                  >
-                  <el-dropdown-item @click="setType('Flying')"
-                    >Flying</el-dropdown-item
-                  >
-                  <el-dropdown-item @click="setType('Ground')"
-                    >Ground</el-dropdown-item
-                  >
-                  <el-dropdown-item @click="setType('Poison')"
-                    >Poison</el-dropdown-item
-                  >
-                  <el-dropdown-item @click="setType('Steel')"
-                    >Steel</el-dropdown-item
-                  >
-                  <el-dropdown-item @click="setType('Dark')"
-                    >Dark</el-dropdown-item
-                  >
-                  <el-dropdown-item @click="setType('Fighting')"
-                    >Fighting</el-dropdown-item
-                  >
-                  <el-dropdown-item @click="setType('Ghost')"
-                    >Ghost</el-dropdown-item
-                  >
-                  <el-dropdown-item @click="setType('ICE')"
-                    >ICE</el-dropdown-item
-                  >
-                  <el-dropdown-item @click="setType('Psychic')"
-                    >Psychic</el-dropdown-item
-                  >
-                  <el-dropdown-item @click="setType('Water')"
-                    >Water</el-dropdown-item
-                  >
-                  <el-dropdown-item @click="setType('Dragon')"
-                    >Dragon</el-dropdown-item
-                  >
-                  <el-dropdown-item @click="setType('Fire')"
-                    >Fire</el-dropdown-item
-                  >
-                  <el-dropdown-item @click="setType('Grass')"
-                    >Grass</el-dropdown-item
-                  >
-                  <el-dropdown-item @click="setType('Rock')"
-                    >Rock</el-dropdown-item
-                  >
-                  <el-dropdown-item @click="setType('Bug')"
-                    >Bug</el-dropdown-item
-                  >
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
+              <el-dropdown>
+                <el-button type="success" class="dropdown-margin">
+                  Type
+                </el-button>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item @click="setType('Normal')"
+                      >Normal</el-dropdown-item
+                    >
+                    <el-dropdown-item @click="setType('Fairy')"
+                      >Fairy</el-dropdown-item
+                    >
+                    <el-dropdown-item @click="setType('Flying')"
+                      >Flying</el-dropdown-item
+                    >
+                    <el-dropdown-item @click="setType('Ground')"
+                      >Ground</el-dropdown-item
+                    >
+                    <el-dropdown-item @click="setType('Poison')"
+                      >Poison</el-dropdown-item
+                    >
+                    <el-dropdown-item @click="setType('Steel')"
+                      >Steel</el-dropdown-item
+                    >
+                    <el-dropdown-item @click="setType('Dark')"
+                      >Dark</el-dropdown-item
+                    >
+                    <el-dropdown-item @click="setType('Fighting')"
+                      >Fighting</el-dropdown-item
+                    >
+                    <el-dropdown-item @click="setType('Ghost')"
+                      >Ghost</el-dropdown-item
+                    >
+                    <el-dropdown-item @click="setType('ICE')"
+                      >ICE</el-dropdown-item
+                    >
+                    <el-dropdown-item @click="setType('Psychic')"
+                      >Psychic</el-dropdown-item
+                    >
+                    <el-dropdown-item @click="setType('Water')"
+                      >Water</el-dropdown-item
+                    >
+                    <el-dropdown-item @click="setType('Dragon')"
+                      >Dragon</el-dropdown-item
+                    >
+                    <el-dropdown-item @click="setType('Fire')"
+                      >Fire</el-dropdown-item
+                    >
+                    <el-dropdown-item @click="setType('Grass')"
+                      >Grass</el-dropdown-item
+                    >
+                    <el-dropdown-item @click="setType('Rock')"
+                      >Rock</el-dropdown-item
+                    >
+                    <el-dropdown-item @click="setType('Bug')"
+                      >Bug</el-dropdown-item
+                    >
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
 
-            <el-dropdown>
-              <el-button type="warning" class="dropdown-margin">
-                Rarity
-              </el-button>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item @click="setRarity('Common')"
-                    >Common</el-dropdown-item
-                  >
-                  <el-dropdown-item @click="setRarity('Uncommon')"
-                    >Uncommon</el-dropdown-item
-                  >
-                  <el-dropdown-item @click="setRarity('Rare')"
-                    >Rare</el-dropdown-item
-                  >
-                  <el-dropdown-item @click="setRarity('Holo Rare')"
-                    >Holo Rare</el-dropdown-item
-                  >
-                  <el-dropdown-item @click="setRarity('Ultra Rare')"
-                    >Ultra Rare</el-dropdown-item
-                  >
-                  <el-dropdown-item @click="setRarity('Secret Rare')"
-                    >Secret Rare</el-dropdown-item
-                  >
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
+              <el-dropdown>
+                <el-button type="warning" class="dropdown-margin">
+                  Rarity
+                </el-button>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item @click="setRarity('Common')"
+                      >Common</el-dropdown-item
+                    >
+                    <el-dropdown-item @click="setRarity('Uncommon')"
+                      >Uncommon</el-dropdown-item
+                    >
+                    <el-dropdown-item @click="setRarity('Rare')"
+                      >Rare</el-dropdown-item
+                    >
+                    <el-dropdown-item @click="setRarity('Holo Rare')"
+                      >Holo Rare</el-dropdown-item
+                    >
+                    <el-dropdown-item @click="setRarity('Ultra Rare')"
+                      >Ultra Rare</el-dropdown-item
+                    >
+                    <el-dropdown-item @click="setRarity('Secret Rare')"
+                      >Secret Rare</el-dropdown-item
+                    >
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
 
-            <el-dropdown>
-              <el-button type="danger" class="dropdown-margin">
-                Stage
-              </el-button>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item @click="setStage('Basic Pokémon')"
-                    >Basic Pokémon</el-dropdown-item
-                  >
-                  <el-dropdown-item @click="setStage('Stage 1 Pokémon')"
-                    >Stage 1 Pokémon</el-dropdown-item
-                  >
-                  <el-dropdown-item @click="setStage('Stage 2 Pokémon')"
-                    >Stage 2 Pokémon</el-dropdown-item
-                  >
-                  <el-dropdown-item @click="setStage('Baby Pokémon')"
-                    >Baby Pokémon</el-dropdown-item
-                  >
-                  <el-dropdown-item
-                    @click="setStage('Legendary & Mythical Pokémon')"
-                    >Legendary & Mythical Pokémon</el-dropdown-item
-                  >
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
-            <div class="dropdown-tags">
-              <el-tag
-                type="primary"
-                class="dropdown-tag"
-                size="large"
-                effect="plain"
-                round
-              >
-                Generation {{ generation }}
-              </el-tag>
-              <el-tag
-                type="success"
-                size="large"
-                class="dropdown-tag"
-                effect="plain"
-                round
-              >
-                {{ type }}
-              </el-tag>
-              <el-tag
-                type="warning"
-                size="large"
-                class="dropdown-tag"
-                effect="plain"
-                round
-              >
-                {{ rarity }}
-              </el-tag>
-              <el-tag
-                type="danger"
-                size="large"
-                class="dropdown-tag"
-                effect="plain"
-                round
-              >
-                {{ stage }}
-              </el-tag>
+              <el-dropdown>
+                <el-button type="danger" class="dropdown-margin">
+                  Stage
+                </el-button>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item @click="setStage('Basic Pokémon')"
+                      >Basic Pokémon</el-dropdown-item
+                    >
+                    <el-dropdown-item @click="setStage('Stage 1 Pokémon')"
+                      >Stage 1 Pokémon</el-dropdown-item
+                    >
+                    <el-dropdown-item @click="setStage('Stage 2 Pokémon')"
+                      >Stage 2 Pokémon</el-dropdown-item
+                    >
+                    <el-dropdown-item @click="setStage('Baby Pokémon')"
+                      >Baby Pokémon</el-dropdown-item
+                    >
+                    <el-dropdown-item
+                      @click="setStage('Legendary & Mythical Pokémon')"
+                      >Legendary & Mythical Pokémon</el-dropdown-item
+                    >
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+              <div class="dropdown-tags">
+                <el-tag
+                  type="primary"
+                  class="dropdown-tag"
+                  size="large"
+                  effect="plain"
+                  round
+                >
+                  Generation {{ generation }}
+                </el-tag>
+                <el-tag
+                  type="success"
+                  size="large"
+                  class="dropdown-tag"
+                  effect="plain"
+                  round
+                >
+                  {{ type }}
+                </el-tag>
+                <el-tag
+                  type="warning"
+                  size="large"
+                  class="dropdown-tag"
+                  effect="plain"
+                  round
+                >
+                  {{ rarity }}
+                </el-tag>
+                <el-tag
+                  type="danger"
+                  size="large"
+                  class="dropdown-tag"
+                  effect="plain"
+                  round
+                >
+                  {{ stage }}
+                </el-tag>
+              </div>
+
+              <p>Place The Product Image Link Here</p>
+              <!-- !! ADDING SECTION INPUTS -->
+              <input
+                :class="inputClass"
+                :value="productImageUrlOne"
+                placeholder="Primary URL"
+                @input="updateProductImageUrl($event.target.value, 'one')"
+              />
+              <input
+                :class="inputClass"
+                :value="productImageUrlTwo"
+                placeholder="OK to leave blank"
+                @input="updateProductImageUrl($event.target.value, 'two')"
+              />
+              <input
+                :class="inputClass"
+                :value="productImageUrlThree"
+                placeholder="OK to leave blank"
+                @input="updateProductImageUrl($event.target.value, 'three')"
+              />
+              <input
+                :class="inputClass"
+                :value="productImageUrlFour"
+                placeholder="OK to leave blank"
+                @input="updateProductImageUrl($event.target.value, 'four')"
+              />
+              <input
+                :class="inputClass"
+                :value="productImageUrlFive"
+                placeholder="OK to leave blank"
+                @input="updateProductImageUrl($event.target.value, 'five')"
+              />
             </div>
-
-            <p>Place The Product Image Link Here</p>
-            <!-- !! ADDING SECTION INPUTS -->
-            <input
-              :class="inputClass"
-              :value="productImageUrlOne"
-              placeholder="Primary URL"
-              @input="updateProductImageUrl($event.target.value, 'one')"
-            />
-            <input
-              :class="inputClass"
-              :value="productImageUrlTwo"
-              placeholder="OK to leave blank"
-              @input="updateProductImageUrl($event.target.value, 'two')"
-            />
-            <input
-              :class="inputClass"
-              :value="productImageUrlThree"
-              placeholder="OK to leave blank"
-              @input="updateProductImageUrl($event.target.value, 'three')"
-            />
-            <input
-              :class="inputClass"
-              :value="productImageUrlFour"
-              placeholder="OK to leave blank"
-              @input="updateProductImageUrl($event.target.value, 'four')"
-            />
-            <input
-              :class="inputClass"
-              :value="productImageUrlFive"
-              placeholder="OK to leave blank"
-              @input="updateProductImageUrl($event.target.value, 'five')"
-            />
           </div>
         </div>
       </div>
@@ -467,26 +469,29 @@ export default {
         isInStock: this.inStock,
         price: this.productPrice,
         oldPrice: this.productOldPrice,
+        generation: this.generation,
+        type: this.type,
+        stage: this.stage,
+        rarity: this.rarity,
         images: this.productImages,
         quantity: this.quantity,
       };
       try {
         const response = await axios.post("/api/admin/products/add", data);
-        if (response.data.success) {
-          ElNotification({
-            title: "Success! ",
-            message: response.data.success,
-            type: "success",
-            duration: 3000,
-          });
-        } else {
-          ElNotification({
-            title: "Error! ",
-            message: response.data.error,
-            type: "danger",
-            duration: 3000,
-          });
-        }
+
+        response.data.success
+          ? ElNotification({
+              title: "Success! ",
+              message: response.data.success,
+              type: "success",
+              duration: 3000,
+            })
+          : ElNotification({
+              title: "Error! ",
+              message: response.data.error,
+              type: "danger",
+              duration: 3000,
+            });
       } catch (error) {
         ElNotification({
           title: "Error! ",
@@ -522,6 +527,19 @@ export default {
   text-transform: uppercase;
 }
 
+.product-section {
+  display: flex;
+}
+
+.deal-area {
+  margin-left: 20px;
+  width: 70%;
+}
+
+.shop-area {
+  width: 30%;
+}
+
 .prevent-select {
   -webkit-user-select: none; /* Safari */
   -ms-user-select: none; /* IE 10 and IE 11 */
@@ -540,6 +558,10 @@ export default {
   margin: 0;
   padding: 0;
   height: 100%;
+}
+.custom-edit-input {
+  margin-bottom: 30px;
+  width: 80%;
 }
 
 .adding-product-section {
@@ -589,10 +611,6 @@ a {
   color: rgb(34, 170, 46);
   font-family: sans-serif;
   font-size: 15px;
-}
-
-.custom-edit-input {
-  margin-bottom: 30px;
 }
 
 .custom-edit-checkbox {
@@ -709,6 +727,7 @@ hr {
 
 .dropdown-tag {
   margin-right: 40px;
+  margin-top: 10px;
 }
 
 @media screen and (max-width: 700px) {
@@ -717,6 +736,25 @@ hr {
     -webkit-box-shadow: none;
     -moz-box-shadow: none;
     box-shadow: none;
+  }
+  .dropdown-tag {
+    margin-right: 20px;
+  }
+  .dropdown-tag {
+    margin-right: 20px;
+  }
+  .product-section {
+    display: block;
+  }
+  .deal-area {
+    width: 100%;
+  }
+  .shop-area {
+    width: 100%;
+  }
+  .custom-edit-input {
+    margin-bottom: 30px;
+    width: 100%;
   }
 }
 

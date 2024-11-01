@@ -67,6 +67,9 @@ export default {
     const authStore = useAuthStore();
     try {
       const cartItems = await getCartItems(authStore.user.id);
+      cartItems.forEach((element) => {
+        element.images = element.images[0];
+      });
       this.cartItems = cartItems;
     } catch (error) {
       ElNotification({

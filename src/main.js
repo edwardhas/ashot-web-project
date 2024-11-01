@@ -23,6 +23,9 @@ import "./assets/js/main.js";
 import "./assets/js/vendor/jquery-1.12.0.min.js";
 import "./assets/js/jquery.meanmenu";
 
+import PrimeVue from "primevue/config";
+import Lara from "@primevue/themes/lara";
+
 import Vue from "vue";
 import { createApp } from "vue";
 import { autoAnimatePlugin } from "@formkit/auto-animate/vue";
@@ -56,4 +59,5 @@ createApp(App)
   .use(autoAnimatePlugin)
   .use(ElementPlus)
   .use(pinia)
+  .use(PrimeVue, { theme: { preset: Lara } })
   .mount("#app");

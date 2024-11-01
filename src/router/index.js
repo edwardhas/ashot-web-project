@@ -3,37 +3,37 @@ import App from "../App.vue";
 
 import { useAuthStore } from "@/store/authStore";
 
-import ShoppingCartPage from "../views/ShoppingCartPage";
-import ProductDetailPage from "../views/ProductDetailPage";
-import ProductsPage from "../views/ProductsPage";
+// import ShoppingCartPage from "../views/ShoppingCartPage";
+// import ProductDetailPage from "../views/ProductDetailPage";
+// import ProductsPage from "../views/ProductsPage";
 
-import AboutUsPage from "../views/AboutUsPage";
-import ContactUsPage from "../views/ContactUsPage";
-import NotFoundPage from "../views/NotFoundPage";
-import CheckoutPage from "../views/CheckoutPage";
-import MyAccountPage from "../views/MyAccountPage";
-import LoginPage from "../views/LoginPage";
-import RegisterPage from "../views/RegisterPage";
-import ForgetPasswordPage from "../views/ForgetPasswordPage";
-import PaymentCancel from "@/views/PaymentCancel.vue";
-import PaymentSuccess from "@/views/PaymentSuccess.vue";
-import AdminPage from "../views/AdminPage.vue";
-import AdminPanelEmails from "../views/AdminPanelEmails.vue";
-import AdminEditDeleteProductComponent from "../components/AdminEditDeleteProductComponent.vue";
-import AdminPanelStatistics from "../views/AdminPanelStatistics.vue";
-import AddingProductsComponent from "../components/AddingProductsComponent.vue";
-import search from "@/components/search.vue";
+// import AboutUsPage from "../views/AboutUsPage";
+// import ContactUsPage from "../views/ContactUsPage";
+// import NotFoundPage from "../views/NotFoundPage";
+// import CheckoutPage from "../views/CheckoutPage";
+// import MyAccountPage from "../views/MyAccountPage";
+// import LoginPage from "../views/LoginPage";
+// import RegisterPage from "../views/RegisterPage";
+// import ForgetPasswordPage from "../views/ForgetPasswordPage";
+// import PaymentCancel from "@/views/PaymentCancel.vue";
+// import PaymentSuccess from "@/views/PaymentSuccess.vue";
+// import AdminPage from "../views/AdminPage.vue";
+// import AdminPanelEmails from "../views/AdminPanelEmails.vue";
+// import AdminEditDeleteProductComponent from "../components/AdminEditDeleteProductComponent.vue";
+// import AdminPanelStatistics from "../views/AdminPanelStatistics.vue";
+// import AddingProductsComponent from "../components/AddingProductsComponent.vue";
+// import search from "@/components/search.vue";
 
 const routes = [
   {
     path: "/search",
     name: "search",
-    component: search,
+    component: () => import("@/components/search.vue"),
   },
   {
     path: "/",
     name: "products",
-    component: ProductsPage,
+    component: () => import("../views/ProductsPage"),
     beforeEnter: (to, from, next) => {
       if (!useAuthStore().isAuthenticated) {
         next("/login"); // Redirect to login page
@@ -46,7 +46,7 @@ const routes = [
   {
     path: "/about-us",
     name: "about-us",
-    component: AboutUsPage,
+    component: () => import("../views/AboutUsPage"),
     beforeEnter: (to, from, next) => {
       if (!useAuthStore().isAuthenticated) {
         next("/login"); // Redirect to login page
@@ -58,7 +58,7 @@ const routes = [
   {
     path: "/contact-us",
     name: "contact-us",
-    component: ContactUsPage,
+    component: () => import("../views/ContactUsPage"),
     beforeEnter: (to, from, next) => {
       if (!useAuthStore().isAuthenticated) {
         next("/login"); // Redirect to login page
@@ -70,7 +70,7 @@ const routes = [
   {
     path: "/checkout",
     name: "checkout",
-    component: CheckoutPage,
+    component: () => import("../views/CheckoutPage"),
     beforeEnter: (to, from, next) => {
       if (!useAuthStore().isAuthenticated) {
         next("/login"); // Redirect to login page
@@ -82,7 +82,7 @@ const routes = [
   {
     path: "/cancel",
     name: "PaymentCancel",
-    component: PaymentCancel,
+    component: () => import("@/views/PaymentCancel.vue"),
     beforeEnter: (to, from, next) => {
       if (!useAuthStore().isAuthenticated) {
         next("/login");
@@ -94,7 +94,7 @@ const routes = [
   {
     path: "/success",
     name: "PaymentSuccess",
-    component: PaymentSuccess,
+    component: () => import("@/views/PaymentSuccess.vue"),
     beforeEnter: (to, from, next) => {
       if (!useAuthStore().isAuthenticated) {
         next("/login");
@@ -106,17 +106,27 @@ const routes = [
   {
     path: "/test",
     name: "Stats",
-    component: AdminPanelStatistics,
+    component: () => import("../views/AdminPanelStatistics.vue"),
+  },
+  {
+    path: "/gpt-send-request",
+    name: "ChatGPT-3",
+    component: () => import("../views/ChatGPT.vue"),
+  },
+  {
+    name: "shop-list",
+    path: "/shop-list",
+    component: () => import("../views/ShopList.vue"),
   },
   {
     path: "/adding-products",
     name: "adding-products",
-    component: AddingProductsComponent,
+    component: () => import("../components/AddingProductsComponent.vue"),
   },
   {
     path: "/my-account",
     name: "my-account",
-    component: MyAccountPage,
+    component: () => import("../views/MyAccountPage"),
     beforeEnter: (to, from, next) => {
       if (!useAuthStore().isAuthenticated) {
         next("/login"); // Redirect to login page
@@ -128,22 +138,22 @@ const routes = [
   {
     path: "/login",
     name: "login",
-    component: LoginPage,
+    component: () => import("../views/LoginPage"),
   },
   {
     path: "/register",
     name: "register",
-    component: RegisterPage,
+    component: () => import("../views/RegisterPage"),
   },
   {
     path: "/recover",
     name: "recover",
-    component: ForgetPasswordPage,
+    component: () => import("../views/ForgetPasswordPage"),
   },
   {
     path: "/cart",
     name: "cart",
-    component: ShoppingCartPage,
+    component: () => import("../views/ShoppingCartPage"),
     beforeEnter: (to, from, next) => {
       if (!useAuthStore().isAuthenticated) {
         next("/login"); // Redirect to login page
@@ -155,7 +165,7 @@ const routes = [
   {
     path: "/products/:productId",
     name: "productDetails",
-    component: ProductDetailPage,
+    component: () => import("../views/ProductDetailPage"),
     beforeEnter: (to, from, next) => {
       if (!useAuthStore().isAuthenticated) {
         next("/login"); // Redirect to login page
@@ -167,7 +177,7 @@ const routes = [
   {
     path: "/admin/panel/:userId/:emailId",
     name: "AdminPageEmailsReply",
-    component: AdminPanelEmails,
+    component: () => import("../views/AdminPanelEmails.vue"),
     beforeEnter: (to, from, next) => {
       if (!useAuthStore().isAuthenticated || !useAuthStore().user.isAdmin) {
         next("/");
@@ -178,8 +188,9 @@ const routes = [
   },
   {
     path: "/admin/panel/edit_delete_product/:productId",
-    name: AdminEditDeleteProductComponent,
-    component: AdminEditDeleteProductComponent,
+    name: "AdminEditDeleteProductComponent",
+    component: () =>
+      import("../components/AdminEditDeleteProductComponent.vue"),
     beforeEnter: (to, from, next) => {
       if (!useAuthStore().isAuthenticated || !useAuthStore().user.isAdmin) {
         next("/");
@@ -191,7 +202,7 @@ const routes = [
   {
     path: "/admin/panel",
     name: "AdminPage",
-    component: AdminPage,
+    component: () => import("../views/AdminPage.vue"),
     beforeEnter: (to, from, next) => {
       if (!useAuthStore().isAuthenticated || !useAuthStore().user.isAdmin) {
         next("/");
@@ -204,7 +215,7 @@ const routes = [
   {
     path: "/:pathMatch(.*)*",
     name: "notFoundPage",
-    component: NotFoundPage,
+    component: () => import("../views/NotFoundPage"),
   },
 ];
 

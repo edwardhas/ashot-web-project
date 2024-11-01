@@ -197,8 +197,7 @@ export default {
       };
 
       const response = await axios.post("/api/users/add", userData);
-      const message = response.data.message;
-      const errorMessage = response.data.error;
+      const success = response.data.success;
       const { token, user } = response.data;
 
       this.name = "";
@@ -209,11 +208,11 @@ export default {
       this.shippingAddress.userState = "";
       this.shippingAddress.userZip = "";
 
-      message == undefined
-        ? ((this.message = errorMessage),
+      success == undefined || null
+        ? ((this.message = response.data.error),
           (this.status = false),
           (this.isDisplayed = true))
-        : ((this.message = message),
+        : ((this.message = success),
           (this.status = false),
           (this.isDisplayed = true),
           authStore.setToken(token),

@@ -181,6 +181,22 @@ const bestDealSchema = new Schema({
     type: String,
     required: true,
   },
+  generation: {
+    type: String,
+    required: true,
+  },
+  type: {
+    type: String,
+    required: true,
+  },
+  rarity: {
+    type: String,
+    required: true,
+  },
+  stage: {
+    type: String,
+    required: true,
+  },
   imageUrl: {
     type: String,
     required: true,

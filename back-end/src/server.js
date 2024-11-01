@@ -4,17 +4,19 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
-import { WebSocketServer } from "ws";
+// import { WebSocketServer } from "ws";
 import { Server } from "socket.io";
 import { MongoClient, ObjectId } from "mongodb";
 import { User, Products, UserActivity } from "./schema.js";
 // import { error } from "console";
 import nodemailer from "nodemailer";
+import axios from "axios";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import Stripe from "stripe";
 import helmet from "helmet";
 import cors from "cors";
+import cohere from "cohere-ai";
 import bodyParser from "body-parser";
 import { v4 as uuid4 } from "uuid";
 import "dotenv/config";
@@ -32,7 +34,6 @@ async function start() {
         imgSrc: ["'self'", "data:"], // Allow images from self and base64-encoded
         scriptSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles if needed
-        // Add more directives based on your requirements
       },
     })
   );
@@ -60,40 +61,79 @@ async function start() {
   const server = https.createServer(options, app);
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-  const wss = new WebSocketServer({ server });
+  // const wss = new WebSocketServer({ server });
 
-  let activeUsers = 0;
+  let activeUsers = new Map();
 
   const io = new Server(server, {
     cors: {
       origin: "https://localhost:8080",
       methods: ["GET", "POST"],
-      allowedHeaders: ["users-active"],
-      credentials: true,
+      // allowedHeaders: ["users-active"],
+      credentials: true, // enables cookies for authentication
     },
+    pingInterval: 25000, // Send a ping every 25 seconds (default is 25 seconds)
+    pingTimeout: 5000, // Disconnect if no pong within 5 seconds (default is 60 seconds)
+  });
+
+  io.use((socket, next) => {
+    const token = socket.handshake.auth.token;
+    if (!token) {
+      return next(new Error("Authentication error"));
+    }
+
+    // Verify token
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+      if (err) {
+        console.log("Token verification failed:", err.message);
+        return next(new Error("Authentication error"));
+      }
+
+      socket.user = decoded; // Attach user info to socket
+      next();
+    });
   });
 
   io.on("connection", (socket) => {
-    activeUsers++;
+    const { userId, username } = socket.user;
 
-    io.emit("activeUsers", activeUsers);
+    // Track user as active
+    activeUsers.set(userId, { username, socketId: socket.id });
+    io.emit("activeUsers", Array.from(activeUsers.values())); // Broadcast active users
+
+    // console.log("User connected:", userId);
+    // console.log(activeUsers);
 
     socket.on("disconnect", () => {
-      activeUsers--;
-      io.emit("activeUsers", activeUsers);
+      activeUsers.delete(userId);
+      io.emit("activeUsers", Array.from(activeUsers.values())); // Update active users
+      // console.log("User disconnected:", username);
     });
   });
 
-  wss.on("connection", (ws) => {
-    console.log("WebSocket connection established");
-    ws.on("message", (message) => {
-      console.log(`Received: ${message}`);
-      ws.send(`Hello, you sent -> ${message}`);
-    });
-    ws.on("close", () => {
-      console.log("WebSocket connection closed");
-    });
-  });
+  // io.on("connection", (socket) => {
+  //   console.log("User connected: ", socket.user);
+  //   activeUsers++;
+
+  //   io.emit("activeUsers", activeUsers);
+
+  //   socket.on("disconnect", () => {
+  //     console.log("User disconnected: ", socket.user);
+  //     activeUsers--;
+  //     io.emit("activeUsers", activeUsers);
+  //   });
+  // });
+
+  // wss.on("connection", (ws) => {
+  //   console.log("WebSocket connection established");
+  //   ws.on("message", (message) => {
+  //     console.log(`Received: ${message}`);
+  //     ws.send(`Hello, you sent -> ${message}`);
+  //   });
+  //   ws.on("close", () => {
+  //     console.log("WebSocket connection closed");
+  //   });
+  // });
 
   server.listen(8000, () => {
     console.log("HTTPS Server running on port 8000");
@@ -144,6 +184,39 @@ async function start() {
     return `${year}-${month}`; // Format as YYYY-MM
   };
 
+  async function fetchOpenAIResponse(prompt) {
+    try {
+      const response = await fetch("https://api.openai.com/v1/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "text-davinci-003", // Choose the model you need
+          prompt: prompt,
+          max_tokens: 100,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // Check if choices array exists and has at least one item
+      if (data.choices && data.choices.length > 0) {
+        return data.choices[0].text;
+      } else {
+        throw new Error("Unexpected API response structure");
+      }
+    } catch (error) {
+      console.error("Error fetching OpenAI response:", error);
+      return "An error occurred while fetching the response.";
+    }
+  }
+
   //!! findUserByInput()
   // async function findUserByInput(userData, isId) {
   //   if (!isId) {
@@ -191,6 +264,30 @@ async function start() {
     const products = await db.collection("products").find({}).toArray();
 
     res.json({ products: products });
+  });
+
+  app.get("/api/products/paginated", async (req, res) => {
+    try {
+      const products = await db.collection("products").find({}).toArray(); // Fetch all products from MongoDB
+      const limit = 20; // Number of products per page
+      const productsArray = [];
+
+      for (let i = 0; i < products.length; i += limit) {
+        const page = {};
+        const pageProducts = products.slice(i, i + limit); // Get 20 products for this page
+
+        // Map each product to a numbered key in the object
+        pageProducts.forEach((product, index) => {
+          page[index] = product;
+        });
+
+        productsArray.push(page);
+      }
+
+      res.json({ paginatedProducts: productsArray });
+    } catch (error) {
+      res.json({ error: "Error fetching products", error });
+    }
   });
 
   //!! GET EMAILS
@@ -312,7 +409,6 @@ async function start() {
       const product = await db
         .collection("products")
         .findOne({ _id: new ObjectId(productId) });
-
       res.json(product);
     }
   );
@@ -329,7 +425,7 @@ async function start() {
         productPrice,
         productOldPrice,
         productIsInStock,
-        productImageUrl,
+        productImages,
       } = req.body;
 
       const originalProperties = {
@@ -339,7 +435,7 @@ async function start() {
         price: productPrice.toString(),
         oldPrice: productOldPrice.toString(),
         isInStock: Boolean(productIsInStock),
-        image: productImageUrl.toString(),
+        images: productImages,
       };
 
       if (productId.toString().length != 24)
@@ -372,7 +468,9 @@ async function start() {
       const result = findNonMatchingValues(originalProperties, product);
 
       if (result.length == 0) {
-        return res.json({ error: "Ashot Brat Please Make Changes first" });
+        return res.json({
+          error: "Ashot Brat Please Make Changes first and then submit",
+        });
       }
 
       async function updateProducts(updates, productId) {
@@ -494,8 +592,19 @@ async function start() {
 
   //!! ADD PRODUCTS FROM ADMIN PANEL
   app.post("/api/admin/products/add", async (req, res) => {
-    const { name, description, price, oldPrice, isInStock, images, quantity } =
-      req.body;
+    const {
+      name,
+      description,
+      price,
+      oldPrice,
+      isInStock,
+      generation,
+      type,
+      stage,
+      rarity,
+      images,
+      quantity,
+    } = req.body;
 
     if (
       !name ||
@@ -503,6 +612,10 @@ async function start() {
       !price ||
       !oldPrice ||
       !isInStock ||
+      !generation ||
+      !type ||
+      !rarity ||
+      !stage ||
       !images.length
     ) {
       return res.json({ error: "Missing Fiels" });
@@ -517,6 +630,10 @@ async function start() {
         price: price,
         oldPrice: oldPrice,
         description: description,
+        generation: generation,
+        type: type,
+        stage: stage,
+        rarity: rarity,
         isInStock: isInStock,
         quantity: quantity,
         images: images,
@@ -525,7 +642,7 @@ async function start() {
 
       await newProduct.save();
       return res.json({ success: "Product Added Successfully" });
-    } catch (e) {
+    } catch {
       return res.json({ error: "Error Occured While Adding Product" });
     }
   });
@@ -533,7 +650,17 @@ async function start() {
   //!! ADD BEST DEAL FROM ADMIN PANEL
   app.post("/api/admin/deal/add", async (req, res) => {
     // Get data
-    const { name, price, oldPrice, description, imageUrls } = req.body;
+    const {
+      name,
+      price,
+      oldPrice,
+      description,
+      imageUrls,
+      generation,
+      type,
+      stage,
+      rarity,
+    } = req.body;
 
     try {
       const now = new Date();
@@ -545,6 +672,10 @@ async function start() {
         price: price,
         oldPrice: oldPrice,
         description: description,
+        generation: generation,
+        type: type,
+        stage: stage,
+        rarity: rarity,
         imageUrl: imageUrls,
         endTimestamp: dealEnd,
       };
@@ -593,8 +724,7 @@ async function start() {
 
       const token = jwt.sign(
         { id: userDb._id },
-        process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: "1h" }
+        process.env.ACCESS_TOKEN_SECRET
       );
       return res.json({
         token,
@@ -675,8 +805,7 @@ async function start() {
 
       const token = jwt.sign(
         { id: secondAttemptUserDb._id },
-        process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: "1h" }
+        process.env.ACCESS_TOKEN_SECRET
       );
 
       return res.json({
@@ -689,7 +818,7 @@ async function start() {
           isAdmin: secondAttemptUserDb.isAdmin,
           shippingAddress: secondAttemptUserDb.shippingAddress,
         },
-        message: "User successfuly logged in",
+        success: "User successfuly logged in",
       });
 
       //res.json({ message: "User created successfully", user: newUser });
@@ -847,7 +976,7 @@ async function start() {
           currency: "usd",
           product_data: {
             name: product.name,
-            images: [product.image],
+            images: [product.images],
           },
           unit_amount: product.price * 100, // convert to cents
         },
@@ -980,6 +1109,33 @@ async function start() {
     });
 
     return res.json({ success: "user is found and data is provided" });
+  });
+
+  // !! openAI
+  app.post("/api/openAI/answer", async (req, res) => {
+    // const question =
+    //   "Based on the provided product data, can you tell me which product has the highest quantity and provide a detailed explanation of why?";
+
+    const { question } = req.body;
+    try {
+      const productsData = await db.collection("products").find({}).toArray();
+
+      let context = "";
+      for (let i = 0; i < productsData.length; i++) {
+        context += `Product Name: ${productsData[i].name} | Product Price: ${productsData[i].price} | Product Old Price: ${productsData[i].oldPrice} | Product Description: ${productsData[i].description} | Product Quantity: ${productsData[i].quantity} | Product Views: ${productsData[i].views} \n`;
+      }
+
+      const prompt = `${context}\n\nQuestion: ${question}\nAnswer:`;
+
+      fetchOpenAIResponse(prompt)
+        .then((response) => {
+          console.log(response), res.json({ answer: response });
+        })
+        .catch((error) => console.error(error));
+    } catch (error) {
+      console.error(error);
+      res.json({ error: "An error occurred while processing the request." });
+    }
   });
 }
 

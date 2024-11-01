@@ -22,6 +22,7 @@ module.exports = defineConfig({
         "../COPY-ashot-web-project-COPY/back-end/certs/server.cert"
       ),
     },
+    server: "https",
     proxy: {
       "/api": {
         target: "https://localhost:8000",

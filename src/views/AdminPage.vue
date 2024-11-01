@@ -1,137 +1,176 @@
 <template>
-  <div class="breadcrumb-area pt-95 pb-95 bg-img">
+  <!-- <div class="breadcrumb-area pt-95 pb-95 bg-img">
     <div class="container">
       <div class="breadcrumb-content text-center">
         <h2>Admin Panel</h2>
         <ul>
-          <li class="active">Here You Can Add Products</li>
+          <li class="active">A Place Where You control It</li>
         </ul>
       </div>
     </div>
-  </div>
+  </div> -->
+  <BreadcrumbComponent
+    :title="'Admin Page'"
+    :subTitle="'A Place Where You Control It'"
+  />
 
   <!-- !!  START OF DEAL OF THE WEEK PRODUCT SECTION -->
 
-  <div class="deal-area bg-img pt-95 pb-100">
-    <div class="container">
-      <div class="section-title text-center mb-50">
-        <h2>Deal of the Week Section</h2>
-      </div>
-      <div class="row">
-        <div class="col-lg-6 col-md-6">
-          <div class="deal-img wow fadeInLeft">
-            <img v-if="dealProductImageUrlOne" :src="dealProductImageUrlOne" />
-            <p v-else>
-              Picture will be displayed here after you place the link in the
-              corresponding field below
-            </p>
+  <el-tabs v-model="activeTab" tab-position="top" class="demo-tabs">
+    <el-tab-pane
+      class="tab"
+      label="Add Product"
+      name="add-products"
+    ></el-tab-pane>
+    <el-tab-pane class="tab" label="Add Deal" name="add-deal"></el-tab-pane>
+    <el-tab-pane
+      class="tab"
+      label="Reply Emails"
+      name="manage-emails"
+    ></el-tab-pane>
+    <el-tab-pane
+      class="tab"
+      label="Manage Products"
+      name="manage-products"
+    ></el-tab-pane>
+  </el-tabs>
+
+  <AddingProductsComponent v-if="activeTab === 'add-products'" />
+
+  <AddingDealComponent v-if="activeTab === 'add-deal'" />
+  <!-- <div class="deal-section">
+    <div class="deal-area bg-img pt-95 pb-100" v-if="activeTab === 'add-deal'">
+      <div class="container">
+        <div class="section-title text-center mb-50">
+          <h2>Deal of the Week Section</h2>
+        </div>
+        <div class="row">
+          <div class="col-lg-6 col-md-6">
+            <div class="deal-img wow fadeInLeft">
+              <img
+                v-if="dealProductImageUrlOne"
+                :src="dealProductImageUrlOne"
+              />
+              <p v-else>
+                Picture will be displayed here after you place the link in the
+                corresponding field below
+              </p>
+            </div>
+          </div>
+
+          <div class="col-lg-6 col-md-6">
+            <div class="deal-content">
+              <h3>
+                <a>{{ dealProductName }}</a>
+              </h3>
+              <div class="deal-pro-price">
+                <span class="deal-old-price"
+                  >${{ dealProductOldPrice }}.00
+                </span>
+                <span>${{ dealProductPrice }}.00</span>
+              </div>
+              <p>
+                {{ dealProductDescription }}
+              </p>
+              <div class="timer timer-style">
+                <div data-countdown="2017/10/01"></div>
+              </div>
+              <div class="discount-btn mt-35">
+                <a class="btn-style">SHOP NOW</a>
+              </div>
+            </div>
           </div>
         </div>
+      </div>
+    </div>
 
-        <div class="col-lg-6 col-md-6">
-          <div class="deal-content">
-            <h3>
-              <a>{{ dealProductName }}</a>
-            </h3>
-            <div class="deal-pro-price">
-              <span class="deal-old-price">${{ dealProductOldPrice }}.00 </span>
-              <span>${{ dealProductPrice }}.00</span>
-            </div>
+    <div class="shop-area pt-95 pb-100" v-if="activeTab === 'add-deal'">
+      <div class="container">
+        <div class="row">
+          <div class="custom-row-wrap">
+            <p>Place The Product Name Here</p>
+            <input
+              class="custom-edit-input"
+              :value="dealProductName"
+              @input="updateProductName($event.target.value, 'deal')"
+            />
+
+            <p>Place The Product Price Here</p>
+
+            <input
+              type="number"
+              class="custom-edit-input"
+              :value="dealProductPrice"
+              min="0"
+              @input="updateProductPrice($event.target.value, 'deal')"
+            />
+
+            <p>Place The Product Old Price Here</p>
+
+            <input
+              type="number"
+              class="custom-edit-input"
+              :value="dealProductOldPrice"
+              min="0"
+              @input="updateProductOldPrice($event.target.value, 'deal')"
+            />
+
+            <p>Place The Product Description Here</p>
+
+            <input
+              class="custom-edit-input"
+              :value="dealProductDescription"
+              @input="updateProductDescription($event.target.value, 'deal')"
+            />
+
             <p>
-              {{ dealProductDescription }}
+              Place The Product Image Link Here (Only the first one shows up on
+              this page)
             </p>
-            <div class="timer timer-style">
-              <div data-countdown="2017/10/01"></div>
-            </div>
-            <div class="discount-btn mt-35">
-              <a class="btn-style">SHOP NOW</a>
-            </div>
+
+            <input
+              class="custom-edit-input"
+              :value="dealProductImageUrlOne"
+              placeholder="URL goes here"
+              @input="updateProductImageUrl($event.target.value, 'deal', 'one')"
+            />
+            <input
+              class="custom-edit-input"
+              :value="dealProductImageUrlTwo"
+              placeholder="OK to leave blank"
+              @input="updateProductImageUrl($event.target.value, 'deal', 'two')"
+            />
+            <input
+              class="custom-edit-input"
+              :value="dealProductImageUrlThree"
+              placeholder="OK to leave blank"
+              @input="
+                updateProductImageUrl($event.target.value, 'deal', 'three')
+              "
+            />
+            <input
+              class="custom-edit-input"
+              :value="dealProductImageUrlFour"
+              placeholder="OK to leave blank"
+              @input="
+                updateProductImageUrl($event.target.value, 'deal', 'four')
+              "
+            />
+            <input
+              class="custom-edit-input"
+              :value="dealProductImageUrlFive"
+              placeholder="OK to leave blank"
+              @input="
+                updateProductImageUrl($event.target.value, 'deal', 'five')
+              "
+            />
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="shop-area pt-95 pb-100">
-    <div class="container">
-      <div class="row">
-        <div class="custom-row-wrap">
-          <p>Place The Product Name Here</p>
-          <input
-            class="custom-edit-input"
-            :value="dealProductName"
-            @input="updateProductName($event.target.value, 'deal')"
-          />
-
-          <p>Place The Product Price Here</p>
-
-          <input
-            type="number"
-            class="custom-edit-input"
-            :value="dealProductPrice"
-            min="0"
-            @input="updateProductPrice($event.target.value, 'deal')"
-          />
-
-          <p>Place The Product Old Price Here</p>
-
-          <input
-            type="number"
-            class="custom-edit-input"
-            :value="dealProductOldPrice"
-            min="0"
-            @input="updateProductOldPrice($event.target.value, 'deal')"
-          />
-
-          <p>Place The Product Description Here</p>
-
-          <input
-            class="custom-edit-input"
-            :value="dealProductDescription"
-            @input="updateProductDescription($event.target.value, 'deal')"
-          />
-
-          <p>
-            Place The Product Image Link Here (Only the first one shows up on
-            this page)
-          </p>
-
-          <input
-            class="custom-edit-input"
-            :value="dealProductImageUrlOne"
-            placeholder="URL goes here"
-            @input="updateProductImageUrl($event.target.value, 'deal', 'one')"
-          />
-          <input
-            class="custom-edit-input"
-            :value="dealProductImageUrlTwo"
-            placeholder="OK to leave blank"
-            @input="updateProductImageUrl($event.target.value, 'deal', 'two')"
-          />
-          <input
-            class="custom-edit-input"
-            :value="dealProductImageUrlThree"
-            placeholder="OK to leave blank"
-            @input="updateProductImageUrl($event.target.value, 'deal', 'three')"
-          />
-          <input
-            class="custom-edit-input"
-            :value="dealProductImageUrlFour"
-            placeholder="OK to leave blank"
-            @input="updateProductImageUrl($event.target.value, 'deal', 'four')"
-          />
-          <input
-            class="custom-edit-input"
-            :value="dealProductImageUrlFive"
-            placeholder="OK to leave blank"
-            @input="updateProductImageUrl($event.target.value, 'deal', 'five')"
-          />
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="submit">
+  <div class="submit" v-if="activeTab === 'add-deal'">
     <div class="product-list-action-left">
       <a
         @click="addBestDeal"
@@ -143,11 +182,11 @@
         Add To DataBase
       </a>
     </div>
-  </div>
+  </div> -->
 
   <!-- !! END OF DEAL OF THE WEEK PRODUCT SECTION -->
   <!-- !!  START OF EMAILS SECTION -->
-  <div class="product-area pt-95 gray-bg">
+  <div class="product-area pt-95 gray-bg" v-if="activeTab === 'manage-emails'">
     <div class="container">
       <div class="section-title text-center mb-55">
         <h2>All emails section</h2>
@@ -219,7 +258,10 @@
   </div>
   <!-- !!  END OF EMAILS SECTION -->
   <!-- !!  START OF PRODUCTS VIEWS/CHANGES SECTION -->
-  <div class="product-area adding-deleting-area pt-95 pb-70 gray-bg">
+  <div
+    class="product-area adding-deleting-area pt-95 pb-70 gray-bg"
+    v-if="activeTab === 'manage-products'"
+  >
     <div class="container">
       <div class="section-title text-center mb-55">
         <h4>Most Popular</h4>
@@ -277,14 +319,22 @@
 
 <script>
 import ValidationComponent from "@/components/ValidationComponent.vue";
-import { getProducts } from "../db_queries";
+import BreadcrumbComponent from "@/components/BreadcrumbComponent.vue";
+import AddingProductsComponent from "@/components/AddingProductsComponent.vue";
+import AddingDealComponent from "@/components/AddingDealComponent.vue";
 import axios from "axios";
 
 export default {
   name: "AdminPage",
-  components: { ValidationComponent },
+  components: {
+    BreadcrumbComponent,
+    ValidationComponent,
+    AddingProductsComponent,
+    AddingDealComponent,
+  },
   data() {
     return {
+      activeTab: "add-products",
       // global active users amount variable
       activeUsers: 0,
       // start of adding product section
@@ -507,56 +557,15 @@ export default {
     const usersAmount = activeUsers_response.data.activeUsers;
     this.activeUsers = usersAmount;
 
-    const products = await getProducts();
-    this.edit_delete_products = products;
+    const products = await axios.get("/api/products");
+    console.log(products.data);
+    this.edit_delete_products = products.data;
   },
 };
 </script>
 
 <style scoped>
 @import "../assets/css/responsive.css";
-
-.breadcrumb-area {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 9/2;
-  overflow: hidden; /* Ensure no overflow from pseudo-element */
-  background-size: cover;
-  background-position: center;
-}
-
-.breadcrumb-area::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: url("https://www.empire-tcg.com/cdn/shop/files/IMG_2920.jpg?v=1723960927&width=3840");
-  background-size: cover;
-  background-position: center;
-  filter: brightness(50%);
-  z-index: -1; /* Place behind the content */
-  animation: zoom-in-out 40s infinite;
-}
-
-.breadcrumb-content {
-  position: relative;
-  color: white; /* Ensure text is visible */
-  text-align: center;
-}
-
-@keyframes zoom-in-out {
-  0% {
-    background-size: 100%; /* Initial size */
-  }
-  50% {
-    background-size: 120%; /* Zoom in at the halfway point */
-  }
-  100% {
-    background-size: 100%; /* Zoom out back to original size */
-  }
-}
 
 .hr {
   width: 80%;
@@ -643,7 +652,10 @@ a {
 }
 
 .custom-edit-input {
+  display: flex;
+  width: 80%;
   margin-bottom: 30px;
+  flex-wrap: wrap;
 }
 
 .custom-edit-checkbox {
@@ -745,6 +757,14 @@ hr {
 .section-title h4 {
   margin-top: 100px;
 }
+
+.demo-tabs {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  margin-top: 50px;
+}
+
 /* end of adding/deleting products section */
 
 @media screen and (max-width: 700px) {
@@ -753,6 +773,12 @@ hr {
     -webkit-box-shadow: none;
     -moz-box-shadow: none;
     box-shadow: none;
+  }
+  .demo-tabs {
+    display: block;
+    /* align-items: center;
+    height: 100%; */
+    margin-top: 50px;
   }
 }
 
