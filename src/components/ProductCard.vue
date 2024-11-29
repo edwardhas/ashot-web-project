@@ -7,7 +7,7 @@
         </router-link>
       </a>
 
-      <div class="product-action">
+      <div class="product-action" v-if="!isAdmin">
         <router-link :to="{ path: `/products/${product._id}` }">
           <a
             class="ti-plus-a"
@@ -27,6 +27,13 @@
           ></el-button>
         </a>
       </div>
+      <div class="product-action" v-else>
+        <router-link :to="{ path: `/products/${product._id}` }">
+          <a class="ti-plus-a" title="Edit">
+            <el-button text class="ti-plus"></el-button>
+          </a>
+        </router-link>
+      </div>
     </div>
     <div class="product-content">
       <h4>
@@ -42,7 +49,11 @@
       </div>
     </div>
   </div>
-  <Drawer :product="product" v-model="isDisplayingTable" />
+  <Drawer
+    :product="product"
+    v-model="isDisplayingTable"
+    @close-drawer="closeDrawer"
+  />
 </template>
 
 <script setup>
@@ -57,9 +68,14 @@ const props = defineProps({
     oldPrice: String,
     images: Array,
   },
+  isAdmin: Boolean,
 });
 
 const isDisplayingTable = ref(false);
+
+const closeDrawer = () => {
+  isDisplayingTable.value = false;
+};
 </script>
 
 <style scoped>

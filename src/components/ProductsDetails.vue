@@ -44,10 +44,21 @@
             </div>
 
             <div class="in-stock">
-              <span type="success" class="inStock" v-if="product.isInStock"
+              <!-- <span type="success" class="inStock" v-if="product.isInStock"
                 >In Stock</span
               >
-              <span type="danger" class="outOfStock" v-else>Out Of Stock</span>
+              <span type="danger" class="outOfStock" v-else>Out Of Stock</span> -->
+              <span :class="product.isInStock ? 'inStock' : 'outOfStock'">{{
+                product.isInStock ? "INSTOCK" : "OUT OF STOCK"
+              }}</span>
+              <!-- !! SECOND SOLUTION BELOW -->
+              <!-- <el-tag
+                :type="product.isInStock ? 'success' : 'danger'"
+                effect="dark"
+                style="color: white"
+              >
+                {{ product.isInStock ? "INSTOCK" : "OUT OF STOCK" }}
+              </el-tag> -->
             </div>
             <p>{{ product.description }}</p>
             <div class="quality-wrapper mt-30 product-quantity">
@@ -114,7 +125,8 @@
 import axios from "axios";
 import "../assets/css/style.css";
 import { useAuthStore } from "@/store/authStore";
-import EventBus from "../eventBus";
+
+import { io } from "socket.io-client";
 
 import { ElNotification } from "element-plus";
 import "element-plus/dist/index.css";
@@ -124,6 +136,7 @@ export default {
   props: ["product"],
   data() {
     return {
+      socket: null,
       quantity: 1,
       cartItemsAmount: 0,
       items: [
@@ -132,6 +145,7 @@ export default {
         "https://i.pinimg.com/originals/0f/cf/b2/0fcfb272e54b3589603a90bad790a200.jpg",
         "https://i.pinimg.com/736x/1f/1f/27/1f1f2723eedec8337befa786626b5bf9.jpg",
       ],
+      delayedExecutionTimer: null,
     };
   },
   methods: {
@@ -159,7 +173,7 @@ export default {
       });
 
       this.cartItemsAmount++;
-      EventBus.emit("add-to-cart", this.cartItemsAmount);
+      // EventBus.emit("add-to-cart", this.cartItemsAmount);
     },
     manageQuantity(operation) {
       if (this.quantity > 0 && this.quantity < 10) {
@@ -174,6 +188,17 @@ export default {
         return;
       }
     },
+    async logLastViewedProduct() {
+      const authStore = useAuthStore();
+
+      try {
+        await axios.post(
+          `/api/last-viewed-products/${this.product._id}/${authStore.user.id}/add`
+        );
+      } catch (error) {
+        console.error("Failed to log last viewed product:", error);
+      }
+    },
   },
   async created() {
     const authStore = useAuthStore();
@@ -181,6 +206,42 @@ export default {
     // const cartItems = axios.get(`/api/users/${authStore.user.id}/cartQuantity`);
 
     // return (this.cartItemsAmount = cartItems.length);
+  },
+
+  watch: {
+    product: {
+      handler(newProduct) {
+        if (this.socket && newProduct) {
+          const productData = JSON.parse(JSON.stringify(newProduct));
+          this.socket.emit("viewProduct", productData);
+        }
+      },
+      immediate: true,
+    },
+  },
+
+  mounted() {
+    this.socket = io("https://localhost:8000");
+    // const authStore = useAuthStore();
+
+    // Only set the timer if both product and user data are available
+    // if (this.product && authStore.user && authStore.user.id) {
+    //   this.delayedExecutionTimer = setTimeout(() => {
+    //     this.logLastViewedProduct();
+    //   }, 3000); // Delay for 3 seconds
+    // }
+    // console.log(this.product);
+    // const productData = JSON.parse(JSON.stringify(this.product)); // Clone to avoid reactivity issues
+    // socket.emit("viewProduct", productData);
+  },
+
+  beforeUnmount() {
+    // Clear the timer if the user navigates away before 3 seconds
+    // if (this.delayedExecutionTimer) {
+    //   clearTimeout(this.delayedExecutionTimer);
+    //   this.delayedExecutionTimer = null;
+    // }
+    this.socket.emit("stopViewingProduct", this.product._id);
   },
 };
 </script>
@@ -241,7 +302,10 @@ export default {
 }
 
 .outOfStock {
-  color: #ff3131;
+  color: white;
+  background-color: #ff3131;
+  padding: 5px;
+  border-radius: 5px;
   font-family: "Roboto", sans-serif;
   font-weight: 500;
   font-style: normal;
@@ -275,11 +339,14 @@ export default {
 }
 
 .inStock {
-  color: rgb(34, 170, 46);
+  color: white;
+  background-color: rgb(34, 170, 46);
+  padding: 5px;
+  border-radius: 5px;
   font-family: "Roboto", sans-serif;
   font-weight: 500;
   font-style: normal;
-  font-size: 15px;
+  font-size: 13px;
 }
 
 /* owl carousel */

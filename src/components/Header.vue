@@ -53,8 +53,12 @@ const welcomeUser = () => {
       <div class="container">
         <div class="row">
           <div class="col-xl-2 col-lg-3 col-md-4 col-sm-4 col-6">
-            <div class="logo pt-39">
-              <a href="/"><img alt="Logo goes here" src="" /></a>
+            <div class="logo pt-10">
+              <a href="/"
+                ><img
+                  alt="Logo goes here"
+                  src="../assets/img/logo/logo-title-empire-tcg-removebg-preview.png"
+              /></a>
             </div>
           </div>
           <div class="col-xl-8 col-lg-7 d-none d-lg-block">
@@ -92,7 +96,7 @@ const welcomeUser = () => {
             <div class="search-login-cart-wrapper">
               <div class="header-search same-style">
                 <button class="search-toggle" @click="isModalOpen = true">
-                  <search v-if="isModalOpen" />
+                  <search v-model="isModalOpen" />
                   <i class="icon-magnifier s-open"></i>
                 </button>
               </div>
@@ -176,5 +180,10 @@ const welcomeUser = () => {
 .logo {
   display: flex;
   justify-content: flex-end;
+}
+
+.logo img {
+  width: 100px;
+  height: 100px;
 }
 </style>

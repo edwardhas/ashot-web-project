@@ -25,6 +25,11 @@
     <el-tab-pane class="tab" label="Add Deal" name="add-deal"></el-tab-pane>
     <el-tab-pane
       class="tab"
+      label="Email Templates"
+      name="email-templates"
+    ></el-tab-pane>
+    <el-tab-pane
+      class="tab"
       label="Reply Emails"
       name="manage-emails"
     ></el-tab-pane>
@@ -33,11 +38,31 @@
       label="Manage Products"
       name="manage-products"
     ></el-tab-pane>
+    <el-tab-pane
+      class="tab"
+      label="Statistics"
+      name="manage-stats"
+    ></el-tab-pane>
+    <el-tab-pane
+      class="tab"
+      label="Discounts"
+      name="discount-generator"
+    ></el-tab-pane>
   </el-tabs>
 
   <AddingProductsComponent v-if="activeTab === 'add-products'" />
 
   <AddingDealComponent v-if="activeTab === 'add-deal'" />
+
+  <AdminEmailsComponent v-if="activeTab === 'manage-emails'" />
+
+  <CustomEmailTemplateComponent v-if="activeTab === 'email-templates'" />
+
+  <ManageProductsComponent v-if="activeTab === 'manage-products'" />
+
+  <AdminPanelStatistics v-if="activeTab === 'manage-stats'" />
+
+  <DiscountGenerator v-if="activeTab === 'discount-generator'" />
   <!-- <div class="deal-section">
     <div class="deal-area bg-img pt-95 pb-100" v-if="activeTab === 'add-deal'">
       <div class="container">
@@ -186,7 +211,7 @@
 
   <!-- !! END OF DEAL OF THE WEEK PRODUCT SECTION -->
   <!-- !!  START OF EMAILS SECTION -->
-  <div class="product-area pt-95 gray-bg" v-if="activeTab === 'manage-emails'">
+  <!-- <div class="product-area pt-95 gray-bg" v-if="activeTab === 'manage-emails'">
     <div class="container">
       <div class="section-title text-center mb-55">
         <h2>All emails section</h2>
@@ -255,65 +280,25 @@
         <h3>No emails at this moment</h3>
       </div>
     </div>
-  </div>
+  </div> -->
   <!-- !!  END OF EMAILS SECTION -->
   <!-- !!  START OF PRODUCTS VIEWS/CHANGES SECTION -->
-  <div
+  <!-- <div
     class="product-area adding-deleting-area pt-95 pb-70 gray-bg"
     v-if="activeTab === 'manage-products'"
   >
     <div class="container">
-      <div class="section-title text-center mb-55">
-        <h4>Most Popular</h4>
-        <h2>Recent Products</h2>
-      </div>
-      <div class="row" v-if="edit_delete_products[0]">
+      <div class="row" v-if="products[0]">
         <div
           class="col-xl-3 col-lg-4 col-md-6 col-sm-2"
-          v-for="product in edit_delete_products"
+          v-for="product in products"
           :key="product._id"
         >
-          <div class="product-wrapper mb-10">
-            <div class="product-img">
-              <router-link
-                :to="{
-                  path: `/admin/panel/edit_delete_product/${product._id}`,
-                }"
-              >
-                <a href="">
-                  <img class="custom-image" :src="product.image" alt="" />
-                </a>
-              </router-link>
-
-              <!-- "../assets/img/product/product-4.jpg" -->
-            </div>
-            <div class="product-content">
-              <h4>
-                <router-link
-                  :to="{
-                    path: `/admin/panel/edit_delete_product/${product._id}`,
-                  }"
-                >
-                  <a href="">{{ product.name }}</a>
-                </router-link>
-                <h4 class="inStock" v-if="product.isInStock">In Stock</h4>
-                <h4 class="outOfStock" v-else>Out Of Stock</h4>
-              </h4>
-              <div class="product-price">
-                <span class="new">${{ product.price }}.00</span>
-                <span class="old" v-if="product.oldPrice"
-                  >${{ product.oldPrice }}.00</span
-                >
-              </div>
-            </div>
-          </div>
+          <ProductCard :product="product" />
         </div>
       </div>
-      <div class="custom-empty-products-list" v-else>
-        <h3>Products are coming soon...</h3>
-      </div>
     </div>
-  </div>
+  </div> -->
   <!-- !!  END OF PRODUCTS VIEWS/CHANGES SECTION -->
 </template>
 
@@ -322,6 +307,12 @@ import ValidationComponent from "@/components/ValidationComponent.vue";
 import BreadcrumbComponent from "@/components/BreadcrumbComponent.vue";
 import AddingProductsComponent from "@/components/AddingProductsComponent.vue";
 import AddingDealComponent from "@/components/AddingDealComponent.vue";
+import AdminPanelStatistics from "./AdminPanelStatistics.vue";
+import ProductCard from "@/components/ProductCard.vue";
+import CustomEmailTemplateComponent from "@/components/CustomEmailTemplateComponent.vue";
+import DiscountGenerator from "@/components/DiscountGenerator.vue";
+import AdminEmailsComponent from "@/components/AdminEmailsComponent.vue";
+import ManageProductsComponent from "@/components/ManageProductsComponent.vue";
 import axios from "axios";
 
 export default {
@@ -331,9 +322,16 @@ export default {
     ValidationComponent,
     AddingProductsComponent,
     AddingDealComponent,
+    AdminPanelStatistics,
+    ProductCard,
+    CustomEmailTemplateComponent,
+    DiscountGenerator,
+    AdminEmailsComponent,
+    ManageProductsComponent,
   },
   data() {
     return {
+      products: [],
       activeTab: "add-products",
       // global active users amount variable
       activeUsers: 0,
@@ -558,7 +556,7 @@ export default {
     this.activeUsers = usersAmount;
 
     const products = await axios.get("/api/products");
-    console.log(products.data);
+    this.products = products.data.products;
     this.edit_delete_products = products.data;
   },
 };

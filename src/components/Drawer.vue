@@ -1,8 +1,9 @@
 <template>
   <el-drawer
+    v-if="isDisplayingTable"
     title="This is your Cart. You can add an item to it!"
     direction="rtl"
-    size="50%"
+    size="30%"
     z-index="999"
   >
     <div class="drawer-adding-product">
@@ -57,9 +58,7 @@
     </el-table>
     <template #footer>
       <div style="flex: auto">
-        <el-button @click="isDisplayingTable = !isDisplayingTable"
-          >Cancel</el-button
-        >
+        <el-button @click="cancelDrawer">Cancel</el-button>
         <el-button
           @click="addToCart"
           class="el-button-bg"
@@ -90,7 +89,8 @@ const props = defineProps({
   },
 });
 
-const isDisplayingTable = ref(false);
+const emit = defineEmits(["close-drawer"]);
+const isDisplayingTable = ref(true);
 let gridData = ref([]);
 let quantity = ref(1);
 
@@ -114,6 +114,10 @@ const manageQuantity = (operation) => {
     if (!operation) return quantity.value--;
     return;
   }
+};
+
+const cancelDrawer = () => {
+  emit("close-drawer");
 };
 
 const addToCart = async () => {

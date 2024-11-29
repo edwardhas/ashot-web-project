@@ -7,7 +7,13 @@ import { dirname } from "path";
 // import { WebSocketServer } from "ws";
 import { Server } from "socket.io";
 import { MongoClient, ObjectId } from "mongodb";
-import { User, Products, UserActivity } from "./schema.js";
+import {
+  User,
+  Products,
+  UserActivity,
+  Discount,
+  RecentlyViewedProducts,
+} from "./schema.js";
 // import { error } from "console";
 import nodemailer from "nodemailer";
 import axios from "axios";
@@ -54,16 +60,16 @@ async function start() {
   app.use("/images", express.static(path.join(assetsDir)));
 
   const options = {
-    key: fs.readFileSync("./certs/server.key"),
-    cert: fs.readFileSync("./certs/server.cert"),
+    key: fs.readFileSync("../certs/server.key"),
+    cert: fs.readFileSync("../certs/server.cert"),
   };
-
+  // C:\Users\edwar\OneDrive\Desktop\COPY OF ASHOT WEB PROJECT\v2\COPY-ashot-web-project-COPY\certs\server.csr
   const server = https.createServer(options, app);
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
   // const wss = new WebSocketServer({ server });
 
-  let activeUsers = new Map();
+  let activeUsers = 0;
 
   const io = new Server(server, {
     cors: {
@@ -73,67 +79,96 @@ async function start() {
       credentials: true, // enables cookies for authentication
     },
     pingInterval: 25000, // Send a ping every 25 seconds (default is 25 seconds)
-    pingTimeout: 5000, // Disconnect if no pong within 5 seconds (default is 60 seconds)
+    pingTimeout: 5000, // Disconnect if no ping within 5 seconds (default is 60 seconds)
   });
 
-  io.use((socket, next) => {
-    const token = socket.handshake.auth.token;
-    if (!token) {
-      return next(new Error("Authentication error"));
-    }
-
-    // Verify token
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
-      if (err) {
-        console.log("Token verification failed:", err.message);
-        return next(new Error("Authentication error"));
-      }
-
-      socket.user = decoded; // Attach user info to socket
-      next();
-    });
-  });
+  const onlineUsers = new Map();
+  const viewedProducts = new Map();
 
   io.on("connection", (socket) => {
-    const { userId, username } = socket.user;
+    console.log("A user connected:", socket.id);
 
-    // Track user as active
-    activeUsers.set(userId, { username, socketId: socket.id });
-    io.emit("activeUsers", Array.from(activeUsers.values())); // Broadcast active users
+    // Authenticate socket connection using JWT
+    socket.on("authenticate", async ({ token }) => {
+      try {
+        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET); // Use your secret key
+        const userId = decoded.id; // Assuming the JWT contains the userId
 
-    // console.log("User connected:", userId);
-    // console.log(activeUsers);
+        // Save user ID to track by socket ID
+        onlineUsers.set(socket.id, userId);
 
-    socket.on("disconnect", () => {
-      activeUsers.delete(userId);
-      io.emit("activeUsers", Array.from(activeUsers.values())); // Update active users
-      // console.log("User disconnected:", username);
+        // Update user status in the database
+        await User.findByIdAndUpdate(userId, { isOnline: true });
+
+        // Broadcast updated users
+        const onlineUserList = await User.find({ isOnline: true });
+        io.emit("updateOnlineUsers", onlineUserList);
+      } catch (error) {
+        console.error("Authentication error:", error);
+        socket.disconnect();
+      }
+    });
+
+    // socket.on("viewProduct", (product) => {
+    //   console.log(product);
+    //   if (!product || Object.keys(product).length === 0) {
+    //     return;
+    //   }
+
+    //   io.emit("productViewed", { product: product });
+    // });
+
+    socket.on("viewProduct", (product) => {
+      if (!product || Object.keys(product).length === 0) {
+        return;
+      }
+
+      // Store the full product object in the Map, using the product ID as the key
+      viewedProducts.set(product._id, product);
+
+      // Emit the updated list of currently viewed products to all clients
+      io.emit("productViewed", {
+        productList: Array.from(viewedProducts.values()),
+      });
+    });
+
+    // Optional: Listen for when a user stops viewing a product
+    socket.on("stopViewingProduct", (productId) => {
+      if (viewedProducts.has(productId)) {
+        viewedProducts.delete(productId);
+
+        // Emit the updated list of currently viewed products
+        io.emit("productViewed", {
+          productList: Array.from(viewedProducts.values()),
+        });
+      }
+    });
+
+    // Periodically send the list of currently viewed products to clients
+    // setInterval(() => {
+    //   io.emit("productViewed", {
+    //     productList: Array.from(viewedProducts.values()),
+    //   });
+    // }, 30000);
+
+    // Handle user disconnect
+    socket.on("disconnect", async () => {
+      console.log("A user disconnected:", socket.id);
+
+      // Retrieve and remove the user ID from the map
+      const userId = onlineUsers.get(socket.id);
+      if (userId) {
+        onlineUsers.delete(socket.id);
+
+        // Update the user's status in the database
+        await User.findByIdAndUpdate(userId, { isOnline: false });
+
+        // Broadcast the updated list of online users
+        const onlineUserList = await User.find({ isOnline: true });
+        io.emit("updateOnlineUsers", onlineUserList);
+      }
     });
   });
-
-  // io.on("connection", (socket) => {
-  //   console.log("User connected: ", socket.user);
-  //   activeUsers++;
-
-  //   io.emit("activeUsers", activeUsers);
-
-  //   socket.on("disconnect", () => {
-  //     console.log("User disconnected: ", socket.user);
-  //     activeUsers--;
-  //     io.emit("activeUsers", activeUsers);
-  //   });
-  // });
-
-  // wss.on("connection", (ws) => {
-  //   console.log("WebSocket connection established");
-  //   ws.on("message", (message) => {
-  //     console.log(`Received: ${message}`);
-  //     ws.send(`Hello, you sent -> ${message}`);
-  //   });
-  //   ws.on("close", () => {
-  //     console.log("WebSocket connection closed");
-  //   });
-  // });
 
   server.listen(8000, () => {
     console.log("HTTPS Server running on port 8000");
@@ -141,6 +176,7 @@ async function start() {
 
   await client.connect();
   const db = client.db("test");
+
   async function populatedCartIds(cartItems) {
     return Promise.all(
       cartItems.map((item) =>
@@ -154,6 +190,20 @@ async function start() {
       )
     );
   }
+
+  const categorizeTransactions = (transactions) => {
+    const weeks = [[], [], [], []];
+    transactions.forEach((transaction) => {
+      const date = new Date(transaction.created * 1000); // Stripe timestamps are in seconds
+      const weekNumber = Math.floor((date.getDate() - 1) / 7);
+      weeks[weekNumber].push(transaction.amount / 100); // Convert amount to dollars
+    });
+
+    return weeks.map((week, index) => ({
+      week: `Week ${index + 1}`,
+      total: week.reduce((sum, amount) => sum + amount, 0),
+    }));
+  };
 
   function generateRandomId() {
     return Math.random().toString(36).substr(2, 9); // Generates a random alphanumeric string
@@ -217,6 +267,45 @@ async function start() {
     }
   }
 
+  const updateUserActivity = async (userId) => {
+    try {
+      const currentDate = new Date();
+      const currentDay = new Date(currentDate.setUTCHours(0, 0, 0, 0)); // Start of today
+      const currentMonth = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth(),
+        1
+      ); // First day of the month
+
+      const user = await User.findById(userId);
+
+      // Update lastActiveDate
+      user.lastActiveDate = currentDay;
+
+      // Update dailyActiveDates (only add if the date is not already present)
+      if (
+        !user.dailyActiveDates.some(
+          (date) => date.getTime() === currentDay.getTime()
+        )
+      ) {
+        user.dailyActiveDates.push(currentDay);
+      }
+
+      // Update monthlyActiveDates (only add if the date is not already present)
+      if (
+        !user.monthlyActiveDates.some(
+          (date) => date.getTime() === currentMonth.getTime()
+        )
+      ) {
+        user.monthlyActiveDates.push(currentMonth);
+      }
+
+      await user.save();
+    } catch (error) {
+      console.error("Error updating user activity:", error);
+    }
+  };
+
   //!! findUserByInput()
   // async function findUserByInput(userData, isId) {
   //   if (!isId) {
@@ -266,6 +355,15 @@ async function start() {
     res.json({ products: products });
   });
 
+  app.get("/api/users/online", async (req, res) => {
+    try {
+      const onlineUsers = await User.find({ isOnline: true });
+      res.json({ count: onlineUsers.length, users: onlineUsers });
+    } catch (error) {
+      res.json({ error: "Error fetching online users." });
+    }
+  });
+
   app.get("/api/products/paginated", async (req, res) => {
     try {
       const products = await db.collection("products").find({}).toArray(); // Fetch all products from MongoDB
@@ -283,7 +381,7 @@ async function start() {
 
         productsArray.push(page);
       }
-
+      updateUserActivity();
       res.json({ paginatedProducts: productsArray });
     } catch (error) {
       res.json({ error: "Error fetching products", error });
@@ -301,8 +399,12 @@ async function start() {
     for (let i = 0; i < users.length; i++) {
       const user = await users[i].emailsSent;
       const userId = users[i]._id.toString();
+      const userName = users[i].username;
+      const userLastName = users[i].userlastname;
       const emailsAndIds = {
         id: userId,
+        userName: userName,
+        userLastName: userLastName,
         emails: user,
       };
       if (user.length > 0) {
@@ -310,6 +412,8 @@ async function start() {
         // userIds.push(userId);
         emailsAndIds.id = userId;
         emailsAndIds.emails = user;
+        emailsAndIds.userName = userName;
+        emailsAndIds.userLastName = userLastName;
         ALL_EMAILS_INFO.push(emailsAndIds);
       }
     }
@@ -703,7 +807,7 @@ async function start() {
   });
 
   //!! LOG IN USER
-  app.post("/api/users/get", async (req, res) => {
+  app.post("/api/login", async (req, res) => {
     const userEmail = req.body.userEmail;
     const userPassword = req.body.userPassword;
     try {
@@ -711,17 +815,14 @@ async function start() {
         return res.json({ error: "All fields are required" });
 
       const userDb = await db.collection("users").findOne({ email: userEmail });
-
-      if (userDb == null) {
+      if (userDb == null || undefined) {
         return res.json({ error: "User with this email does not exist" });
       }
-
       const isMatch = await bcrypt.compare(userPassword, userDb.password);
 
       if (!isMatch) {
         return res.json({ error: "Wrong email or password" });
       }
-
       const token = jwt.sign(
         { id: userDb._id },
         process.env.ACCESS_TOKEN_SECRET
@@ -745,7 +846,7 @@ async function start() {
   });
 
   //!! REGISTER USER
-  app.post("/api/users/add", async (req, res) => {
+  app.post("/api/register", async (req, res) => {
     const { userName, userLastName, userEmail, userPassword, userPhone } =
       req.body;
 
@@ -791,6 +892,11 @@ async function start() {
           city: city,
           state: state,
           zip: zip,
+        },
+        activity: {
+          lastActiveDate: Date.now(),
+          dailyActiveDates: [],
+          monthlyActiveDates: [],
         },
         cartItems: [],
         emailsSent: [],
@@ -966,6 +1072,36 @@ async function start() {
     res.json({ dailyActiveUsers });
   });
 
+  app.get("/api/users-data-table", async (req, res) => {
+    try {
+      const users = await User.find();
+
+      const formattedUsers = await Promise.all(
+        users.map(async (user) => {
+          return {
+            ...user._doc,
+            created: user.created
+              ? new Date(user.created).toLocaleString("en-US", {
+                  year: "numeric",
+                  month: "2-digit",
+                  day: "2-digit",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  second: "2-digit",
+                  hour12: false,
+                })
+              : "N/A",
+            isOnline: user.isOnline ? "Online" : "Offline",
+            cartItems: await populatedCartIds(user.cartItems),
+          };
+        })
+      );
+      res.json({ users: formattedUsers });
+    } catch (error) {
+      res.json({ error: error.message });
+    }
+  });
+
   //!! STRIPE CHECKOUT SESSION
   app.post("/api/create-checkout-session", async (req, res) => {
     const { products } = req.body;
@@ -976,7 +1112,7 @@ async function start() {
           currency: "usd",
           product_data: {
             name: product.name,
-            images: [product.images],
+            images: [product.images[0]],
           },
           unit_amount: product.price * 100, // convert to cents
         },
@@ -1034,6 +1170,91 @@ async function start() {
     }
   );
 
+  app.get("/api/transactions/today", async (req, res) => {
+    try {
+      const transactions = [];
+      let hasMore = true;
+      let startingAfter = null;
+
+      // Get today's date
+      const now = new Date();
+
+      // Get the current day, month, and year
+      const day = now.getDate();
+      const month = now.getMonth(); // Zero-based month
+      const year = now.getFullYear();
+
+      // Calculate the start of today (00:00:00)
+      const startOfDay = new Date(year, month, day, 0, 0, 0).getTime() / 1000; // Start of the day in seconds
+
+      // Calculate the end of today (23:59:59)
+      const endOfDay = new Date(year, month, day, 23, 59, 59).getTime() / 1000; // End of the day in seconds
+
+      // Log the start and end times for debugging
+
+      while (hasMore) {
+        const params = {
+          limit: 100, // Maximum allowed transactions per request
+          created: {
+            gte: startOfDay,
+            lt: endOfDay,
+          },
+        };
+
+        if (startingAfter) {
+          params.starting_after = startingAfter; // For pagination
+        }
+
+        // Fetch transactions from Stripe
+        const charges = await stripe.charges.list(params);
+
+        // Add fetched data to the transactions array
+        transactions.push(...charges.data);
+        hasMore = charges.has_more;
+        startingAfter = charges.data.length
+          ? charges.data[charges.data.length - 1].id
+          : null;
+      }
+
+      console.log(transactions);
+
+      // const categorizedTransactions = categorizeTransactions(transactions);
+
+      // res.json(categorizedTransactions);
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+      res.status(500).send("Server Error");
+    }
+  });
+
+  app.post("/api/transactions/picked-dates", async (req, res) => {
+    const { created } = req.body;
+    // Validate the input
+    if (!created || !created.gte || !created.lte) {
+      return res.json({ error: "Invalid date range provided." });
+    }
+
+    try {
+      // Fetch charges from Stripe
+      const charges = await stripe.charges.list({
+        created: {
+          gte: created.gte, // Start of the range
+          lte: created.lte, // End of the range
+        },
+        status: "succeeded",
+        limit: 100,
+      });
+
+      res.json({
+        success: true,
+        charges: charges.data, // Return the list of charges
+      });
+    } catch (error) {
+      console.error("Error fetching charges:", error);
+      res.json({ error: "Failed to fetch charges. Please try again later." });
+    }
+  });
+
   // app.get("/success", (req, res) => {
   //   res.send("Success");
   // });
@@ -1041,6 +1262,132 @@ async function start() {
   // app.get("/cancel", (req, res) => {
   //   res.send("Cancel");
   // });
+
+  app.get("/api/get-users-email", async (req, res) => {
+    try {
+      const users = await User.find({}, "email");
+      const emails = users.map((user) => user.email);
+      res.json(emails);
+    } catch (error) {
+      res.json({ error: error.message });
+    }
+  });
+
+  // !! POST product to the recentlyViewedProducts collection
+  app.post(
+    "/api/last-viewed-products/:productId/:userId/add",
+    async (req, res) => {
+      const { productId, userId } = req.params;
+
+      const recentlyViewedProducts = new RecentlyViewedProducts({
+        productId: productId,
+        userId: userId,
+      });
+
+      await recentlyViewedProducts.save();
+    }
+  );
+
+  //!! GET discounts
+  app.get("/api/get-discounts", async (req, res) => {
+    try {
+      const DISCOUNTS = await Discount.find({});
+
+      if (!DISCOUNTS) {
+        res.json({ error: "Unable to send discounts" });
+      }
+
+      async function getDiscountsWithUserData() {
+        const discounts = await db.collection("discounts").find().toArray(); // Retrieve all discounts
+
+        // Populate user data for each discount
+        const formattedDiscounts = await Promise.all(
+          discounts.map(async (discount) => {
+            const user = await db
+              .collection("users")
+              .findOne({ _id: discount.userId }); // Get user data
+            return {
+              ...discount,
+              user, // Embed user data in place of userId
+            };
+          })
+        );
+
+        return formattedDiscounts;
+      }
+
+      const discounts = await getDiscountsWithUserData();
+      res.json({ discounts: discounts });
+    } catch (error) {
+      res.json({ error: error.message });
+    }
+  });
+
+  app.delete("/api/delete-discount/:discountId", async (req, res) => {
+    const { discountId } = req.params;
+    await Discount.deleteOne({
+      _id: new ObjectId(discountId),
+    });
+
+    const discounts = await Discount.find();
+
+    res.json({ discounts: discounts });
+  });
+
+  //!! Generate Discount
+  app.post("/api/generate-discount/:userId", async (req, res) => {
+    const { userId } = req.params;
+    const { discountCode, expirationDate } = req.body;
+    const discountPercentage = Number(req.body.discountPercentage);
+
+    if (!discountCode || !userId || !expirationDate || !discountPercentage) {
+      return res.json({ error: "All fields are required." });
+    }
+
+    const now = new Date(Date.now());
+    // from iso to regular format
+    const formattedDate = now.toLocaleString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      hour12: true,
+      timeZone: "UTC",
+    });
+
+    const expirationDateConverted = new Date(expirationDate);
+    const formattedExpirationDate = expirationDateConverted.toLocaleString(
+      "en-US",
+      {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+        hour12: true,
+        timeZone: "UTC",
+      }
+    );
+
+    try {
+      const userMatch = await User.find({ _id: userId });
+      if (!userMatch) res.json({ error: "User does not exist" });
+
+      const discount = new Discount({
+        userId: userId,
+        discountCode: discountCode,
+        percentage: discountPercentage,
+        expires: formattedExpirationDate,
+        createdAt: formattedDate,
+      });
+
+      await discount.save();
+      res.json({ success: "Discount Successfuly added!" });
+    } catch (error) {
+      res.json({ error: error.message });
+    }
+  });
 
   // !! REVEIVING EMAILS FROM USERS
   app.post("/api/:userId/contact-us", async (req, res) => {

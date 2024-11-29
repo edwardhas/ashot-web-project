@@ -32,6 +32,10 @@ const userSchema = new Schema({
     type: Boolean,
     required: true,
   },
+  isOnline: {
+    type: Boolean,
+    required: true,
+  },
   historyOfPurchase: {
     type: Array,
     required: true,
@@ -96,6 +100,21 @@ const userSchema = new Schema({
         type: Date,
         required: true,
         default: Date.now(),
+      },
+    },
+  ],
+  activity: [
+    {
+      lastActiveDate: {
+        type: Date,
+        required: true,
+        default: Date.now(),
+      },
+      dailyActiveDates: {
+        type: [Date],
+      },
+      monthlyActiveDates: {
+        type: [Date],
       },
     },
   ],
@@ -239,6 +258,38 @@ const userActivitySchema = new mongoose.Schema({
   },
 });
 
+const discountSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "users",
+  },
+  createdAt: {
+    type: String,
+  },
+  discountCode: {
+    type: String,
+    unique: true,
+  },
+  percentage: {
+    type: Number,
+    required: true,
+  },
+  expires: {
+    type: String,
+  },
+});
+
+const recentlyViewedProducts = new mongoose.Schema({
+  productId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "products",
+  },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "users",
+  },
+});
+
 const User = mongoose.model("Users", userSchema);
 const Products = mongoose.model("Products", ProductsSchema);
 // const MonthlyActiveUsers = mongoose.model(
@@ -246,4 +297,9 @@ const Products = mongoose.model("Products", ProductsSchema);
 //   monthlyActiveUsersSchema
 // );
 const UserActivity = mongoose.model("UserActivity", userActivitySchema);
-export { User, Products, UserActivity };
+const Discount = mongoose.model("Discounts", discountSchema);
+const RecentlyViewedProducts = mongoose.model(
+  "RecentlyViewedProducts",
+  recentlyViewedProducts
+);
+export { User, Products, UserActivity, Discount, RecentlyViewedProducts };

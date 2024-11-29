@@ -68,7 +68,7 @@
                     placeholder="Find a product..."
                     @input="handleProductSearch"
                   />
-                  <button type="submit">
+                  <button type="button">
                     <i class="icon-magnifier"></i>
                   </button>
                 </form>
@@ -106,21 +106,79 @@
               </div>
             </div>
             <div class="shop-widget mt-50">
-              <h4 class="shop-sidebar-title">Generation</h4>
-              <div class="shop-list-style mt-20">
-                <ul v-for="generation in generationCategory" :key="generation">
-                  <li class="mt-10">
-                    <a href="#">{{ generation }}</a>
-                  </li>
-                </ul>
+              <div
+                class="panel-heading shop-sidebar-title"
+                @click="toggleGenerationView = !toggleGenerationView"
+              >
+                <h5 class="panel-title">
+                  <span>
+                    <el-icon><ArrowRight /></el-icon>
+                  </span>
+                  <a style="cursor: pointer">Generation </a>
+                </h5>
               </div>
+
+              <transition name="slide-fade">
+                <div class="shop-list-style mt-20" v-if="toggleGenerationView">
+                  <ul
+                    v-for="generation in generationCategory"
+                    :key="generation.prop"
+                  >
+                    <li
+                      class="mt-10"
+                      style="
+                        display: flex;
+                        flex-direction: row;
+                        align-items: center;
+                      "
+                    >
+                      <el-checkbox
+                        v-model="generation.value"
+                        size="medium"
+                        style="margin-right: 15px"
+                        @change="handleCategorySearch"
+                      />
+                      <a
+                        class="prevent-select"
+                        @click="
+                          (generation.value = !generation.value),
+                            handleCategorySearch()
+                        "
+                        style="cursor: pointer"
+                      >
+                        {{ generation.prop }}
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </transition>
             </div>
             <div class="shop-widget mt-50">
               <h4 class="shop-sidebar-title">Type</h4>
               <div class="shop-list-style mt-20">
-                <ul v-for="type in typeCategory" :key="type">
-                  <li>
-                    <a href="#">{{ type }}</a>
+                <ul v-for="type in typeCategory" :key="type.prop">
+                  <li
+                    style="
+                      display: flex;
+                      flex-direction: row;
+                      align-items: center;
+                    "
+                  >
+                    <el-checkbox
+                      v-model="type.value"
+                      size="medium"
+                      style="margin-right: 15px"
+                      @change="handleCategorySearch"
+                    />
+                    <a
+                      class="prevent-select"
+                      style="cursor: pointer"
+                      @click="
+                        (type.value = !type.value), handleCategorySearch()
+                      "
+                    >
+                      {{ type.prop }}
+                    </a>
                   </li>
                 </ul>
               </div>
@@ -167,47 +225,50 @@
   </div>
   <Footer />
 </template>
-
 <script setup>
-import { ref, onBeforeMount } from "vue";
+import { ref, reactive, onBeforeMount, computed } from "vue";
 import axios from "axios";
 import { ElNotification } from "element-plus";
 import "element-plus/dist/index.css";
 import Header from "../components/Header.vue";
 import Footer from "../components/Footer.vue";
 import ProductCard from "@/components/ProductCard.vue";
+import { ArrowRight } from "@element-plus/icons-vue";
 
 let products = ref([]); // contains all products
-let generationCategory = [
-  "Gen. I",
-  "Gen. II",
-  "Gen. III",
-  "Gen. IV",
-  "Gen. V",
-  "Gen. VI",
-  "Gen. VII",
-  "Gen. VIII",
-  "Gen. IX",
-]; // contains all generations
-let typeCategory = [
-  "Normal",
-  "Fairy",
-  "Flying",
-  "Ground",
-  "Poison",
-  "Steel",
-  "Dark",
-  "Fighting",
-  "Ghost",
-  "ICE",
-  "Psychic",
-  "Water",
-  "Dragon",
-  "Fire",
-  "Grass",
-  "Rock",
-  "Bug",
-]; // contains all generations
+
+const toggleGenerationView = ref(false);
+
+const generationCategory = reactive([
+  { prop: "I", value: false },
+  { prop: "II", value: false },
+  { prop: "III", value: false },
+  { prop: "IV", value: false },
+  { prop: "V", value: false },
+  { prop: "VI", value: false },
+  { prop: "VII", value: false },
+  { prop: "VIII", value: false },
+  { prop: "IX", value: false },
+]);
+const typeCategory = reactive([
+  { prop: "Normal", value: false },
+  { prop: "Fairy", value: false },
+  { prop: "Flying", value: false },
+  { prop: "Ground", value: false },
+  { prop: "Poison", value: false },
+  { prop: "Steel", value: false },
+  { prop: "Dark", value: false },
+  { prop: "Fighting", value: false },
+  { prop: "Ghost", value: false },
+  { prop: "ICE", value: false },
+  { prop: "Psychic", value: false },
+  { prop: "Water", value: false },
+  { prop: "Dragon", value: false },
+  { prop: "Fire", value: false },
+  { prop: "Grass", value: false },
+  { prop: "Rock", value: false },
+  { prop: "Bug", value: false },
+]);
 
 let sliderValue = ref([0, 1000]);
 let matchedProduct = ref([]); // matched products from different searches
@@ -215,9 +276,12 @@ let matchedProduct = ref([]); // matched products from different searches
 let productInput = ref("");
 let priceInput = ref([]);
 
+const categoryObjSet = ref(new Set());
+
 const handleProductSearch = (event) => {
   productInput.value = event.target.value;
   const productsArray = products.value;
+  console.log(event.target.value);
   matchedProduct.value = productsArray.filter((obj) =>
     obj.name.includes(productInput.value)
   );
@@ -230,8 +294,29 @@ const handlePriceSearch = (price) => {
     (obj) =>
       obj.price >= priceInput.value[0] && obj.price <= priceInput.value[1]
   );
-  console.log(matchedProduct.value);
 };
+
+const handleCategorySearch = () => {
+  categoryObjSet.value.clear();
+
+  generationCategory.forEach((generation) => {
+    if (generation.value) categoryObjSet.value.add(generation.prop);
+  });
+
+  typeCategory.forEach((type) => {
+    if (type.value) categoryObjSet.value.add(type.prop);
+  });
+};
+
+const filteredProductsByCategory = computed(() => {
+  if (categoryObjSet.value.size === 0) return products.value;
+  return (matchedProduct.value = products.value.filter((product) => {
+    return (
+      categoryObjSet.value.has(product.generation) ||
+      categoryObjSet.value.has(product.type)
+    );
+  }));
+});
 
 onBeforeMount(async () => {
   try {
@@ -253,9 +338,67 @@ a {
   text-decoration: none;
 }
 
+/* Transition styles for slide and fade */
+.slide-fade-enter-active,
+.slide-fade-leave-active {
+  transition: opacity 1s ease, transform 1s ease, height 1s ease;
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+  height: 0;
+}
+
+.slide-fade-leave-from,
+.slide-fade-enter-to {
+  opacity: 1;
+  transform: translateY(0);
+  height: auto;
+}
+
 .filter-slider {
   margin-left: 15px;
   width: 250px;
   /* background-color: #7e4c4f; */
+}
+
+.prevent-select {
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+}
+
+:deep(.el-slider__runway) {
+  background-color: #e0e0e0 !important; /* Background of the entire slider */
+}
+
+:deep(.el-slider__bar) {
+  background-color: #7e4c4f !important; /* Active portion of the slider */
+}
+
+:deep(.el-slider__button) {
+  background-color: #9b6065 !important; /* Thumb background color */
+  border-color: #7e4c4f !important; /* Thumb border color */
+}
+
+.slide-fade-enter-active,
+.slide-fade-leave-active {
+  transition: opacity 0.8s ease, transform 0.8s ease, height 0.8s ease;
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+  height: 0;
+}
+
+.slide-fade-leave-from,
+.slide-fade-enter-to {
+  opacity: 1;
+  transform: translateY(0);
+  height: auto;
 }
 </style>

@@ -25,7 +25,7 @@
                   <tr>
                     <th>Image</th>
                     <th>Product Name</th>
-                    <th>Until Price</th>
+                    <th>Unit Price</th>
                     <th>Qty</th>
                     <th>Subtotal</th>
                     <th>Delete</th>
@@ -42,7 +42,7 @@
                       </router-link>
                     </td>
                     <td class="product-price-cart" v-if="item.oldPrice">
-                      <span class="amount">${{ item.oldPrice }}.00</span>
+                      <span class="amount">${{ item.price }}.00</span>
                     </td>
                     <td class="product-quantity">
                       <div class="cart-plus-minus">
@@ -54,7 +54,9 @@
                         />
                       </div>
                     </td>
-                    <td class="product-subtotal">${{ item.price }}.00</td>
+                    <td class="product-subtotal">
+                      ${{ item.price * item.quantity }}.00
+                    </td>
                     <td class="product-remove">
                       <a @click="$emit('remove-from-cart', item._id)"
                         ><i class="ti-trash"></i
@@ -90,6 +92,27 @@
                 <a @click="handleCheckout">Proceed To Checkout</a>
               </div>
             </div>
+            <div class="col-lg-4 col-md-6">
+              <div class="discount-code-wrapper">
+                <h4 class="cart-bottom-title">DISCOUNT CODES</h4>
+                <div class="discount-code">
+                  <p>Enter your coupon code if you have one.</p>
+                  <form>
+                    <input
+                      type="text"
+                      required=""
+                      name="name"
+                      class="discount-generator-input"
+                      v-model="discountCodeInput"
+                      @input="removeSpaces"
+                    />
+                    <button class="cart-btn-2" type="submit">
+                      Get A Quote
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -115,15 +138,30 @@
 <script>
 import axios from "axios";
 import { loadStripe } from "@stripe/stripe-js";
+import { ref } from "vue";
 
 export default {
   name: "ShoppingCartList",
 
   props: ["cartItems"],
 
+  setup() {
+    const discountCodeInput = ref("");
+
+    const removeSpaces = () => {
+      discountCodeInput.value = discountCodeInput.value.replace(/\s+/g, "");
+    };
+    return {
+      discountCodeInput,
+      removeSpaces,
+    };
+  },
+
   methods: {
     calculateTotal() {
-      const prices = this.cartItems.map((item) => Number(item.price));
+      const prices = this.cartItems.map((item) =>
+        Number(item.price * item.quantity)
+      );
 
       let totalPrice = 0;
 
@@ -215,6 +253,14 @@ export default {
   -webkit-user-select: none; /* Safari */
   -ms-user-select: none; /* IE 10 and IE 11 */
   user-select: none; /* Standard syntax */
+}
+
+.discount-generator-input {
+  border-radius: 0px;
+  font-size: 20px;
+  color: black;
+  text-transform: uppercase;
+  font-weight: 700;
 }
 
 .custom-empty-cart {

@@ -6,7 +6,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "server": "cd back-end && npm run start",
-    "start": "concurrently \"npm run serve --prefix ./\" \"npm run start --prefix back-end\""
+    "start": "concurrently \"npm run serve --prefix ./\" \"npm run start --prefix back-end\" \"tailwindcss -i ./src/assets/css/style.css -o ./src/assets/css/output.css --watch\""
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
@@ -17,6 +17,7 @@
     "@vue/cli-service": "~5.0.0",
     "axios": "^1.7.2",
     "bootstrap": "^5.3.3",
+    "chart.js": "^4.4.6",
     "concurrently": "^8.2.2",
     "core-js": "^3.8.3",
     "element-plus": "^2.8.2",
@@ -30,6 +31,7 @@
     "socket.io": "^4.8.0",
     "socket.io-client": "^4.8.0",
     "tailwindcss-primeui": "^0.3.4",
+    "util": "^0.12.5",
     "vue": "^3.2.13",
     "vue-countup-v2": "^4.0.0",
     "vue-router": "^4.0.3",
@@ -40,6 +42,7 @@
   "devDependencies": {
     "@vue/cli-plugin-babel": "~5.0.0",
     "@vue/cli-plugin-router": "~5.0.0",
+    "tailwindcss": "^3.4.14",
     "webpack": "^5.93.0"
   }
 }

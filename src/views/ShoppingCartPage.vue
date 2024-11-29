@@ -10,7 +10,6 @@
 <script>
 import ShoppingCartList from "@/components/ShoppingCartList.vue";
 import Footer from "../components/Footer.vue";
-import EventBus from "../eventBus";
 import axios from "axios";
 import { ref } from "vue";
 import { deleteProductFromCart, getCartItems } from "../db_queries";

@@ -196,7 +196,7 @@ export default {
         shippingAddress: this.shippingAddress,
       };
 
-      const response = await axios.post("/api/users/add", userData);
+      const response = await axios.post("/api/register", userData);
       const success = response.data.success;
       const { token, user } = response.data;
 

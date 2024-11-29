@@ -11,7 +11,7 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./assets/css/responsive.css";
 import "./assets/css/simple-line-icons.css";
-import "./assets/css/style.css";
+// import "./assets/css/style.css";
 import "./assets/css/themify-icons.css";
 import "./assets/css/slick.css";
 import "./assets/css/owl.carousel.min.css";
@@ -24,7 +24,8 @@ import "./assets/js/vendor/jquery-1.12.0.min.js";
 import "./assets/js/jquery.meanmenu";
 
 import PrimeVue from "primevue/config";
-import Lara from "@primevue/themes/lara";
+import Aura from "@primevue/themes/aura";
+import "./assets/css/style.css";
 
 import Vue from "vue";
 import { createApp } from "vue";
@@ -59,5 +60,5 @@ createApp(App)
   .use(autoAnimatePlugin)
   .use(ElementPlus)
   .use(pinia)
-  .use(PrimeVue, { theme: { preset: Lara } })
+  .use(PrimeVue, { theme: { preset: Aura } })
   .mount("#app");

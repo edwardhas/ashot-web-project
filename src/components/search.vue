@@ -3,9 +3,14 @@
     Open a Form nested Dialog
   </el-button> -->
 
-  <el-dialog v-model="dialogFormVisible" title="Search" width="1000">
+  <el-dialog
+    class="search-dialog-box"
+    v-model="dialogFormVisible"
+    title="Search"
+    width="50%"
+  >
     <el-form>
-      <el-form-item label="I am looking for...">
+      <el-form-item>
         <input type="text" class="search-input" @input="handleSearch" />
       </el-form-item>
     </el-form>
@@ -26,7 +31,17 @@
       </el-table-column>
       <el-table-column prop="name" label="Name" width="180" />
       <el-table-column prop="price" label="Price" />
-      <el-table-column prop="isInStock" label="Availablity" />
+      <!-- <el-table-column prop="isInStock" label="Availablity" /> -->
+      <el-table-column prop="isInStock" label="Availability" width="170">
+        <template #default="{ row: product }">
+          <el-tag
+            :type="product.isInStock ? 'success' : 'danger'"
+            effect="dark"
+          >
+            {{ product.isInStock ? "INSTOCK" : "OUT OF STOCK" }}
+          </el-tag>
+        </template>
+      </el-table-column>
       <el-table-column label="View">
         <template #default="scope">
           <router-link :to="{ path: `/products/${scope.row._id}` }">
@@ -50,7 +65,7 @@ const handleSearch = (event) => {
   userInput.value = event.target.value;
   const productsArray = products.value;
   matchedProduct.value = productsArray.filter((obj) =>
-    obj.name.includes(userInput.value)
+    obj.name.toLowerCase().includes(userInput.value.toLowerCase())
   );
 };
 
@@ -60,11 +75,11 @@ onMounted(async () => {
   try {
     const productsResponse = await axios.get("/api/products");
     const response = productsResponse.data.products;
-    response.forEach((obj) => {
-      obj.isInStock
-        ? (obj.isInStock = "In Stock")
-        : (obj.isInStock = "Not in Stock");
-    });
+    // response.forEach((obj) => {
+    //   obj.isInStock
+    //     ? (obj.isInStock = "In Stock")
+    //     : (obj.isInStock = "Not in Stock");
+    // });
     products.value = productsResponse.data.products;
   } catch (error) {
     console.error(error);
@@ -156,4 +171,10 @@ onMounted(async () => {
   box-shadow: rgba(60, 64, 67, 0.3) 0 1px 3px 0,
     rgba(60, 64, 67, 0.15) 0 4px 8px 3px;
 } */
+
+@media screen and (max-width: 700px) {
+  ::v-deep(.el-dialog) {
+    --el-dialog-width: 80%;
+  }
+}
 </style>

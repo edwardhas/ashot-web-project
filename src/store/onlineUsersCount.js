@@ -1,17 +1,61 @@
+// import { defineStore } from "pinia";
+// import { ref } from "vue";
+
+// export const useOnlineUsersCountStore = defineStore("user", () => {
+//   const onlineUserCount = ref(0);
+//   const activeUsers = ref([]); // Array to hold active users
+
+//   function setUserCount(count) {
+//     onlineUserCount.value = count;
+//   }
+
+//   function setActiveUsers(users) {
+//     activeUsers.value = users; // Update the active users
+//   }
+
+//   return { onlineUserCount, activeUsers, setUserCount, setActiveUsers };
+// });
+
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { io } from "socket.io-client";
+import axios from "axios";
 
-export const useOnlineUsersCountStore = defineStore("user", () => {
-  const onlineUserCount = ref(0);
-  const activeUsers = ref([]); // Array to hold active users
+export const useUserStore = defineStore("user", {
+  state: () => ({
+    onlineUsers: [],
+    onlineCount: 0,
+    socket: null,
+  }),
+  actions: {
+    async initializeSocket() {
+      const token = await localStorage.getItem("token"); // Retrieve JWT from local storage
 
-  function setUserCount(count) {
-    onlineUserCount.value = count;
-  }
+      this.socket = io("https://localhost:8000", {
+        auth: { token },
+        reconnection: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 2000,
+      });
 
-  function setActiveUsers(users) {
-    activeUsers.value = users; // Update the active users
-  }
+      this.socket.on("connect", () => {
+        console.log("Socket connected:", this.socket.id);
+        this.socket.emit("authenticate", { token }); // Emit token for authentication
+      });
 
-  return { onlineUserCount, activeUsers, setUserCount, setActiveUsers };
+      this.socket.on("updateOnlineUsers", (users) => {
+        this.onlineUsers = users;
+        this.onlineCount = users.length;
+      });
+    },
+
+    async fetchOnlineUsers() {
+      try {
+        const response = await axios.get("/api/users/online");
+        this.onlineUsers = response.data.users;
+        this.onlineCount = response.data.count;
+      } catch (error) {
+        console.error("Error fetching online users:", error);
+      }
+    },
+  },
 });

@@ -36,7 +36,7 @@
               <div id="lg1" class="tab-pane active mx-auto">
                 <div class="login-form-container">
                   <div class="login-register-form">
-                    <form method="post" @submit.prevent="sendForm">
+                    <form @submit.prevent="sendForm">
                       <input
                         type="text"
                         v-model="email"
@@ -102,33 +102,45 @@ export default {
         userPassword: this.password,
       };
 
-      const response = await axios.post("/api/users/get", userData);
+      const response = await axios.post("/api/login", userData);
       const success = response.data.success;
       const error = response.data.error;
-      const { token, user } = response.data;
-      const cartItemsAmount = user.cartItems.length;
+
+      success == undefined || null
+        ? ((this.message = error),
+          (this.status = false),
+          (this.isDisplayed = true))
+        : (authStore.setToken(response.data.token),
+          authStore.setUser(response.data.user),
+          authStore.setCartItemsAmount(response.data.user.cartItems.length),
+          (this.message = success),
+          (this.status = true),
+          (this.isDisplayed = true));
+
+      // const { token, user } = response.data;
+      // const cartItemsAmount = user.cartItems.length;
       // store.commit("setToken", token);
       // store.commit("setUser", user);
       // console.log(`This is the console log: ${message}`);
       // console.log(`This is the console log: ${errorMessage}`);
 
-      this.email = "";
-      this.password = "";
-      if (success == undefined)
-        return (
-          (this.message = error),
-          (this.status = false),
-          (this.isDisplayed = true)
-        );
+      // this.email = "";
+      // this.password = "";
+      // if (success == undefined)
+      //   return (
+      //     (this.message = error),
+      //     (this.status = false),
+      //     (this.isDisplayed = true)
+      //   );
 
-      return (
-        authStore.setToken(token),
-        authStore.setUser(user),
-        authStore.setCartItemsAmount(cartItemsAmount),
-        (this.message = success),
-        (this.status = true),
-        (this.isDisplayed = true)
-      );
+      // return (
+      //   authStore.setToken(token),
+      //   authStore.setUser(user),
+      //   authStore.setCartItemsAmount(cartItemsAmount),
+      //   (this.message = success),
+      //   (this.status = true),
+      //   (this.isDisplayed = true)
+      // );
     },
   },
 };

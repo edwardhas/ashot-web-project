@@ -4,7 +4,7 @@ export const useAuthStore = defineStore("auth", {
   state: () => ({
     token: localStorage.getItem("token") || null,
     user: JSON.parse(localStorage.getItem("user")) || null,
-    cartItemsAmount: localStorage.getItem("amount") || null,
+    cartItemsAmount: localStorage.getItem("amount") || 0,
   }),
   actions: {
     setToken(token) {

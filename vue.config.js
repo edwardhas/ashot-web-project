@@ -15,12 +15,8 @@ module.exports = defineConfig({
   transpileDependencies: true,
   devServer: {
     https: {
-      key: fs.readFileSync(
-        "../COPY-ashot-web-project-COPY/back-end/certs/server.key"
-      ),
-      cert: fs.readFileSync(
-        "../COPY-ashot-web-project-COPY/back-end/certs/server.cert"
-      ),
+      key: fs.readFileSync("./certs/server.key"),
+      cert: fs.readFileSync("./certs/server.cert"),
     },
     server: "https",
     proxy: {
