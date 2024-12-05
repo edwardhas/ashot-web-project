@@ -100,18 +100,28 @@
                       <div class="row">
                         <div class="col-lg-12 col-md-12">
                           <div class="billing-info">
-                            <label>Password</label>
-                            <input type="password" />
+                            <label>New Password</label>
+                            <input
+                              type="password"
+                              v-model="newPassword"
+                              @input="removeSpaces('newPassword')"
+                            />
                           </div>
                         </div>
                         <div class="col-lg-12 col-md-12">
                           <div class="billing-info">
                             <label>Password Confirm</label>
-                            <input type="password" />
+                            <input
+                              type="password"
+                              v-model="confirmPassword"
+                              @input="removeSpaces('confirmPassword')"
+                            />
                           </div>
                         </div>
                         <div class="entries-edit-delete text-center">
-                          <a class="edit">Change</a>
+                          <a class="edit" @click="submitPasswordChange"
+                            >Change</a
+                          >
                         </div>
                       </div>
                       <div class="billing-back-btn">
@@ -144,10 +154,68 @@
                       <div class="entries-wrapper">
                         <div class="row">
                           <div
+                            v-if="isEditingAddress"
+                            class="col-lg-6 col-md-6 d-flex align-items-center justify-content-center address-change"
+                            style="display: flex; flex-direction: column"
+                          >
+                            <label class="mt-10">Street</label>
+                            <input
+                              type="text"
+                              class="mb-10"
+                              style="width: 70%"
+                              placeholder="111 Street Ave"
+                              v-model="newStreet"
+                            />
+
+                            <label>City</label>
+                            <input
+                              type="text"
+                              class="mb-10"
+                              style="width: 70%"
+                              placeholder="Los Angeles"
+                              v-model="newCity"
+                            />
+
+                            <label>State</label>
+                            <input
+                              type="text"
+                              class="mb-10"
+                              style="width: 70%"
+                              placeholder="CA"
+                              v-model="newState"
+                            />
+
+                            <label>ZIP</label>
+                            <input
+                              type="text"
+                              class="mb-10"
+                              style="width: 70%"
+                              placeholder="91000"
+                              v-model="newZip"
+                            />
+
+                            <div
+                              class="panel panel-default custom-btn-logout mt-3"
+                            >
+                              <div class="product-list-action-left">
+                                <a
+                                  class="addtocart-btn"
+                                  title="Add to cart"
+                                  @click="submitAddressChange"
+                                >
+                                  Submit Changes
+                                </a>
+                              </div>
+                            </div>
+                          </div>
+                          <div
+                            v-else
                             class="col-lg-6 col-md-6 d-flex align-items-center justify-content-center"
                           >
                             <div class="entries-info text-center">
-                              <p>{{ firstname }}</p>
+                              <p style="font-weight: bold">
+                                {{ firstname }} {{ lastname }}
+                              </p>
                               <p>
                                 {{ shippingAddress.street }},
                                 {{ shippingAddress.city }},
@@ -159,8 +227,23 @@
                           <div
                             class="col-lg-6 col-md-6 d-flex align-items-center justify-content-center"
                           >
-                            <div class="entries-edit-delete text-center">
-                              <a class="edit">Edit</a>
+                            <div
+                              class="entries-edit-delete text-center"
+                              v-if="isEditingAddress"
+                            >
+                              <a
+                                class="edit"
+                                @click="isEditingAddress = !isEditingAddress"
+                                >Cancel</a
+                              >
+                            </div>
+
+                            <div class="entries-edit-delete text-center" v-else>
+                              <a
+                                class="edit"
+                                @click="isEditingAddress = !isEditingAddress"
+                                >Edit</a
+                              >
                               <a class="delete">Delete</a>
                             </div>
                           </div>
@@ -198,30 +281,132 @@
   <Footer />
 </template>
 
-<script>
+<script setup>
 import Header from "../components/Header.vue";
 import Footer from "../components/Footer.vue";
+import { useRouter } from "vue-router";
 import { useAuthStore } from "@/store/authStore";
+import { ElNotification } from "element-plus";
+import axios from "axios";
+import { ref, onMounted } from "vue";
 
-export default {
-  name: "MyAccountPage",
-  data() {
-    return {
-      firstname: useAuthStore().user.username,
-      lastname: useAuthStore().user.userlastname,
-      email: useAuthStore().user.email,
-      shippingAddress: useAuthStore().user.shippingAddress,
-    };
-  },
-  components: { Header, Footer },
-  methods: {
-    logoutHandler() {
-      const authStore = useAuthStore();
-      authStore.logout();
-      this.$router.push({ name: "login" });
-    },
-  },
+const authStore = useAuthStore();
+const router = useRouter();
+
+const id = authStore.user.id;
+const firstname = authStore.user.username;
+const lastname = authStore.user.userlastname;
+const email = authStore.user.email;
+const shippingAddress = ref({});
+
+const isEditingAddress = ref(false);
+const newPassword = ref("");
+const confirmPassword = ref("");
+
+const newStreet = ref("");
+const newCity = ref("");
+const newState = ref("");
+const newZip = ref("");
+
+const removeSpaces = (inputName) => {
+  if (inputName === "newPassword") {
+    newPassword.value = newPassword.value.replace(/\s+/g, "");
+  } else if (inputName === "confirmPassword") {
+    confirmPassword.value = confirmPassword.value.replace(/\s+/g, "");
+  }
 };
+
+const submitAddressChange = async () => {
+  if (!newStreet.value || !newCity.value || !newState.value || !newZip.value) {
+    return ElNotification({
+      title: "Error",
+      message: "Fill out the form first",
+      type: "error",
+    });
+  }
+
+  const userId = authStore.getUser.id;
+
+  const data = {
+    newStreet: newStreet.value,
+    newCity: newCity.value,
+    newState: newState.value,
+    newZip: newZip.value,
+  };
+  try {
+    const response = await axios.post(`/api/address-change/${userId}`, data);
+    console.log(response.data.shippingAddress);
+    shippingAddress.value = response.data.shippingAddress;
+    ElNotification({
+      title: "Success!",
+      message: response.data.success,
+      type: "success",
+    });
+  } catch (error) {
+    ElNotification({
+      title: "Error!",
+      message: error.message,
+      type: "error",
+    });
+  } finally {
+    newStreet.value = "";
+    newCity.value = "";
+    newState.value = "";
+    newZip.value = "";
+  }
+};
+
+const submitPasswordChange = async () => {
+  if (newPassword.value != confirmPassword.value)
+    return ElNotification({
+      title: "Error!",
+      message: "Passwords do not match",
+      type: "error",
+    });
+
+  const data = {
+    newPassword: newPassword.value,
+    confirmPassword: confirmPassword.value,
+  };
+
+  try {
+    const response = await axios.post(`/api/password-change/${id}`, data);
+
+    ElNotification({
+      title: "Success!",
+      message: response.data.success,
+      type: "success",
+    });
+  } catch (error) {
+    ElNotification({
+      title: "Error!",
+      message: error.message,
+      type: "error",
+    });
+  } finally {
+    newPassword.value = "";
+    confirmPassword.value = "";
+  }
+};
+
+const logoutHandler = () => {
+  authStore.logout();
+  router.push({ name: "login" });
+};
+
+onMounted(async () => {
+  try {
+    const userId = authStore.getUser.id;
+    const response = await axios.get(`/api/user-address/${userId}`);
+    shippingAddress.value = response.data.shippingAddress;
+  } catch (error) {
+    ElNotification({
+      title: "Error!",
+      message: error.message,
+      type: "error",
+    });
+  }
+});
 </script>
 
 <style scoped>
@@ -269,6 +454,11 @@ export default {
 
 #my-account-1 input {
   cursor: not-allowed;
+}
+
+.address-change input {
+  border-radius: 10px;
+  height: 35px;
 }
 
 .custom-btn-logout {

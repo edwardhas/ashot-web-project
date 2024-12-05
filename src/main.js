@@ -32,7 +32,6 @@ import { createApp } from "vue";
 import { autoAnimatePlugin } from "@formkit/auto-animate/vue";
 import App from "./App.vue";
 import router from "./router";
-import mitt from "mitt";
 import axios from "axios";
 import { createPinia } from "pinia";
 import { useAuthStore } from "./store/authStore";

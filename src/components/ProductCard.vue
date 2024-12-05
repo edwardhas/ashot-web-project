@@ -46,6 +46,7 @@
         <span class="old" v-if="product.oldPrice"
           >${{ product.oldPrice }}.00</span
         >
+        <el-tag v-if="isRecent" type="success"> NEW </el-tag>
       </div>
     </div>
   </div>
@@ -68,6 +69,7 @@ const props = defineProps({
     oldPrice: String,
     images: Array,
   },
+  isRecent: Boolean,
   isAdmin: Boolean,
 });
 
@@ -110,5 +112,11 @@ const closeDrawer = () => {
 
 .ti-shopping-cart-a > .el-button {
   border: none;
+}
+
+@media screen and (max-width: 700px) {
+  .product-action {
+    display: none;
+  }
 }
 </style>

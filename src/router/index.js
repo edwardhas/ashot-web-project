@@ -223,6 +223,15 @@ const router = createRouter({
   mode: "history",
   history: createWebHistory(),
   routes,
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      // If the user used the back/forward browser button, return to the saved position
+      return savedPosition;
+    } else {
+      // Always scroll to the top when navigating to a new page
+      return { top: 0 };
+    }
+  },
 });
 
 router.beforeEach((to, from, next) => {

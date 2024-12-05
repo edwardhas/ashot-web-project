@@ -56,6 +56,7 @@
 <script setup>
 import { onMounted, ref } from "vue";
 import axios from "axios";
+import { Search } from "@element-plus/icons-vue";
 
 const dialogFormVisible = ref(true);
 const userInput = ref("");
@@ -89,7 +90,9 @@ onMounted(async () => {
 
 <style scoped>
 .search-input {
+  margin: 0 auto;
   height: 30px;
+  width: 50%;
 }
 
 .deal-style-white .btn-style {

@@ -4,6 +4,13 @@
       <div class="breadcrumb-content text-center">
         <h1 class="text-flicker-in-glow">A Place Where It Begins</h1>
       </div>
+      <div class="view-more-wrapper mt-90">
+        <div class="cart-shiping-update">
+          <router-link :to="{ name: 'shop-list' }">
+            <a>Shop Now</a>
+          </router-link>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -19,53 +26,14 @@
           v-for="product in products"
           :key="product._id"
         >
-          <ProductCard :product="product" />
-          <!-- <div class="product-wrapper mb-10">
-            <div class="product-img">
-              <a href="">
-                <router-link :to="{ path: `/products/${product._id}` }">
-                  <img class="custom-image" :src="product.images[0]" alt="" />
-                </router-link>
-              </a>
-
-              <div class="product-action">
-                <router-link :to="{ path: `/products/${product._id}` }">
-                  <a
-                    class="ti-plus-a"
-                    title="Quick View"
-                    data-toggle="modal"
-                    data-target="#exampleModal"
-                  >
-                    <el-button text class="ti-plus"></el-button>
-                  </a>
-                </router-link>
-
-                <a class="ti-shopping-cart-a" title="Add To Cart">
-                  <el-button
-                    text
-                    @click="
-                      (isDisplayingTable = true),
-                        passCurrentProductToDrawer(product)
-                    "
-                    class="ti-shopping-cart"
-                  ></el-button>
-                </a>
-              </div>
-            </div>
-            <div class="product-content">
-              <h4>
-                <router-link :to="{ path: `/products/${product._id}` }">
-                  <a href="">{{ product.name }}</a>
-                </router-link>
-              </h4>
-              <div class="product-price">
-                <span class="new">${{ product.price }}.00</span>
-                <span class="old" v-if="product.oldPrice"
-                  >${{ product.oldPrice }}.00</span
-                >
-              </div>
-            </div>
-          </div> -->
+          <ProductCard :product="product" :isRecent="true" />
+        </div>
+        <div class="view-more-wrapper">
+          <div class="cart-shiping-update">
+            <router-link :to="{ name: 'shop-list' }">
+              <a>View More</a>
+            </router-link>
+          </div>
         </div>
       </div>
       <div class="custom-empty-products-list" v-else>
@@ -73,6 +41,35 @@
       </div>
     </div>
   </div>
+  <hr />
+  <div class="service-area bg-img pt-100 pb-65">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-4 col-md-4">
+          <div class="service-content text-center mb-30 service-color-1">
+            <img src="../assets/img/icon-img/shipping.png" alt="" />
+            <h4>FREE SHIPPING</h4>
+            <p>Free shipping on all order</p>
+          </div>
+        </div>
+        <div class="col-lg-4 col-md-4">
+          <div class="service-content text-center mb-30 service-color-2">
+            <img src="../assets/img/icon-img/support.png" alt="" />
+            <h4>ONLINE SUPPORT</h4>
+            <p>Online support 24 hours a day</p>
+          </div>
+        </div>
+        <div class="col-lg-4 col-md-4">
+          <div class="service-content text-center mb-30 service-color-3">
+            <img src="../assets/img/icon-img/money.png" alt="" />
+            <h4>MONEY RETURN</h4>
+            <p>Back guarantee under 5 days</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <hr />
 
   <div class="deal-area bg-img deal-style-white pt-95 pb-100 bg-img">
     <div class="container">
@@ -111,35 +108,7 @@
       </div>
     </div>
   </div>
-  <hr />
-  <div class="service-area bg-img pt-100 pb-65">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-4 col-md-4">
-          <div class="service-content text-center mb-30 service-color-1">
-            <img src="../assets/img/icon-img/shipping.png" alt="" />
-            <h4>FREE SHIPPING</h4>
-            <p>Free shipping on all order</p>
-          </div>
-        </div>
-        <div class="col-lg-4 col-md-4">
-          <div class="service-content text-center mb-30 service-color-2">
-            <img src="../assets/img/icon-img/support.png" alt="" />
-            <h4>ONLINE SUPPORT</h4>
-            <p>Online support 24 hours a day</p>
-          </div>
-        </div>
-        <div class="col-lg-4 col-md-4">
-          <div class="service-content text-center mb-30 service-color-3">
-            <img src="../assets/img/icon-img/money.png" alt="" />
-            <h4>MONEY RETURN</h4>
-            <p>Back guarantee under 5 days</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <hr />
+
   <div class="blog-area pb-70">
     <div class="container">
       <div class="section-title text-center mb-60">
@@ -537,11 +506,12 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: url("https://images7.alphacoders.com/592/thumb-1920-592678.jpg");
+  /* background-image: url("https://images7.alphacoders.com/592/thumb-1920-592678.jpg"); */
+  background-color: #ccbe8f;
   background-size: cover;
   background-position: center;
-  z-index: -2; /* Place behind the content */
-  animation: zoom-in-out-deal 40s infinite;
+  z-index: -2;
+  /* animation: zoom-in-out-deal 40s infinite; */
 }
 
 .deal-area::after {
@@ -551,8 +521,8 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.7); /* Black overlay with 50% opacity */
-  z-index: -1; /* Place above the background image but below the content */
+  /* background-color: rgba(0, 0, 0, 0.7); */ /* uncomment when bg-img needed*/
+  z-index: -1;
 }
 
 .deal-content {
@@ -605,6 +575,16 @@ export default {
   border: none;
 } */
 
+.view-more-wrapper {
+  display: flex;
+  justify-content: center;
+  align-content: center;
+}
+
+.view-more-wrapper a {
+  text-decoration: none;
+}
+
 hr {
   width: 85%;
   margin: 1rem 0;
@@ -620,8 +600,81 @@ hr {
 }
 
 @media screen and (max-width: 700px) {
-  .deal-area {
+  /* .deal-area {
     background: url("https://i.pinimg.com/736x/bb/54/3f/bb543feec97c5d66dfd0551d55034032.jpg");
+  } */
+  .breadcrumb-area {
+    height: 300px;
+  }
+  .breadcrumb-area::before {
+    filter: brightness(35%);
+    animation: zoom-in-out 40s infinite;
+  }
+  .breadcrumb-content h1 {
+    font-size: 2rem;
+    position: relative;
+    color: white;
+    text-align: center;
+  }
+  .breadcrumb-area .view-more-wrapper {
+    margin-top: 70px;
+  }
+  @keyframes zoom-in-out {
+    0% {
+      background-size: 120%; /* Initial size */
+    }
+    50% {
+      background-size: 150%; /* Zoom in at the halfway point */
+    }
+    100% {
+      background-size: 100%; /* Zoom out back to original size */
+    }
+  }
+
+  .deal-area {
+    position: relative;
+    width: 100%;
+    padding: 95px 0 100px; /* Ensure padding matches your design */
+    overflow: hidden; /* Ensure no overflow from pseudo-element */
+    /* filter: brightness(0.7); */
+  }
+
+  .deal-area::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* background-image: url("https://images7.alphacoders.com/592/thumb-1920-592678.jpg"); */
+    background-color: #ccbe8f;
+    background-size: cover;
+    background-position: center;
+    z-index: -2; /* Place behind the content */
+    /* animation: zoom-in-out-deal 40s infinite; */
+  }
+
+  .deal-area::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* background-color: rgba(0, 0, 0, 0.7); Black overlay with 50% opacity */
+    z-index: -1; /* Place above the background image but below the content */
+  }
+
+  @keyframes zoom-in-out-deal {
+    0% {
+      background-size: 150%; /* Initial size */
+    }
+    50% {
+      background-size: 200%; /* Zoom in at the halfway point */
+    }
+    100% {
+      background-size: 150%; /* Zoom out back to original size */
+    }
   }
 }
 </style>

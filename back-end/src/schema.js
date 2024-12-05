@@ -54,7 +54,7 @@ const userSchema = new Schema({
       required: true,
     },
     zip: {
-      type: Number,
+      type: String,
       required: true,
     },
   },
@@ -277,6 +277,9 @@ const discountSchema = new mongoose.Schema({
   expires: {
     type: String,
   },
+  isValid: {
+    type: Boolean,
+  },
 });
 
 const recentlyViewedProducts = new mongoose.Schema({
@@ -290,14 +293,14 @@ const recentlyViewedProducts = new mongoose.Schema({
   },
 });
 
-const User = mongoose.model("Users", userSchema);
-const Products = mongoose.model("Products", ProductsSchema);
+const User = mongoose.model("users", userSchema);
+const Products = mongoose.model("products", ProductsSchema);
 // const MonthlyActiveUsers = mongoose.model(
 //   "MonthlyActiveUsers",
 //   monthlyActiveUsersSchema
 // );
-const UserActivity = mongoose.model("UserActivity", userActivitySchema);
-const Discount = mongoose.model("Discounts", discountSchema);
+const UserActivity = mongoose.model("userActivity", userActivitySchema);
+const Discount = mongoose.model("discounts", discountSchema);
 const RecentlyViewedProducts = mongoose.model(
   "RecentlyViewedProducts",
   recentlyViewedProducts

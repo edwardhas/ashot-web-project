@@ -692,6 +692,10 @@ video {
   margin-top: 5rem !important;
 }
 
+.mt-3 {
+  margin-top: 0.75rem !important;
+}
+
 .block {
   display: block !important;
 }
@@ -726,6 +730,10 @@ video {
 
 .hidden {
   display: none !important;
+}
+
+.border-collapse {
+  border-collapse: collapse !important;
 }
 
 .transform {

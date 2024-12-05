@@ -347,9 +347,9 @@ const fetchTransactions = async () => {
       });
 
       if (transactionMap.has(day)) {
-        transactionMap.set(day, transactionMap.get(day) + element.amount / 10);
+        transactionMap.set(day, transactionMap.get(day) + element.amount / 100);
       } else {
-        transactionMap.set(day, element.amount / 10);
+        transactionMap.set(day, element.amount / 100);
       }
     });
 

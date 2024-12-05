@@ -46,27 +46,41 @@
         All Promocodes
       </h4>
       <el-table :data="discountsTableData" style="width: 100%">
-        <el-table-column prop="_id" label="Discount ID" width="170" />
         <el-table-column label="Created By" width="170">
           <template #default="{ row }">
             {{ row.user.username }} {{ row.user.userlastname }}
           </template>
         </el-table-column>
-        <el-table-column prop="discountCode" label="Code" width="120" />
+        <el-table-column prop="discount._id" label="Discount ID" width="170" />
+        <el-table-column
+          prop="discount.discountCode"
+          label="Code"
+          width="120"
+        />
         <el-table-column prop="percentage" label="Value of Code" width="100">
-          <template #default="{ row }"> {{ row.percentage }}% off </template>
+          <template #default="{ row }">
+            {{ row.discount.percentage }}% off
+          </template>
         </el-table-column>
-        <el-table-column prop="createdAt" label="Created At" width="200" />
-        <el-table-column prop="expires" label="Expires At" width="200" />
-        <el-table-column prop="expires" label="Is Active" width="100">
+        <el-table-column
+          prop="discount.createdAt"
+          label="Created At"
+          width="200"
+        />
+        <el-table-column
+          prop="discount.expires"
+          label="Expires At"
+          width="200"
+        />
+        <el-table-column prop="isValid" label="Is Active" width="100">
           <template #default="{ row }">
             <el-tag
-              :type="getCurrentDate === row.expires ? 'danger' : 'success'"
+              :type="row.discount.isValid ? 'success' : 'danger'"
               effect="dark"
             >
-              {{ getCurrentDate === row.expires ? "Expired" : "Active" }}
+              {{ row.discount.isValid ? "Active" : "Expired" }}
             </el-tag>
-          </template>
+          </template> 
         </el-table-column>
         <el-table-column fixed="right" label="Operations" min-width="120">
           <template #default="{ row: discount }">
@@ -216,6 +230,7 @@ const getCurrentDate = () => {
 onMounted(async () => {
   try {
     const response = await axios.get("/api/get-discounts");
+    console.log(response.data.discounts);
     discountsTableData.value = response.data.discounts;
   } catch (error) {
     throw error;

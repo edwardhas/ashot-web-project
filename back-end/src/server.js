@@ -350,9 +350,12 @@ async function start() {
 
   //!! GET PRODUCTS
   app.get("/api/products", async (req, res) => {
-    const products = await db.collection("products").find({}).toArray();
-
-    res.json({ products: products });
+    try {
+      const products = await db.collection("products").find({}).toArray();
+      res.json({ products: products });
+    } catch (error) {
+      res.json({ error: "Something went wrong..." });
+    }
   });
 
   app.get("/api/users/online", async (req, res) => {
@@ -803,6 +806,87 @@ async function start() {
       res.json(latestDeal[0]);
     } catch (error) {
       res.status(500).json({ error: "Internal Server Error" });
+    }
+  });
+
+  //! GET USER SHIPPING ADDRESS
+  app.get("/api/user-address/:userId", async (req, res) => {
+    const { userId } = req.params;
+    try {
+      const user = await db
+        .collection("users")
+        .findOne({ _id: new ObjectId(userId) });
+
+      const shippingAddress = user.shippingAddress;
+
+      res.json({ shippingAddress: shippingAddress });
+    } catch (error) {
+      res.json({ error: "Something went wrong while loading data" });
+    }
+  });
+
+  //! USER ADDRESS CHANGE
+  app.post("/api/address-change/:userId", async (req, res) => {
+    const { userId } = req.params;
+    const { newStreet, newCity, newState, newZip } = req.body;
+
+    if (!newStreet || !newCity || !newState || !newZip) {
+      return res.json({ error: "Something went wrong..." });
+    }
+
+    try {
+      const user = await db.collection("users").updateOne(
+        { _id: new ObjectId(userId) },
+        {
+          $set: {
+            shippingAddress: {
+              street: newStreet,
+              city: newCity,
+              state: newState,
+              zip: newZip,
+            },
+          },
+        }
+      );
+
+      // Get the current user address
+      const userAddress = await db
+        .collection("users")
+        .findOne({ _id: new ObjectId(userId) });
+
+      const shippingAddress = userAddress.shippingAddress;
+
+      res.json({
+        success: "Address was successfuly changed",
+        shippingAddress: shippingAddress,
+      });
+    } catch (error) {
+      res.json({ error: "Something went wrong..." });
+    }
+  });
+
+  //! USER PASSWORD CHANGE
+  app.post("/api/password-change/:userId", async (req, res) => {
+    const userId = req.params;
+    const { newPassword, confirmPassword } = req.body;
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    if (newPassword != confirmPassword) {
+      return res.json({ error: "Something went wrong..." });
+    }
+
+    const user = await db
+      .collection("users")
+      .updateOne(
+        { _id: new ObjectId(userId.userId) },
+        { $set: { password: hashedPassword } }
+      );
+
+    if (user) {
+      res.json({ success: "Password was successfuly changed" });
+    } else {
+      res.json({ error: "Something went wrong..." });
     }
   });
 
@@ -1288,38 +1372,118 @@ async function start() {
     }
   );
 
+  //! Check discount expiration
+  app.post("/api/dicounts/:discountCode", async (req, res) => {
+    const { discountCode } = req.params;
+
+    try {
+      const discount = await db
+        .collection("discounts")
+        .findOne({ code: discountCode });
+
+      if (!discount) {
+        res.json({ error: "Something went wrong..." });
+      }
+
+      const now = new Date();
+      const expiryDate = new Date(discount.expires);
+
+      if (expiryDate < now) {
+        res.json({ isValid: false });
+      } else {
+        res.json({ isValid: true });
+      }
+    } catch (err) {
+      res.json({ error: "Error checking discount expiration date" });
+    }
+  });
+
   //!! GET discounts
+  // app.get("/api/get-discounts", async (req, res) => {
+  //   try {
+  //     const DISCOUNTS = await Discount.find({});
+
+  //     if (!DISCOUNTS) {
+  //       res.json({ error: "Unable to send discounts" });
+  //     }
+
+  //     async function getDiscountsWithUserData() {
+  //       const discounts = await db.collection("discounts").find().toArray(); // Retrieve all discounts
+
+  //       const now = new Date();
+  //       // Populate user data for each discount
+  //       const formattedDiscounts = await Promise.all(
+  //         discounts.map(async (discount) => {
+  //           const user = await db
+  //             .collection("users")
+  //             .findOne({ _id: discount.userId }); // Get user data
+  //           console.log(discount);
+  //           const expiryDate = new Date(discount.expires);
+  //           if (expiryDate < now) {
+  //             // Update the discount's isValid field to false if expired
+  //             await db
+  //               .collection("discounts")
+  //               .updateOne({ _id: discount._id }, { $set: { isValid: false } });
+  //             discount.isValid = false;
+  //           }
+  //           return {
+  //             ...discount,
+  //             user, // Embed user data in place of userId
+  //           };
+  //         })
+  //       );
+
+  //       return formattedDiscounts;
+  //     }
+
+  //     const discounts = await getDiscountsWithUserData();
+  //     res.json({ discounts: discounts });
+  //   } catch (error) {
+  //     res.json({ error: error.message });
+  //   }
+  // });
+
   app.get("/api/get-discounts", async (req, res) => {
     try {
-      const DISCOUNTS = await Discount.find({});
+      const discounts = await Discount.find({}).lean();
 
-      if (!DISCOUNTS) {
-        res.json({ error: "Unable to send discounts" });
-      }
+      const now = new Date();
 
-      async function getDiscountsWithUserData() {
-        const discounts = await db.collection("discounts").find().toArray(); // Retrieve all discounts
+      const response = await Promise.all(
+        discounts.map(async (discount) => {
+          let expiryDate;
 
-        // Populate user data for each discount
-        const formattedDiscounts = await Promise.all(
-          discounts.map(async (discount) => {
-            const user = await db
-              .collection("users")
-              .findOne({ _id: discount.userId }); // Get user data
-            return {
-              ...discount,
-              user, // Embed user data in place of userId
-            };
-          })
-        );
+          try {
+            // Parse the date
+            expiryDate = new Date(discount.expires);
 
-        return formattedDiscounts;
-      }
+            // Fallback if parsing fails
+            if (isNaN(expiryDate)) {
+              expiryDate = new Date(discount.expires.replace(" at ", " "));
+            }
+          } catch (err) {
+            console.error("Invalid date format:", discount.expires);
+            return { ...discount, error: "Invalid date format" };
+          }
 
-      const discounts = await getDiscountsWithUserData();
-      res.json({ discounts: discounts });
+          // Check if expired
+          if (expiryDate < now && discount.isValid) {
+            await Discount.updateOne(
+              { _id: discount._id },
+              { $set: { isValid: false } }
+            );
+            discount.isValid = false;
+          }
+
+          const user = await User.findById(discount.userId).lean();
+          return { discount, user };
+        })
+      );
+
+      res.json({ discounts: response });
     } catch (error) {
-      res.json({ error: error.message });
+      console.error("Error fetching discounts:", error);
+      res.status(500).json({ error: "Internal server error" });
     }
   });
 
@@ -1380,6 +1544,7 @@ async function start() {
         percentage: discountPercentage,
         expires: formattedExpirationDate,
         createdAt: formattedDate,
+        isValid: true,
       });
 
       await discount.save();
